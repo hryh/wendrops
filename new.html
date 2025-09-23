@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit Airdrop — Airdrop Hub</title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { bg: '#0b0f17', panel: '#0f1522', panelSoft: '#11182a', neon: { purple:'#9b5cff', teal:'#1ee3cf' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glow {
+      background: radial-gradient(120% 120% at 0% 0%, rgba(155,92,255,0.16) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 100% 0%, rgba(30,227,207,0.10) 0%, transparent 60%),
+                  radial-gradient(120% 120% at 50% 100%, rgba(255,62,165,0.10) 0%, transparent 60%);
+    }
+    .focus-neon:focus-visible { outline: 2px solid #9b5cff; box-shadow: 0 0 0.5rem rgba(155,92,255,0.7), 0 0 1rem rgba(30,227,207,0.3); }
+    label span { display: inline-block; margin-bottom: 6px; }
+  </style>
+</head>
+<body class="h-full bg-bg text-white antialiased">
+  <div class="w-full h-1 from-neon-purple to-neon-teal bg-gradient-to-r"></div>
+  <header class="glow sticky top-0 z-40 backdrop-blur bg-bg/70 border-b border-white/5">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3">
+      <a href="index.html" class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon-purple to-neon-teal flex items-center justify-center"><span class="text-sm font-extrabold">AD</span></a>
+      <div class="flex-1"><h1 class="text-lg sm:text-xl font-bold">Submit Airdrop</h1></div>
+      <button id="darkToggle" class="focus-neon px-3 py-1.5 rounded-md border border-white/10 bg-panel hover:bg-panelSoft text-white/80 text-sm">Toggle Theme</button>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <form id="submitForm" class="rounded-xl border border-white/10 bg-panel p-6 space-y-4">
+      <p class="text-white/70 text-sm">This will open a pre-filled GitHub Issue in your repository. You (or a maintainer) can review and merge into data/airdrops.json.</p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block">
+          <span>Project ID (unique, no spaces)</span>
+          <input required name="id" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="zkwave">
+        </label>
+        <label class="block">
+          <span>Project Name</span>
+          <input required name="name" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="ZK Wave">
+        </label>
+        <label class="block">
+          <span>Chain</span>
+          <input required name="chain" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="Base / Ethereum / Solana">
+        </label>
+        <label class="block">
+          <span>Status</span>
+          <select required name="status" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2">
+            <option value="live">Live</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="ended">Ended</option>
+          </select>
+        </label>
+        <label class="block">
+          <span>Approx Reward USD</span>
+          <input required name="rewardUSD" type="number" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="100">
+        </label>
+        <label class="block">
+          <span>Deadline (YYYY-MM-DD)</span>
+          <input required name="deadline" type="date" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2">
+        </label>
+      </div>
+
+      <label class="block">
+        <span>Tasks (comma separated)</span>
+        <input name="tasks" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="Bridge testnet, Provide LP, Quest campaign">
+      </label>
+      <label class="block">
+        <span>Tags (comma separated)</span>
+        <input name="tags" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="defi, zk">
+      </label>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span>Website URL</span>
+          <input name="site" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="https://example.com">
+        </label>
+        <label class="block">
+          <span>Twitter URL</span>
+          <input name="twitter" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="https://twitter.com/example">
+        </label>
+        <label class="block">
+          <span>Docs URL</span>
+          <input name="docs" class="w-full bg-panelSoft/60 border border-white/10 rounded-lg px-3 py-2" placeholder="https://docs.example.com">
+        </label>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <a href="index.html" class="px-3 py-2 text-sm border border-white/10 rounded-md">Cancel</a>
+        <button type="submit" class="px-4 py-2 text-sm rounded-md border border-white/10 bg-panelSoft hover:bg-panelSoft/80">Open GitHub Issue</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const THEME_KEY = 'theme';
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    if (savedTheme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
+    document.getElementById('darkToggle').addEventListener('click', () => {
+      root.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, root.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    const REPO = 'YOUR_GITHUB_USERNAME/YOUR_REPO'; // e.g., 'hryh/airdrop-hub'
+    const form = document.getElementById('submitForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const data = {
+        id: (fd.get('id') || '').toString().trim(),
+        name: (fd.get('name') || '').toString().trim(),
+        chain: (fd.get('chain') || '').toString().trim(),
+        status: fd.get('status'),
+        rewardUSD: Number(fd.get('rewardUSD') || 0),
+        deadline: (fd.get('deadline') || '').toString().trim(),
+        tasks: (fd.get('tasks') || '').toString().split(',').map(s=>s.trim()).filter(Boolean),
+        tags: (fd.get('tags') || '').toString().split(',').map(s=>s.trim()).filter(Boolean),
+        links: {
+          site: (fd.get('site') || '').toString().trim(),
+          twitter: (fd.get('twitter') || '').toString().trim(),
+          docs: (fd.get('docs') || '').toString().trim()
+        }
+      };
+      const title = encodeURIComponent(`New airdrop: ${data.name} (${data.id})`);
+      const body = encodeURIComponent(
+`Please review and add this airdrop to data/airdrops.json.
+
+{
+  "id": "${data.id}",
+  "name": "${data.name}",
+  "chain": "${data.chain}",
+  "rewardUSD": ${data.rewardUSD || 0},
+  "status": "${data.status}",
+  "deadline": "${data.deadline}",
+  "tasks": ${JSON.stringify(data.tasks)},
+  "tags": ${JSON.stringify(data.tags)},
+  "popularity": 50,
+  "links": ${JSON.stringify(data.links, null, 2)}
+}
+
+Checklist:
+- [ ] Verify links and official channels
+- [ ] Confirm status and deadline
+- [ ] Assign popularity (0-100)
+- [ ] Add chain to filter if new`
+      );
+      const url = `https://github.com/${REPO}/issues/new?title=${title}&body=${body}`;
+      window.open(url, '_blank', 'noopener');
+    });
+  </script>
+</body>
+</html>
