@@ -114,8 +114,7 @@
       localStorage.setItem(THEME_KEY, root.classList.contains('dark') ? 'dark' : 'light');
     });
 
-    const REPO = 'YOUR_GITHUB_USERNAME/YOUR_REPO'; // e.g., 'hryh/airdrop-hub'
-    const form = document.getElementById('submitForm');
+const REPO = 'hryh/airdrop-hub';    const form = document.getElementById('submitForm');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(form);
