@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Airdrop Hub — Neon Dark</title>
 
-  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN (for learning/prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,8 +17,10 @@
           fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
           colors: {
             bg: '#0b0f17',
+            bgLight: '#0e1220',
             panel: '#0f1522',
             panelSoft: '#11182a',
+            panelLight: '#141b2e',
             neon: {
               purple: '#9b5cff',
               teal: '#1ee3cf',
@@ -37,7 +37,6 @@
   </script>
 
   <style>
-    /* Subtle animated gradient glow for headers/buttons */
     .glow {
       background: radial-gradient(120% 120% at 0% 0%, rgba(155,92,255,0.16) 0%, transparent 60%),
                   radial-gradient(120% 120% at 100% 0%, rgba(30,227,207,0.10) 0%, transparent 60%),
@@ -47,31 +46,32 @@
       outline: 2px solid #9b5cff;
       box-shadow: 0 0 0.5rem rgba(155,92,255,0.7), 0 0 1rem rgba(30,227,207,0.3);
     }
-    .scrollbar-thin::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: #2a3350;
-      border-radius: 9999px;
-    }
+    .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #2a3350; border-radius: 9999px; }
+    /* Light theme adjustments (when html:not(.dark)) */
+    :root:not(.dark) body { background-color: #12182a; color: #e8ebff; }
+    :root:not(.dark) .light-bg { background-color: #141b2e; }
+    :root:not(.dark) .light-border { border-color: rgba(255,255,255,0.12); }
+    :root:not(.dark) .text-dim { color: rgba(232,235,255,0.75); }
   </style>
 </head>
 
 <body class="h-full bg-bg text-white antialiased">
-  <!-- Top neon border -->
   <div class="w-full h-1 from-neon-purple to-neon-teal bg-gradient-to-r"></div>
 
-  <!-- Header -->
   <header class="glow sticky top-0 z-40 backdrop-blur bg-bg/70 border-b border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon-purple to-neon-teal flex items-center justify-center shadow-neon">
+      <a href="index.html" class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon-purple to-neon-teal flex items-center justify-center shadow-neon">
         <span class="text-sm font-extrabold tracking-widest">AD</span>
-      </div>
+      </a>
       <div class="flex-1">
         <h1 class="text-lg sm:text-xl font-bold leading-tight">Airdrop Hub</h1>
         <p class="text-xs text-white/60">Discover live and upcoming crypto airdrops. Stay safe. Verify links.</p>
       </div>
+
+      <nav class="hidden sm:flex items-center gap-3 mr-2">
+        <a href="terms.html" class="text-sm text-white/70 hover:text-white/100 px-2 py-1 rounded">Terms</a>
+      </nav>
 
       <button id="darkToggle" class="focus-neon px-3 py-1.5 rounded-md border border-white/10 bg-panel hover:bg-panelSoft text-white/80 text-sm">
         Toggle Theme
@@ -79,16 +79,14 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    <!-- Controls -->
     <section class="grid gap-4 lg:grid-cols-12">
       <div class="lg:col-span-9 space-y-3">
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
             <input id="searchInput" type="text" placeholder="Search projects, chains, tags..."
                    class="w-full focus-neon bg-panelSoft/60 border border-white/10 rounded-lg px-4 py-2.5 pr-10 placeholder-white/40">
-            <svg class="w-5 h-5 text-white/40 absolute right-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none">
+            <svg class="w-5 h-5 text-white/40 absolute right-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
@@ -130,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Safety panel -->
       <aside class="lg:col-span-3">
         <div class="rounded-xl border border-white/10 bg-panel p-4">
           <h3 class="font-semibold mb-2 text-neon-teal">Safety Tips</h3>
@@ -144,131 +141,62 @@
       </aside>
     </section>
 
-    <!-- Cards Grid -->
     <section id="cardsContainer" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Cards injected by JS -->
     </section>
 
-    <!-- Pagination -->
     <section class="flex items-center justify-center gap-2">
       <button id="prevPage" class="focus-neon px-3 py-2 rounded-md border border-white/10 bg-panel hover:bg-panelSoft text-white/80 disabled:opacity-40 disabled:cursor-not-allowed">Prev</button>
       <div id="pageInfo" class="text-sm text-white/60"></div>
       <button id="nextPage" class="focus-neon px-3 py-2 rounded-md border border-white/10 bg-panel hover:bg-panelSoft text-white/80 disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
     </section>
 
-    <!-- Footer -->
     <footer class="pt-6 text-center text-xs text-white/40">
-      Built for learning. Data is sample only. Always DYOR.
+      Built for learning. Data is sample only. Always DYOR. • <a class="underline hover:text-white" href="terms.html">Terms</a>
     </footer>
   </main>
 
   <script>
-    // -----------------------------
+    // THEME: persist and toggle
+    const THEME_KEY = 'theme';
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    if (savedTheme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
+    document.getElementById('darkToggle').addEventListener('click', () => {
+      root.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, root.classList.contains('dark') ? 'dark' : 'light');
+    });
+
     // Sample Data (edit freely)
-    // -----------------------------
     const AIRDROPS = [
-      {
-        id: 'zkwave',
-        name: 'ZK Wave',
-        chain: 'Ethereum',
-        rewardUSD: 250,
-        status: 'live',
-        deadline: '2025-10-15',
-        tasks: ['Bridge testnet', 'Provide LP', 'Quest campaign'],
-        tags: ['zk', 'defi'],
-        popularity: 86,
-        links: { site: '#', twitter: '#', docs: '#' }
-      },
-      {
-        id: 'solbird',
-        name: 'SolBird',
-        chain: 'Solana',
-        rewardUSD: 80,
-        status: 'upcoming',
-        deadline: '2025-11-03',
-        tasks: ['Mint test NFT', 'Stake token'],
-        tags: ['nft', 'gaming'],
-        popularity: 71,
-        links: { site: '#', twitter: '#', docs: '#' }
-      },
-      {
-        id: 'arbvault',
-        name: 'ArbVault',
-        chain: 'Arbitrum',
-        rewardUSD: 140,
-        status: 'live',
-        deadline: '2025-09-30',
-        tasks: ['Deposit vault', 'Referral quests'],
-        tags: ['yield', 'defi'],
-        popularity: 64,
-        links: { site: '#', twitter: '#', docs: '#' }
-      },
-      {
-        id: 'basebyte',
-        name: 'BaseByte',
-        chain: 'Base',
-        rewardUSD: 60,
-        status: 'upcoming',
-        deadline: '2025-10-05',
-        tasks: ['Bridge to Base', 'Swap 3x'],
-        tags: ['l2', 'dex'],
-        popularity: 58,
-        links: { site: '#', twitter: '#', docs: '#' }
-      },
-      {
-        id: 'polyquest',
-        name: 'PolyQuest',
-        chain: 'Polygon',
-        rewardUSD: 45,
-        status: 'ended',
-        deadline: '2025-08-20',
-        tasks: ['Galxe campaign', 'Social tasks'],
-        tags: ['quest'],
-        popularity: 77,
-        links: { site: '#', twitter: '#', docs: '#' }
-      },
-      {
-        id: 'aptosky',
-        name: 'AptoSky',
-        chain: 'Aptos',
-        rewardUSD: 120,
-        status: 'live',
-        deadline: '2025-10-02',
-        tasks: ['Faucet + swap', 'Provide LP'],
-        tags: ['move', 'defi'],
-        popularity: 52,
-        links: { site: '#', twitter: '#', docs: '#' }
-      }
+      { id:'zkwave', name:'ZK Wave', chain:'Ethereum', rewardUSD:250, status:'live', deadline:'2025-10-15',
+        tasks:['Bridge testnet','Provide LP','Quest campaign'], tags:['zk','defi'], popularity:86,
+        links:{ site:'#', twitter:'#', docs:'#' } },
+      { id:'solbird', name:'SolBird', chain:'Solana', rewardUSD:80, status:'upcoming', deadline:'2025-11-03',
+        tasks:['Mint test NFT','Stake token'], tags:['nft','gaming'], popularity:71,
+        links:{ site:'#', twitter:'#', docs:'#' } },
+      { id:'arbvault', name:'ArbVault', chain:'Arbitrum', rewardUSD:140, status:'live', deadline:'2025-09-30',
+        tasks:['Deposit vault','Referral quests'], tags:['yield','defi'], popularity:64,
+        links:{ site:'#', twitter:'#', docs:'#' } },
+      { id:'basebyte', name:'BaseByte', chain:'Base', rewardUSD:60, status:'upcoming', deadline:'2025-10-05',
+        tasks:['Bridge to Base','Swap 3x'], tags:['l2','dex'], popularity:58,
+        links:{ site:'#', twitter:'#', docs:'#' } },
+      { id:'polyquest', name:'PolyQuest', chain:'Polygon', rewardUSD:45, status:'ended', deadline:'2025-08-20',
+        tasks:['Galxe campaign','Social tasks'], tags:['quest'], popularity:77,
+        links:{ site:'#', twitter:'#', docs:'#' } },
+      { id:'aptosky', name:'AptoSky', chain:'Aptos', rewardUSD:120, status:'live', deadline:'2025-10-02',
+        tasks:['Faucet + swap','Provide LP'], tags:['move','defi'], popularity:52,
+        links:{ site:'#', twitter:'#', docs:'#' } }
     ];
 
-    // -----------------------------
-    // State
-    // -----------------------------
     const state = {
-      query: '',
-      status: '',
-      chain: '',
-      sort: 'deadlineAsc',
-      page: 1,
-      perPage: 6,
-      showFavorites: false,
-      favorites: new Set(JSON.parse(localStorage.getItem('favorites') || '[]')),
-      theme: localStorage.getItem('theme') || 'dark'
+      query: '', status: '', chain: '', sort: 'deadlineAsc',
+      page: 1, perPage: 6, showFavorites: false,
+      favorites: new Set(JSON.parse(localStorage.getItem('favorites') || '[]'))
     };
 
-    // Apply theme immediately
-    if (state.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    // -----------------------------
-    // Utilities
-    // -----------------------------
     function fmtDate(iso) {
-      const d = new Date(iso + 'T00:00:00');
-      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      const d = new Date(iso + 'T00:00:00'); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
     }
 
     function statusBadgeClass(status) {
@@ -280,75 +208,34 @@
       }
     }
 
-    // -----------------------------
-    // Filtering, sorting, paging
-    // -----------------------------
     function getFiltered() {
       const q = state.query.trim().toLowerCase();
       let arr = AIRDROPS.filter(a => {
         if (state.status && a.status !== state.status) return false;
         if (state.chain && a.chain !== state.chain) return false;
         if (state.showFavorites && !state.favorites.has(a.id)) return false;
-
         if (!q) return true;
-        const hay = [a.name, a.chain, a.status, ...(a.tags || [])].join(' ').toLowerCase();
+        const hay = [a.name, a.chain, a.status, ...(a.tags||[])].join(' ').toLowerCase();
         return hay.includes(q);
       });
-
       switch (state.sort) {
-        case 'deadlineAsc':
-          arr.sort((a, b) => new Date(a.deadline) - new Date(b.deadline)); break;
-        case 'deadlineDesc':
-          arr.sort((a, b) => new Date(b.deadline) - new Date(a.deadline)); break;
-        case 'rewardDesc':
-          arr.sort((a, b) => b.rewardUSD - a.rewardUSD); break;
-        case 'rewardAsc':
-          arr.sort((a, b) => a.rewardUSD - b.rewardUSD); break;
-        case 'popularityDesc':
-          arr.sort((a, b) => b.popularity - a.popularity); break;
+        case 'deadlineAsc': arr.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)); break;
+        case 'deadlineDesc': arr.sort((a,b)=>new Date(b.deadline)-new Date(a.deadline)); break;
+        case 'rewardDesc': arr.sort((a,b)=>b.rewardUSD-a.rewardUSD); break;
+        case 'rewardAsc': arr.sort((a,b)=>a.rewardUSD-b.rewardUSD); break;
+        case 'popularityDesc': arr.sort((a,b)=>b.popularity-a.popularity); break;
       }
-
       return arr;
     }
 
-    function paginate(arr) {
-      const start = (state.page - 1) * state.perPage;
-      return arr.slice(start, start + state.perPage);
-    }
+    function paginate(arr) { const s=(state.page-1)*state.perPage; return arr.slice(s, s+state.perPage); }
 
-    // -----------------------------
-    // Render
-    // -----------------------------
     const cardsContainer = document.getElementById('cardsContainer');
     const resultCount = document.getElementById('resultCount');
     const pageInfo = document.getElementById('pageInfo');
 
-    function render() {
-      const filtered = getFiltered();
-      const total = filtered.length;
-      const totalPages = Math.max(1, Math.ceil(total / state.perPage));
-      if (state.page > totalPages) state.page = totalPages;
-
-      const pageItems = paginate(filtered);
-
-      resultCount.textContent = total.toString();
-      pageInfo.textContent = `Page ${state.page} / ${totalPages}`;
-
-      document.getElementById('prevPage').disabled = state.page <= 1;
-      document.getElementById('nextPage').disabled = state.page >= totalPages;
-
-      cardsContainer.innerHTML = pageItems.map(a => cardHTML(a)).join('');
-
-      // Bind dynamic buttons (favorites)
-      document.querySelectorAll('[data-fav]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-fav');
-          if (state.favorites.has(id)) state.favorites.delete(id);
-          else state.favorites.add(id);
-          localStorage.setItem('favorites', JSON.stringify([...state.favorites]));
-          render();
-        });
-      });
+    function escapeHtml(str) {
+      return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
     }
 
     function cardHTML(a) {
@@ -361,44 +248,49 @@
             <h3 class="font-semibold text-base">${escapeHtml(a.name)}</h3>
             <div class="text-xs text-white/60">${escapeHtml(a.chain)} • Reward ~ $${a.rewardUSD}</div>
           </div>
-          <button title="Favorite" data-fav="${a.id}" class="p-1.5 rounded-md border border-white/10 bg-panelSoft/50 ${favClass}">
-            ★
-          </button>
+          <button title="Favorite" data-fav="${a.id}" class="p-1.5 rounded-md border border-white/10 bg-panelSoft/50 ${favClass}">★</button>
         </div>
-
         <div class="flex flex-wrap gap-2">
-          <span class="px-2 py-0.5 text-xs rounded-full border ${statusBadgeClass(a.status)}">
-            ${a.status[0].toUpperCase()+a.status.slice(1)}
-          </span>
+          <span class="px-2 py-0.5 text-xs rounded-full border ${statusBadgeClass(a.status)}">${a.status[0].toUpperCase()+a.status.slice(1)}</span>
           <span class="px-2 py-0.5 text-xs rounded-full border border-white/10 text-white/60 bg-white/5">Deadline: ${fmtDate(a.deadline)}</span>
           <span class="px-2 py-0.5 text-xs rounded-full border border-white/10 text-white/60 bg-white/5">Pop: ${a.popularity}</span>
         </div>
-
         <ul class="text-sm text-white/70 list-disc pl-5 space-y-1">
-          ${a.tasks.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+          ${a.tasks.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}
         </ul>
-
         <div class="mt-auto pt-2 flex items-center gap-2">
-          <a href="${a.links.site}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs">Website</a>
-          <a href="${a.links.twitter}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs">Twitter</a>
-          <a href="${a.links.docs}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs">Docs</a>
+          <a href="${a.links.site}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs" target="_blank" rel="noopener">Website</a>
+          <a href="${a.links.twitter}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs" target="_blank" rel="noopener">Twitter</a>
+          <a href="${a.links.docs}" class="focus-neon px-2.5 py-1.5 rounded-md border border-white/10 bg-panelSoft/60 hover:bg-panelSoft text-white/80 text-xs" target="_blank" rel="noopener">Docs</a>
         </div>
-      </article>
-      `;
+      </article>`;
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function render() {
+      const filtered = getFiltered();
+      const total = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / state.perPage));
+      if (state.page > totalPages) state.page = totalPages;
+      const pageItems = paginate(filtered);
+
+      resultCount.textContent = total.toString();
+      pageInfo.textContent = `Page ${state.page} / ${totalPages}`;
+      document.getElementById('prevPage').disabled = state.page <= 1;
+      document.getElementById('nextPage').disabled = state.page >= totalPages;
+
+      cardsContainer.innerHTML = pageItems.map(a => cardHTML(a)).join('');
+
+      document.querySelectorAll('[data-fav]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-fav');
+          if (state.favorites.has(id)) state.favorites.delete(id); else state.favorites.add(id);
+          localStorage.setItem('favorites', JSON.stringify([...state.favorites]));
+          render();
+        });
+      });
     }
 
-    // -----------------------------
     // Events
-    // -----------------------------
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
     const chainFilter = document.getElementById('chainFilter');
@@ -407,46 +299,19 @@
     const nextPage = document.getElementById('nextPage');
     const resetBtn = document.getElementById('resetBtn');
     const favoritesToggle = document.getElementById('favoritesToggle');
-    const darkToggle = document.getElementById('darkToggle');
 
     searchInput.addEventListener('input', () => { state.query = searchInput.value; state.page = 1; render(); });
     statusFilter.addEventListener('change', () => { state.status = statusFilter.value; state.page = 1; render(); });
     chainFilter.addEventListener('change', () => { state.chain = chainFilter.value; state.page = 1; render(); });
     sortSelect.addEventListener('change', () => { state.sort = sortSelect.value; render(); });
-
     prevPage.addEventListener('click', () => { state.page = Math.max(1, state.page - 1); render(); });
     nextPage.addEventListener('click', () => { state.page += 1; render(); });
-
-    favoritesToggle.addEventListener('click', () => {
-      state.showFavorites = !state.showFavorites;
-      favoritesToggle.textContent = state.showFavorites ? 'Show All' : 'Show Favorites';
-      state.page = 1;
-      render();
-    });
-
+    favoritesToggle.addEventListener('click', () => { state.showFavorites = !state.showFavorites; favoritesToggle.textContent = state.showFavorites ? 'Show All' : 'Show Favorites'; state.page = 1; render(); });
     resetBtn.addEventListener('click', () => {
-      state.query = '';
-      state.status = '';
-      state.chain = '';
-      state.sort = 'deadlineAsc';
-      state.page = 1;
-      state.showFavorites = false;
-      searchInput.value = '';
-      statusFilter.value = '';
-      chainFilter.value = '';
-      sortSelect.value = 'deadlineAsc';
-      favoritesToggle.textContent = 'Show Favorites';
-      render();
+      state.query = ''; state.status = ''; state.chain = ''; state.sort = 'deadlineAsc'; state.page = 1; state.showFavorites = false;
+      searchInput.value = ''; statusFilter.value = ''; chainFilter.value = ''; sortSelect.value = 'deadlineAsc'; favoritesToggle.textContent = 'Show Favorites'; render();
     });
 
-    darkToggle.addEventListener('click', () => {
-      const root = document.documentElement;
-      root.classList.toggle('dark');
-      state.theme = root.classList.contains('dark') ? 'dark' : 'light';
-      localStorage.setItem('theme', state.theme);
-    });
-
-    // Initial render
     render();
   </script>
 </body>
