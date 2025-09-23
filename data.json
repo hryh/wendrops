@@ -1,74 +1,90 @@
 [
-  {
-    "id": "zkwave",
-    "name": "ZK Wave",
-    "chain": "Ethereum",
-    "rewardUSD": 250,
-    "status": "live",
-    "deadline": "2025-10-15",
-    "tasks": ["Bridge testnet", "Provide LP", "Quest campaign"],
-    "tags": ["zk", "defi"],
-    "popularity": 86,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  },
-  {
-    "id": "solbird",
-    "name": "SolBird",
-    "chain": "Solana",
-    "rewardUSD": 80,
-    "status": "upcoming",
-    "deadline": "2025-11-03",
-    "tasks": ["Mint test NFT", "Stake token"],
-    "tags": ["nft", "gaming"],
-    "popularity": 71,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  },
-  {
-    "id": "arbvault",
-    "name": "ArbVault",
-    "chain": "Arbitrum",
-    "rewardUSD": 140,
-    "status": "live",
-    "deadline": "2025-09-30",
-    "tasks": ["Deposit vault", "Referral quests"],
-    "tags": ["yield", "defi"],
-    "popularity": 64,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  },
-  {
-    "id": "basebyte",
-    "name": "BaseByte",
-    "chain": "Base",
-    "rewardUSD": 60,
-    "status": "upcoming",
-    "deadline": "2025-10-05",
-    "tasks": ["Bridge to Base", "Swap 3x"],
-    "tags": ["l2", "dex"],
-    "popularity": 58,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  },
-  {
-    "id": "polyquest",
-    "name": "PolyQuest",
-    "chain": "Polygon",
-    "rewardUSD": 45,
-    "status": "ended",
-    "deadline": "2025-08-20",
-    "tasks": ["Galxe campaign", "Social tasks"],
-    "tags": ["quest"],
-    "popularity": 77,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  },
-  {
-    "id": "aptosky",
-    "name": "AptoSky",
-    "chain": "Aptos",
-    "rewardUSD": 120,
-    "status": "live",
-    "deadline": "2025-10-02",
-    "tasks": ["Faucet + swap", "Provide LP"],
-    "tags": ["move", "defi"],
-    "popularity": 52,
-    "links": { "site": "#", "twitter": "#", "docs": "#" }
-  }
+{
+"id": "zkwave",
+"name": "ZK Wave",
+"chain": "Ethereum",
+"rewardUSD": 250,
+"status": "live",
+"deadline": "2025-10-15",
+"tasks": ["Bridge testnet", "Provide LP", "Quest campaign"],
+"tags": ["zk", "defi"],
+"popularity": 86,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "solbird",
+"name": "SolBird",
+"chain": "Solana",
+"rewardUSD": 80,
+"status": "upcoming",
+"deadline": "2025-11-03",
+"tasks": ["Mint test NFT", "Stake token"],
+"tags": ["nft", "gaming"],
+"popularity": 71,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "arbvault",
+"name": "ArbVault",
+"chain": "Arbitrum",
+"rewardUSD": 140,
+"status": "live",
+"deadline": "2025-09-30",
+"tasks": ["Deposit vault", "Referral quests"],
+"tags": ["yield", "defi"],
+"popularity": 64,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "basebyte",
+"name": "BaseByte",
+"chain": "Base",
+"rewardUSD": 60,
+"status": "upcoming",
+"deadline": "2025-10-05",
+"tasks": ["Bridge to Base", "Swap 3x"],
+"tags": ["l2", "dex"],
+"popularity": 58,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "polyquest",
+"name": "PolyQuest",
+"chain": "Polygon",
+"rewardUSD": 45,
+"status": "ended",
+"deadline": "2025-08-20",
+"tasks": ["Galxe campaign", "Social tasks"],
+"tags": ["quest"],
+"popularity": 77,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "aptosky",
+"name": "AptoSky",
+"chain": "Aptos",
+"rewardUSD": 120,
+"status": "live",
+"deadline": "2025-10-02",
+"tasks": ["Faucet + swap", "Provide LP"],
+"tags": ["move", "defi"],
+"popularity": 52,
+"links": { "site": "#", "twitter": "#", "docs": "#" }
+},
+{
+"id": "ASTER",
+"name": "ASTER DEX",
+"chain": "BNB",
+"rewardUSD": 1000,
+"status": "live",
+"deadline": "2025-10-05",
+"tasks": ["Deposit ASBNB", "Trade perpetuals (2+ times)"],
+"tags": ["Perpetual Trading", "Deposits", "Fast"],
+"popularity": 50,
+"links": {
+"site": "https://spangle-cheshire-e55.notion.site/MULTIPL-AIRDROP-173bdbd8187880508740e67a8afe744b?pvs=143",
+"twitter": "https://x.com/Aster_DEX",
+"docs": ""
+}
+}
 ]
