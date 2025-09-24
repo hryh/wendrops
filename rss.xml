@@ -2,12 +2,12 @@
 <rss version="2.0">
   <channel>
     <title>Airdrop Hub</title>
-    <link>https://airdrop-hub-two.vercel.app/</link>
+    <link>https://YOUR_DOMAIN</link>
     <description>Live and upcoming airdrops</description>
     <lastBuildDate><!-- updated on deploy --></lastBuildDate>
     <item>
       <title>Sample Airdrop</title>
-      <link>https://airdrop-hub-two.vercel.app/</link>
+      <link>https://YOUR_DOMAIN/#id=sample</link>
       <guid isPermaLink="false">sample</guid>
       <pubDate>Tue, 23 Sep 2025 00:00:00 GMT</pubDate>
       <description>Sample listing; replace with real feed generation later.</description>

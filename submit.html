@@ -4,13 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Submit Airdrop — Airdrop Hub</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3text x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E📝%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🔒%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { colors: { bg:'#0b0f1a', card:'#0f1422' } } }
-    }
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { bg:'#0b0f1a', card:'#0f1422' } } } };
   </script>
   <style>
     :root { color-scheme: dark; }
@@ -19,9 +16,47 @@
     .btn:hover { border-color: rgba(255,255,255,0.2); }
     .input, select, textarea { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
     .label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; display: block; }
-    .note { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+    .note { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
     pre { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.75rem; overflow: auto; }
   </style>
+  <script>
+    // Gate config: change these
+    const YOUR_SECRET_TOKEN = 'CHANGE_ME_TOKEN'; // set your private token
+    const ALLOWLIST = ['your-github-username']; // optional fallback allowlist
+
+    function isAllowed() {
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        if (token && token === YOUR_SECRET_TOKEN) return true;
+        // Fallback: simple passphrase dialog (client-side only)
+        const asked = sessionStorage.getItem('submit_access');
+        if (asked === 'granted') return true;
+        const pass = prompt('This page is restricted. Enter passphrase:');
+        if (pass && pass === YOUR_SECRET_TOKEN) {
+          sessionStorage.setItem('submit_access', 'granted');
+          return true;
+        }
+      } catch {}
+      return false;
+    }
+
+    (function guard() {
+      if (!isAllowed()) {
+        document.write(`
+          <main class="min-h-screen flex items-center justify-center p-6 text-center text-white">
+            <div class="max-w-md">
+              <h1 class="text-2xl font-semibold mb-2">Access Restricted</h1>
+              <p class="text-white/70">This submission page is currently available to whitelisted users only.</p>
+              <p class="text-white/60 mt-3">If you believe this is a mistake, contact the site owner.</p>
+              <p class="mt-6"><a href="index.html" class="underline">Return to Home</a></p>
+            </div>
+          </main>
+        `);
+        throw new Error('blocked');
+      }
+    })();
+  </script>
 </head>
 <body class="min-h-screen text-white">
   <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
@@ -38,7 +73,8 @@
   </header>
 
   <main class="max-w-3xl mx-auto px-4 py-6 space-y-6">
-    <p class="note">Fill out the form. Then copy the JSON and add it to data/data.json in your repo, or use the dev-only Append button while running the local server.</p>
+    <p class="note">Only whitelisted users can submit. Use your private link containing a token, like:
+      <code>https://your-site/submit.html?token=YOUR_TOKEN</code></p>
 
     <form id="airdropForm" class="grid sm:grid-cols-2 gap-4">
       <div>
@@ -89,17 +125,24 @@
       </div>
       <div class="sm:col-span-2">
         <label class="label">Links</label>
-        <div class="grid sm:grid-cols-3 gap-3">
+        <div class="grid sm:grid-cols-4 gap-3">
           <input class="input" id="site" placeholder="https://example.com">
           <input class="input" id="twitter" placeholder="https://x.com/example">
           <input class="input" id="docs" placeholder="https://docs.example.com">
+          <input class="input" id="tutorial" placeholder="https://blog.example.com/how-to">
         </div>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="label">Featured (Daily Picks)</label>
+        <select class="input" id="featured">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
       </div>
       <div class="sm:col-span-2 flex flex-wrap gap-2">
         <button class="btn" type="submit">Preview JSON</button>
         <button class="btn" type="button" id="copyBtn" disabled>Copy JSON</button>
         <button class="btn" type="button" id="downloadBtn" disabled>Download JSON</button>
-        <button class="btn" type="button" id="appendBtn" title="Dev-only: requires local server" disabled>Append to data.json (dev)</button>
       </div>
     </form>
 
@@ -109,13 +152,7 @@
     </div>
 
     <section class="note">
-      <p class="mb-2">To append locally, run the tiny dev server, then click “Append to data.json (dev)”.</p>
-      <ol class="list-decimal ml-6 space-y-1">
-        <li>Install Node.js (if not installed).</li>
-        <li>Save the dev server file below as dev-server.js at the repo root.</li>
-        <li>Run: node dev-server.js</li>
-        <li>Open this page at http://localhost:3000/submit.html</li>
-      </ol>
+      <p class="mb-2">Add the JSON to data/data.json via Git. Static hosting can’t write server files from the browser.</p>
     </section>
   </main>
 
@@ -124,7 +161,6 @@
     const preview = document.getElementById('preview');
     const copyBtn = document.getElementById('copyBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const appendBtn = document.getElementById('appendBtn');
 
     function sanitizeId(str) {
       return String(str).trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
@@ -142,11 +178,13 @@
       const links = {
         site: document.getElementById('site').value.trim(),
         twitter: document.getElementById('twitter').value.trim(),
-        docs: document.getElementById('docs').value.trim()
+        docs: document.getElementById('docs').value.trim(),
+        tutorial: document.getElementById('tutorial').value.trim()
       };
+      const featured = document.getElementById('featured').value === 'true';
       if (!id || !name || !chain || !status || !deadline) throw new Error('Please fill required fields.');
       if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(deadline)) throw new Error('Deadline must be YYYY-MM-DD');
-      return { id, name, chain, rewardUSD, status, deadline, tasks, tags, links, popularity: 0 };
+      return { id, name, chain, rewardUSD, status, deadline, tasks, tags, links, popularity: 0, featured };
     }
 
     form.addEventListener('submit', (e) => {
@@ -157,8 +195,6 @@
         preview.textContent = json;
         copyBtn.disabled = false;
         downloadBtn.disabled = false;
-        // Enable append only if served from localhost
-        appendBtn.disabled = !location.origin.includes('localhost');
       } catch (err) {
         alert(err.message);
       }
@@ -181,23 +217,6 @@
       a.download = 'airdrop-entry.json';
       a.click();
       URL.revokeObjectURL(a.href);
-    });
-
-    appendBtn.addEventListener('click', async () => {
-      if (appendBtn.disabled) return;
-      try {
-        const entry = JSON.parse(preview.textContent);
-        const res = await fetch('/__dev_append', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entry)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || 'Append failed');
-        alert('Appended to data/data.json (dev). Remember to git add/commit/push.');
-      } catch (e) {
-        alert('Append failed: ' + e.message);
-      }
     });
   </script>
 </body>
