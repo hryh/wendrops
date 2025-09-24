@@ -9,7 +9,8 @@
 "tasks": ["Bridge testnet", "Provide LP", "Quest campaign"],
 "tags": ["zk", "defi"],
 "popularity": 86,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
+"featured": true,
+"links": { "site": "#", "twitter": "#", "docs": "#", "tutorial": "#" }
 },
 {
 "id": "solbird",
@@ -21,6 +22,7 @@
 "tasks": ["Mint test NFT", "Stake token"],
 "tags": ["nft", "gaming"],
 "popularity": 71,
+"featured": true,
 "links": { "site": "#", "twitter": "#", "docs": "#" }
 },
 {
@@ -72,7 +74,7 @@
 "links": { "site": "#", "twitter": "#", "docs": "#" }
 },
 {
-"id": "ASTER",
+"id": "aster",
 "name": "ASTER DEX",
 "chain": "BNB",
 "rewardUSD": 1000,
@@ -81,10 +83,12 @@
 "tasks": ["Deposit ASBNB", "Trade perpetuals (2+ times)"],
 "tags": ["Perpetual Trading", "Deposits", "Fast"],
 "popularity": 50,
+"featured": true,
 "links": {
 "site": "https://spangle-cheshire-e55.notion.site/MULTIPL-AIRDROP-173bdbd8187880508740e67a8afe744b?pvs=143",
 "twitter": "https://x.com/Aster_DEX",
-"docs": ""
+"docs": "",
+"tutorial": "https://x.com/Aster_DEX"
 }
 }
 ]
