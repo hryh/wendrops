@@ -25,8 +25,9 @@
     .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
     .hidden { display: none; }
   </style>
+
   <script>
-    // CONFIG: set your secret token (must match submit.html)
+    // CONFIG: set your secret token (same as submit.html and terms.html)
     const YOUR_SECRET_TOKEN = 'betahryh12';
 
     // Apply saved theme early
@@ -39,17 +40,16 @@
       } catch {}
     })();
 
-    // Owner access flag from token in URL (?token=...)
+    // Capture token in URL to grant owner access, then clean it from URL
     (function () {
       try {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
         if (token && token === YOUR_SECRET_TOKEN) {
           localStorage.setItem('owner_access', 'true');
-          // Optionally clean the token from the URL without reload
           const url = new URL(location.href);
           url.searchParams.delete('token');
-          window.history.replaceState({}, '', url.toString());
+          history.replaceState({}, '', url.toString());
         }
       } catch {}
     })();
@@ -155,13 +155,11 @@
   </main>
 
   <script>
-    // Show Submit link only for owner
+    // Show Submit link only if owner_access was granted
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
-        if (isOwner) {
-          document.getElementById('submitLink').classList.remove('hidden');
-        }
+        if (isOwner) document.getElementById('submitLink').classList.remove('hidden');
       } catch {}
     })();
 
@@ -193,6 +191,7 @@
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         try { AIRDROPS = JSON.parse(txt); } catch (e) { console.error('JSON parse error:', e, txt); throw new Error('Invalid JSON format'); }
+        // Build Daily Picks (up to 3)
         featured = AIRDROPS.filter(x => x.featured === true).slice(0, 3);
         renderFeatured();
         render();
@@ -205,18 +204,17 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      filtered = AIRDROPS
-        .filter(x => !featured.some(f => f.id === x.id))
-        .filter(x => {
-          if (state.status !== 'all' && x.status !== state.status) return false;
-          if (state.chain !== 'all' && x.chain !== state.chain) return false;
-          if (state.favoritesOnly && !favorites.has(x.id)) return false;
-          if (q) {
-            const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
-            if (!hay.includes(q)) return false;
-          }
-          return true;
-        });
+      // Do NOT exclude featured — you asked to also show them in the main pool
+      filtered = AIRDROPS.filter(x => {
+        if (state.status !== 'all' && x.status !== state.status) return false;
+        if (state.chain !== 'all' && x.chain !== state.chain) return false;
+        if (state.favoritesOnly && !favorites.has(x.id)) return false;
+        if (q) {
+          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
 
       switch (state.sortBy) {
         case 'deadlineAsc': filtered.sort((a,b)=>a.deadline.localeCompare(b.deadline)); break;
