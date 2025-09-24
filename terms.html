@@ -1,110 +1,102 @@
-<!DOCTYPE html>
-<html lang="en" class="h-full">
+<!doctype html>
+<html lang="en" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Airdrop Hub — Terms & Conditions</title>
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms — Airdrop Hub</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E📃%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            bg: '#0b0f17',
-            panel: '#0f1522',
-            panelSoft: '#11182a',
-            neon: { purple: '#9b5cff', teal: '#1ee3cf', pink: '#ff3ea5', yellow: '#ffd166' }
-          },
-          boxShadow: { neon: '0 0 0.5rem rgba(155,92,255,0.7), 0 0 1.25rem rgba(30,227,207,0.35)' }
-        }
-      }
-    }
-  </script>
-
+  <script>tailwind.config={darkMode:'class'};</script>
   <style>
-    .glow {
-      background: radial-gradient(120% 120% at 0% 0%, rgba(155,92,255,0.16) 0%, transparent 60%),
-                  radial-gradient(120% 120% at 100% 0%, rgba(30,227,207,0.10) 0%, transparent 60%),
-                  radial-gradient(120% 120% at 50% 100%, rgba(255,62,165,0.10) 0%, transparent 60%);
-    }
-    .focus-neon:focus-visible {
-      outline: 2px solid #9b5cff;
-      box-shadow: 0 0 0.5rem rgba(155,92,255,0.7), 0 0 1rem rgba(30,227,207,0.3);
-    }
+    :root { color-scheme: dark; }
+    html, body { background:#0b0f1a; }
+    .hidden { display:none; }
   </style>
+
+  <script>
+    // CONFIG: set the same token used on index.html and submit.html
+    const YOUR_SECRET_TOKEN = 'CHANGE_ME_TOKEN';
+
+    // Apply saved theme early to prevent flash
+    (function () {
+      try {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const mode = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', mode === 'dark');
+      } catch {}
+    })();
+
+    // Capture token in URL to set owner access (optional convenience)
+    (function () {
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        if (token && token === YOUR_SECRET_TOKEN) {
+          localStorage.setItem('owner_access', 'true');
+          const url = new URL(location.href);
+          url.searchParams.delete('token');
+          history.replaceState({}, '', url.toString());
+        }
+      } catch {}
+    })();
+  </script>
 </head>
-
-<body class="h-full bg-bg text-white antialiased">
-  <div class="w-full h-1 from-neon-purple to-neon-teal bg-gradient-to-r"></div>
-
-  <header class="glow sticky top-0 z-40 backdrop-blur bg-bg/70 border-b border-white/5">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3">
-      <a href="index.html" class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon-purple to-neon-teal flex items-center justify-center shadow-neon">
-        <span class="text-sm font-extrabold tracking-widest">AD</span>
-      </a>
-      <div class="flex-1">
-        <h1 class="text-lg sm:text-xl font-bold leading-tight">Terms & Conditions</h1>
-        <p class="text-xs text-white/60">Not financial advice. Do your own research.</p>
+<body class="min-h-screen text-white">
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
+        <h1 class="text-lg sm:text-xl font-semibold">Terms</h1>
       </div>
-      <button id="darkToggle" class="focus-neon px-3 py-1.5 rounded-md border border-white/10 bg-panel hover:bg-panelSoft text-white/80 text-sm">
-        Toggle Theme
-      </button>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="index.html" class="text-white/80 hover:text-white">Home</a>
+        <a id="submitLink" href="submit.html" class="text-white/60 hover:text-white hidden">Submit</a>
+        <button id="toggleTheme" class="px-3 py-1 rounded border border-white/10 bg-white/5 text-white/80">Toggle Theme</button>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-    <article class="rounded-xl border border-white/10 bg-panel p-6 space-y-5">
-      <section>
-        <h2 class="text-xl font-semibold text-neon-teal mb-2">Important Notices</h2>
-        <ul class="list-disc pl-6 space-y-1 text-white/80">
-          <li>Informational purposes only. Nothing here is investment, legal, or tax advice.</li>
-          <li>Crypto assets are volatile and risky. You can lose all participating funds.</li>
-          <li>Always verify official links and smart contract addresses yourself.</li>
-          <li>Never share seed phrases or private keys. Use hardware wallets when possible.</li>
-          <li>We are not affiliated with listed projects unless explicitly stated.</li>
-        </ul>
-      </section>
+  <main class="max-w-3xl mx-auto px-4 py-6 prose prose-invert">
+    <h2>Educational Use Only</h2>
+    <p>Airdrop Hub provides sample data for learning purposes. Nothing here is financial advice. Always do your own research (DYOR) before interacting with any protocol.</p>
 
-      <section>
-        <h3 class="text-lg font-semibold text-neon-purple mb-2">Data Accuracy</h3>
-        <p class="text-white/80">We try to keep information current, but we cannot guarantee completeness or accuracy. Listings may be incomplete, outdated, or incorrect. Always confirm on official channels.</p>
-      </section>
+    <h3>Safety</h3>
+    <ul>
+      <li>Verify official links and domains.</li>
+      <li>Never share seed phrases or private keys.</li>
+      <li>Prefer using burner wallets for testing unknown dApps.</li>
+    </ul>
 
-      <section>
-        <h3 class="text-lg font-semibold text-neon-purple mb-2">User Responsibility</h3>
-        <p class="text-white/80">You are solely responsible for your actions and wallet security. Use burner wallets for testing, review permissions before signing, and be cautious of phishing attempts.</p>
-      </section>
+    <h3>Data</h3>
+    <p>Listings may contain third‑party links. We do not guarantee accuracy or availability. No personal data is collected by this static site.</p>
 
-      <section>
-        <h3 class="text-lg font-semibold text-neon-purple mb-2">No Liability</h3>
-        <p class="text-white/80">We are not liable for any loss, damage, or claims arising from the use of this site or participation in any listed airdrops.</p>
-      </section>
-
-      <section>
-        <h3 class="text-lg font-semibold text-neon-purple mb-2">Contact</h3>
-        <p class="text-white/80">To request updates or removal, open an issue on our GitHub repository.</p>
-      </section>
-    </article>
-
-    <p class="text-center text-xs text-white/50">© <span id="year"></span> Airdrop Hub • <a class="underline hover:text-white" href="index.html">Back to Home</a></p>
+    <h3>Contact</h3>
+    <p>Open an issue or pull request on the repository to suggest changes.</p>
   </main>
 
   <script>
-    const THEME_KEY = 'theme';
-    const root = document.documentElement;
-    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-    if (savedTheme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
-    document.getElementById('darkToggle').addEventListener('click', () => {
-      root.classList.toggle('dark');
-      localStorage.setItem(THEME_KEY, root.classList.contains('dark') ? 'dark' : 'light');
+    // Show Submit link if owner_access is set
+    (function showSubmitIfOwner() {
+      try {
+        const isOwner = localStorage.getItem('owner_access') === 'true';
+        if (isOwner) {
+          document.getElementById('submitLink').classList.remove('hidden');
+        }
+      } catch {}
+    })();
+
+    // Theme toggle with persistence
+    function currentTheme() {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    function setTheme(mode) {
+      document.documentElement.classList.toggle('dark', mode === 'dark');
+      try { localStorage.setItem('theme', mode); } catch {}
+    }
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
     });
-    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

@@ -23,8 +23,12 @@
     .btn { padding: 0.375rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
     .btn:hover { border-color: rgba(255,255,255,0.2); }
     .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+    .hidden { display: none; }
   </style>
   <script>
+    // CONFIG: set your secret token (must match submit.html)
+    const YOUR_SECRET_TOKEN = 'CHANGE_ME_TOKEN';
+
     // Apply saved theme early
     (function () {
       try {
@@ -32,6 +36,21 @@
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const mode = saved || (prefersDark ? 'dark' : 'light');
         document.documentElement.classList.toggle('dark', mode === 'dark');
+      } catch {}
+    })();
+
+    // Owner access flag from token in URL (?token=...)
+    (function () {
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        if (token && token === YOUR_SECRET_TOKEN) {
+          localStorage.setItem('owner_access', 'true');
+          // Optionally clean the token from the URL without reload
+          const url = new URL(location.href);
+          url.searchParams.delete('token');
+          window.history.replaceState({}, '', url.toString());
+        }
       } catch {}
     })();
   </script>
@@ -45,7 +64,7 @@
         <span class="ml-2 text-xs text-white/50">Neon Dark</span>
       </div>
       <nav class="flex items-center gap-4 text-sm">
-        <a href="submit.html" class="text-white/80 hover:text-white">Submit</a>
+        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
         <button id="toggleTheme" class="btn ml-2 text-white/80">Toggle Theme</button>
       </nav>
@@ -130,13 +149,22 @@
 
     <footer class="mt-10 text-white/60 text-sm">
       <p>Built for learning. Data is sample only. Always DYOR. •
-        <a class="underline" href="terms.html">Terms</a> •
-        <a class="underline" href="submit.html">Submit</a>
+        <a class="underline" href="terms.html">Terms</a>
       </p>
     </footer>
   </main>
 
   <script>
+    // Show Submit link only for owner
+    (function showSubmitIfOwner() {
+      try {
+        const isOwner = localStorage.getItem('owner_access') === 'true';
+        if (isOwner) {
+          document.getElementById('submitLink').classList.remove('hidden');
+        }
+      } catch {}
+    })();
+
     // Theme persistence
     function currentTheme() {
       return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
