@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Airdrop — Airdrop Hub</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3text x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E📝%3C/text%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { bg:'#0b0f1a', card:'#0f1422' } } }
+    }
+  </script>
+  <style>
+    :root { color-scheme: dark; }
+    html, body { background: #0b0f1a; }
+    .btn { padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+    .btn:hover { border-color: rgba(255,255,255,0.2); }
+    .input, select, textarea { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+    .label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; display: block; }
+    .note { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+    pre { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.75rem; overflow: auto; }
+  </style>
+</head>
+<body class="min-h-screen text-white">
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
+        <h1 class="text-lg sm:text-xl font-semibold">Submit Airdrop</h1>
+      </div>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="index.html" class="text-white/80 hover:text-white">Home</a>
+        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <p class="note">Fill out the form. Then copy the JSON and add it to data/data.json in your repo, or use the dev-only Append button while running the local server.</p>
+
+    <form id="airdropForm" class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="label">ID (unique, slug-like)</label>
+        <input class="input" id="id" placeholder="aster" required>
+      </div>
+      <div>
+        <label class="label">Name</label>
+        <input class="input" id="name" placeholder="ASTER DEX" required>
+      </div>
+      <div>
+        <label class="label">Chain</label>
+        <select class="input" id="chain" required>
+          <option value="">Select chain</option>
+          <option>Ethereum</option>
+          <option>Solana</option>
+          <option>Arbitrum</option>
+          <option>Base</option>
+          <option>Polygon</option>
+          <option>Aptos</option>
+          <option>BNB</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">Reward (USD number)</label>
+        <input type="number" min="0" step="1" class="input" id="rewardUSD" placeholder="1000">
+      </div>
+      <div>
+        <label class="label">Status</label>
+        <select class="input" id="status" required>
+          <option value="">Select status</option>
+          <option>live</option>
+          <option>upcoming</option>
+          <option>ended</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">Deadline (YYYY-MM-DD)</label>
+        <input class="input" id="deadline" placeholder="2025-10-05" pattern="\\d{4}-\\d{2}-\\d{2}" required>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="label">Tasks (comma-separated)</label>
+        <input class="input" id="tasks" placeholder="Deposit ASBNB, Trade perpetuals (2+ times)">
+      </div>
+      <div class="sm:col-span-2">
+        <label class="label">Tags (comma-separated)</label>
+        <input class="input" id="tags" placeholder="Perpetual Trading, Deposits, Fast">
+      </div>
+      <div class="sm:col-span-2">
+        <label class="label">Links</label>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <input class="input" id="site" placeholder="https://example.com">
+          <input class="input" id="twitter" placeholder="https://x.com/example">
+          <input class="input" id="docs" placeholder="https://docs.example.com">
+        </div>
+      </div>
+      <div class="sm:col-span-2 flex flex-wrap gap-2">
+        <button class="btn" type="submit">Preview JSON</button>
+        <button class="btn" type="button" id="copyBtn" disabled>Copy JSON</button>
+        <button class="btn" type="button" id="downloadBtn" disabled>Download JSON</button>
+        <button class="btn" type="button" id="appendBtn" title="Dev-only: requires local server" disabled>Append to data.json (dev)</button>
+      </div>
+    </form>
+
+    <div>
+      <h2 class="text-white/80 font-semibold mb-2">Preview</h2>
+      <pre id="preview">{ }</pre>
+    </div>
+
+    <section class="note">
+      <p class="mb-2">To append locally, run the tiny dev server, then click “Append to data.json (dev)”.</p>
+      <ol class="list-decimal ml-6 space-y-1">
+        <li>Install Node.js (if not installed).</li>
+        <li>Save the dev server file below as dev-server.js at the repo root.</li>
+        <li>Run: node dev-server.js</li>
+        <li>Open this page at http://localhost:3000/submit.html</li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('airdropForm');
+    const preview = document.getElementById('preview');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const appendBtn = document.getElementById('appendBtn');
+
+    function sanitizeId(str) {
+      return String(str).trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+    }
+
+    function buildEntry() {
+      const id = sanitizeId(document.getElementById('id').value);
+      const name = document.getElementById('name').value.trim();
+      const chain = document.getElementById('chain').value.trim();
+      const rewardUSD = Number(document.getElementById('rewardUSD').value || 0);
+      const status = document.getElementById('status').value.trim();
+      const deadline = document.getElementById('deadline').value.trim();
+      const tasks = document.getElementById('tasks').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const tags = document.getElementById('tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const links = {
+        site: document.getElementById('site').value.trim(),
+        twitter: document.getElementById('twitter').value.trim(),
+        docs: document.getElementById('docs').value.trim()
+      };
+      if (!id || !name || !chain || !status || !deadline) throw new Error('Please fill required fields.');
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(deadline)) throw new Error('Deadline must be YYYY-MM-DD');
+      return { id, name, chain, rewardUSD, status, deadline, tasks, tags, links, popularity: 0 };
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      try {
+        const entry = buildEntry();
+        const json = JSON.stringify(entry, null, 2);
+        preview.textContent = json;
+        copyBtn.disabled = false;
+        downloadBtn.disabled = false;
+        // Enable append only if served from localhost
+        appendBtn.disabled = !location.origin.includes('localhost');
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(preview.textContent);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(()=>copyBtn.textContent='Copy JSON', 1500);
+      } catch {
+        alert('Copy failed. Select and copy manually.');
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([preview.textContent], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'airdrop-entry.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    appendBtn.addEventListener('click', async () => {
+      if (appendBtn.disabled) return;
+      try {
+        const entry = JSON.parse(preview.textContent);
+        const res = await fetch('/__dev_append', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'Append failed');
+        alert('Appended to data/data.json (dev). Remember to git add/commit/push.');
+      } catch (e) {
+        alert('Append failed: ' + e.message);
+      }
+    });
+  </script>
+</body>
+</html>

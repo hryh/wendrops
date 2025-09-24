@@ -4,26 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Airdrop Hub — Neon Dark</title>
-
-  <!-- Inline favicon -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🪂%3C/text%3E%3C/svg%3E" />
-
-  <!-- Tailwind CDN (fine for now; production can switch to Vite per Tailwind docs) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3text x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🪂%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          colors: {
-            bg: '#0b0f1a',
-            card: '#0f1422',
-            edge: '#1a2337',
-            accent: '#22d3ee'
-          },
-          boxShadow: {
-            glow: '0 0 0.6rem rgba(34,211,238,0.35), 0 0 1.2rem rgba(34,211,238,0.2)'
-          }
+          colors: { bg: '#0b0f1a', card: '#0f1422', edge: '#1a2337', accent: '#22d3ee' },
+          boxShadow: { glow: '0 0 0.6rem rgba(34,211,238,0.35), 0 0 1.2rem rgba(34,211,238,0.2)' }
         }
       }
     }
@@ -31,12 +20,12 @@
   <style>
     :root { color-scheme: dark; }
     html, body { background: #0b0f1a; }
-    .btn { @apply px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:border-white/20; }
-    .chip { @apply text-xs px-2 py-1 rounded bg-white/5 border border-white/10; }
+    .btn { padding: 0.375rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+    .btn:hover { border-color: rgba(255,255,255,0.2); }
+    .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
   </style>
 </head>
 <body class="min-h-screen text-white">
-  <!-- Header -->
   <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -45,16 +34,15 @@
         <span class="ml-2 text-xs text-white/50">Neon Dark</span>
       </div>
       <nav class="flex items-center gap-4 text-sm">
-        <button id="linkSubmit" class="text-white/80 hover:text-white">Submit</button>
-        <button id="linkTerms" class="text-white/60 hover:text-white">Terms</button>
-        <button id="linkRSS" class="text-white/60 hover:text-white">RSS</button>
+        <a href="submit.html" class="text-white/80 hover:text-white">Submit</a>
+        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
+        <a href="rss.xml" class="text-white/60 hover:text-white">RSS</a>
         <button id="toggleTheme" class="btn ml-2 text-white/80">Toggle Theme</button>
       </nav>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Filters row -->
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       <div>
         <label class="block text-xs text-white/60 mb-1">All Status</label>
@@ -65,7 +53,6 @@
           <button data-status="ended" class="statusBtn btn">Ended</button>
         </div>
       </div>
-
       <div>
         <label class="block text-xs text-white/60 mb-1">All Chains</label>
         <select id="chainFilter" class="w-full btn">
@@ -79,7 +66,6 @@
           <option>BNB</option>
         </select>
       </div>
-
       <div>
         <label class="block text-xs text-white/60 mb-1">Sort</label>
         <select id="sortBy" class="w-full btn">
@@ -90,7 +76,6 @@
           <option value="popularityDesc">Popularity ↓</option>
         </select>
       </div>
-
       <div class="flex items-end justify-between gap-2">
         <button id="resetBtn" class="btn">Reset</button>
         <label class="flex items-center gap-2 text-sm">
@@ -100,22 +85,18 @@
       </div>
     </section>
 
-    <!-- Search -->
     <section class="mb-4">
       <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
-    <!-- Cards -->
     <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
 
-    <!-- Pagination -->
     <section class="flex items-center justify-between mt-6">
       <button id="prevBtn" class="btn">Prev</button>
       <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
       <button id="nextBtn" class="btn">Next</button>
     </section>
 
-    <!-- Safety Tips -->
     <section class="mt-10">
       <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
       <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
@@ -128,45 +109,28 @@
 
     <footer class="mt-10 text-white/60 text-sm">
       <p>Built for learning. Data is sample only. Always DYOR. •
-        <button id="footerTerms" class="underline">Terms</button> •
-        <button id="footerSubmit" class="underline">Submit</button> •
-        <button id="footerRSS" class="underline">RSS</button>
+        <a class="underline" href="terms.html">Terms</a> •
+        <a class="underline" href="submit.html">Submit</a> •
+        <a class="underline" href="rss.xml">RSS</a>
       </p>
     </footer>
   </main>
 
-  <!-- Modal -->
-  <div id="modal" class="fixed inset-0 hidden items-center justify-center bg-black/60 p-4">
-    <div class="max-w-lg w-full rounded-lg border border-white/10 bg-[#0f1422] p-5">
-      <div class="flex items-center justify-between mb-3">
-        <h3 id="modalTitle" class="text-lg font-semibold">Title</h3>
-        <button id="modalClose" class="btn">✕</button>
-      </div>
-      <div id="modalBody" class="prose prose-invert text-white/80 text-sm max-w-none">
-        <!-- Filled dynamically -->
-      </div>
-    </div>
-  </div>
-
   <script>
-    // App State
     let AIRDROPS = [];
     let filtered = [];
     let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
     let state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
 
-    // Helpers
     function fmtDate(iso) { try { return new Date(iso + 'T00:00:00Z').toLocaleDateString(); } catch { return iso; } }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-    // Data Load (uses data/data.json)
     async function loadData() {
       try {
         const res = await fetch('data/data.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
-        try { AIRDROPS = JSON.parse(txt); }
-        catch (e) { console.error('JSON parse error:', e, txt); throw new Error('Invalid JSON format'); }
+        try { AIRDROPS = JSON.parse(txt); } catch (e) { console.error('JSON parse error:', e, txt); throw new Error('Invalid JSON format'); }
         render();
       } catch (e) {
         console.error('Failed to load data:', e);
@@ -175,7 +139,6 @@
       }
     }
 
-    // Filters + Render
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
       filtered = AIRDROPS.filter(x => {
@@ -259,84 +222,6 @@
       `;
     }
 
-    // Modals (Submit, Terms, RSS)
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalClose = document.getElementById('modalClose');
-
-    function openModal(title, html) {
-      modalTitle.textContent = title;
-      modalBody.innerHTML = html;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-    modalClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-    function bindLinks() {
-      const submitHtml = `
-        <p>To add a new airdrop, edit <code>data/data.json</code> in the repo and push.</p>
-        <pre class="mt-3 bg-black/30 p-3 rounded border border-white/10 text-xs overflow-auto">{
-  "id": "ASTER",
-  "name": "ASTER DEX",
-  "chain": "BNB",
-  "rewardUSD": 1000,
-  "status": "live",
-  "deadline": "2025-10-05",
-  "tasks": ["Deposit ASBNB", "Trade perpetuals (2+ times)"],
-  "tags": ["Perpetual Trading","Deposits","Fast"],
-  "popularity": 50,
-  "links": {
-    "site": "https://example.com",
-    "twitter": "https://x.com/Aster_DEX",
-    "docs": ""
-  }
-}</pre>
-        <p class="mt-3 text-white/70">Make sure the JSON is valid and the id is unique.</p>
-      `;
-      const termsHtml = `
-        <p><strong>Educational use only.</strong> This site lists sample data. Always do your own research.</p>
-        <ul class="list-disc ml-6 mt-2">
-          <li>No financial advice.</li>
-          <li>Links may be third-party. Verify before connecting wallets.</li>
-          <li>We do not collect personal data.</li>
-        </ul>
-      `;
-      const rssHtml = `
-        <p>RSS is available at <code>/rss.xml</code> if you add it to the repo root.</p>
-        <p class="mt-2">For now, here’s a minimal inline feed you can save as <code>rss.xml</code>:</p>
-<pre class="mt-3 bg-black/30 p-3 rounded border border-white/10 text-xs overflow-auto">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;rss version="2.0"&gt;
-  &lt;channel&gt;
-    &lt;title&gt;Airdrop Hub&lt;/title&gt;
-    &lt;link&gt;https://YOUR_DOMAIN&lt;/link&gt;
-    &lt;description&gt;Live and upcoming airdrops&lt;/description&gt;
-    &lt;item&gt;
-      &lt;title&gt;Sample Item&lt;/title&gt;
-      &lt;link&gt;https://YOUR_DOMAIN/#id=zkwave&lt;/link&gt;
-      &lt;guid&gt;zkwave&lt;/guid&gt;
-      &lt;pubDate&gt;${new Date().toUTCString()}&lt;/pubDate&gt;
-    &lt;/item&gt;
-  &lt;/channel&gt;
-&lt;/rss&gt;</pre>
-      `;
-      const wire = (id, title, html) =>
-        document.getElementById(id)?.addEventListener('click', () => openModal(title, html));
-
-      wire('linkSubmit', 'Submit Airdrop', submitHtml);
-      wire('linkTerms', 'Terms', termsHtml);
-      wire('linkRSS', 'RSS', rssHtml);
-      wire('footerSubmit', 'Submit Airdrop', submitHtml);
-      wire('footerTerms', 'Terms', termsHtml);
-      wire('footerRSS', 'RSS', rssHtml);
-    }
-
-    // Events
     function bindEvents() {
       document.querySelectorAll('.statusBtn').forEach(btn => {
         btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
@@ -353,13 +238,11 @@
       });
       document.getElementById('favoritesOnly').addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
       document.getElementById('searchInput').addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
-
       document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
       document.getElementById('nextBtn').addEventListener('click', () => {
         const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
         if (state.page < totalPages) { state.page++; render(); }
       });
-
       document.getElementById('cards').addEventListener('click', e => {
         const btn = e.target.closest('button[data-fav]');
         if (!btn) return;
@@ -368,15 +251,11 @@
         localStorage.setItem('favorites', JSON.stringify([...favorites]));
         render();
       });
-
       document.getElementById('toggleTheme').addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
       });
-
-      bindLinks();
     }
 
-    // Init
     bindEvents();
     loadData();
   </script>
