@@ -25,7 +25,7 @@
     .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
   </style>
   <script>
-    // Theme: persist and apply early to avoid flash
+    // Apply saved theme early
     (function () {
       try {
         const saved = localStorage.getItem('theme');
@@ -47,8 +47,6 @@
       <nav class="flex items-center gap-4 text-sm">
         <a href="submit.html" class="text-white/80 hover:text-white">Submit</a>
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-        <a href="rss.xml" class="text-white/60 hover:text-white" title="Raw RSS for feed readers">RSS</a>
-        <a href="rss.html" class="text-white/60 hover:text-white" title="Readable RSS">RSS (reader)</a>
         <button id="toggleTheme" class="btn ml-2 text-white/80">Toggle Theme</button>
       </nav>
     </div>
@@ -133,14 +131,13 @@
     <footer class="mt-10 text-white/60 text-sm">
       <p>Built for learning. Data is sample only. Always DYOR. •
         <a class="underline" href="terms.html">Terms</a> •
-        <a class="underline" href="submit.html">Submit</a> •
-        <a class="underline" href="rss.html">RSS (reader)</a>
+        <a class="underline" href="submit.html">Submit</a>
       </p>
     </footer>
   </main>
 
   <script>
-    // Theme button wiring (persistent)
+    // Theme persistence
     function currentTheme() {
       return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     }
@@ -168,7 +165,6 @@
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         try { AIRDROPS = JSON.parse(txt); } catch (e) { console.error('JSON parse error:', e, txt); throw new Error('Invalid JSON format'); }
-        // Extract featured (Daily Picks): up to 3 items with featured:true
         featured = AIRDROPS.filter(x => x.featured === true).slice(0, 3);
         renderFeatured();
         render();
@@ -181,17 +177,18 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      // Exclude featured from main list so they don't duplicate
-      filtered = AIRDROPS.filter(x => !featured.some(f => f.id === x.id)).filter(x => {
-        if (state.status !== 'all' && x.status !== state.status) return false;
-        if (state.chain !== 'all' && x.chain !== state.chain) return false;
-        if (state.favoritesOnly && !favorites.has(x.id)) return false;
-        if (q) {
-          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
-        return true;
-      });
+      filtered = AIRDROPS
+        .filter(x => !featured.some(f => f.id === x.id))
+        .filter(x => {
+          if (state.status !== 'all' && x.status !== state.status) return false;
+          if (state.chain !== 'all' && x.chain !== state.chain) return false;
+          if (state.favoritesOnly && !favorites.has(x.id)) return false;
+          if (q) {
+            const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
 
       switch (state.sortBy) {
         case 'deadlineAsc': filtered.sort((a,b)=>a.deadline.localeCompare(b.deadline)); break;
