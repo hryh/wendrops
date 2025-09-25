@@ -24,11 +24,13 @@
     .btn:hover { border-color: rgba(255,255,255,0.2); }
     .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
     .hidden { display: none; }
+    .callout { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(255,255,255,0.12); }
   </style>
 
   <script>
-    // CONFIG: set your secret token (same as submit.html and terms.html)
+    // CONFIG
     const YOUR_SECRET_TOKEN = 'betahryh12';
+    const WHITEPAPER_URL = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
 
     // Apply saved theme early
     (function () {
@@ -64,9 +66,10 @@
         <span class="ml-2 text-xs text-white/50">Neon Dark</span>
       </div>
       <nav class="flex items-center gap-4 text-sm">
-        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-        <button id="toggleTheme" class="btn ml-2 text-white/80">Toggle Theme</button>
+        <a href="#" id="whitepaperLink" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
+        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
+        <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
       </nav>
     </div>
   </header>
@@ -136,6 +139,17 @@
       <button id="nextBtn" class="btn">Next</button>
     </section>
 
+    <!-- Whitepaper callout -->
+    <section class="mt-10 p-4 rounded-lg callout">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-white/90 font-semibold">Read the Whitepaper</h2>
+          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
+        </div>
+        <a class="btn border-cyan-400/40 text-cyan-300 hover:text-white hover:border-cyan-300 underline" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">Open Whitepaper</a>
+      </div>
+    </section>
+
     <!-- Safety Tips -->
     <section class="mt-10">
       <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
@@ -161,6 +175,14 @@
         const isOwner = localStorage.getItem('owner_access') === 'true';
         if (isOwner) document.getElementById('submitLink').classList.remove('hidden');
       } catch {}
+    })();
+
+    // Wire Whitepaper link (header) to open in new tab
+    (function bindWhitepaper() {
+      const a = document.getElementById('whitepaperLink');
+      a.href = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
+      a.target = '_blank';
+      a.rel = 'noopener';
     })();
 
     // Theme persistence
@@ -204,7 +226,7 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      // Do NOT exclude featured — you asked to also show them in the main pool
+      // Keep featured also in the main pool
       filtered = AIRDROPS.filter(x => {
         if (state.status !== 'all' && x.status !== state.status) return false;
         if (state.chain !== 'all' && x.chain !== state.chain) return false;
@@ -253,11 +275,23 @@
       document.getElementById('pageInfo').textContent = `${total} results`;
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
+
+      // Rebind favorite toggles after render
+      cards.querySelectorAll('button[data-fav]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-fav');
+          if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+          localStorage.setItem('favorites', JSON.stringify([...favorites]));
+          renderFeatured();
+          render();
+        });
+      });
     }
 
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
       const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured</span>` : '';
+      const whitepaperAnchor = `<a class="underline text-cyan-300" href="${WHITEPAPER_URL}" target="_blank" rel="noopener">Whitepaper</a>`;
       return `
         <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
           <div class="flex items-start justify-between gap-3">
@@ -290,17 +324,18 @@
             ${(x.tags ?? []).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join('')}
           </div>
 
-          <div class="mt-4 flex items-center gap-2 text-sm">
+          <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
             ${x?.links?.site ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">Site</a>` : ''}
             ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
             ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
             ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" target="_blank" rel="noopener">Tutorial</a>` : ''}
+            ${whitepaperAnchor}
           </div>
         </article>
       `;
     }
 
-    function bindEvents() {
+    function bindStaticEvents() {
       document.querySelectorAll('.statusBtn').forEach(btn => {
         btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
       });
@@ -321,18 +356,9 @@
         const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
         if (state.page < totalPages) { state.page++; render(); }
       });
-      document.getElementById('cards').addEventListener('click', e => {
-        const btn = e.target.closest('button[data-fav]');
-        if (!btn) return;
-        const id = btn.getAttribute('data-fav');
-        if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
-        localStorage.setItem('favorites', JSON.stringify([...favorites]));
-        renderFeatured();
-        render();
-      });
     }
 
-    bindEvents();
+    bindStaticEvents();
     loadData();
   </script>
 </body>
