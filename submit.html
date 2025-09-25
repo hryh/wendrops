@@ -6,10 +6,7 @@
   <title>Submit Airdrop — Airdrop Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { colors: { bg: '#0b0f1a' } } }
-    }
+    tailwind.config = { darkMode: 'class' }
   </script>
   <style>
     :root { color-scheme: dark; }
@@ -85,7 +82,7 @@
         <input name="tags" class="w-full btn" placeholder="dex, defi, bridge" />
       </div>
 
-      <div class="grid sm:grid-cols-3 gap-4">
+      <div class="grid sm:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm mb-1">Site URL</label>
           <input name="site" class="w-full btn" placeholder="https://example.com" />
@@ -97,6 +94,11 @@
         <div>
           <label class="block text-sm mb-1">Docs URL</label>
           <input name="docs" class="w-full btn" placeholder="https://docs.example.com" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Tutorial URL</label>
+          <input name="tutorial" class="w-full btn" placeholder="https://example.com/tutorial" />
+          <p class="help">Optional. When provided, a “Tutorial” link will appear on the card.</p>
         </div>
       </div>
 
@@ -117,7 +119,6 @@
   </main>
 
   <script>
-    // Robust YYYY-MM-DD validator (no timezone gotchas, strict calendar check)
     function isValidISODate(value) {
       if (typeof value !== 'string') return false;
       const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -126,14 +127,10 @@
       if (mm < 1 || mm > 12) return false;
       if (dd < 1 || dd > 31) return false;
       const dt = new Date(Date.UTC(y, mm - 1, dd));
-      // Ensure no auto-correction (e.g., 2025-02-31 --> Mar 3) and same components
       return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === mm && dt.getUTCDate() === dd;
     }
 
-    function splitCSV(s) {
-      if (!s) return [];
-      return s.split(',').map(x => x.trim()).filter(Boolean);
-    }
+    function splitCSV(s) { return !s ? [] : s.split(',').map(x => x.trim()).filter(Boolean); }
 
     const form = document.getElementById('submitForm');
     const deadlineInput = form.elements['deadline'];
@@ -167,11 +164,11 @@
         links: {
           site: form.elements['site'].value.trim(),
           twitter: form.elements['twitter'].value.trim(),
-          docs: form.elements['docs'].value.trim()
+          docs: form.elements['docs'].value.trim(),
+          tutorial: form.elements['tutorial'].value.trim()
         }
       };
 
-      // Field validations
       const idOk = /^[a-z0-9-]+$/.test(data.id);
       const chainOk = !!data.chain;
       const statusOk = ['live', 'upcoming', 'ended'].includes(data.status);
@@ -186,9 +183,8 @@
       if (!rewardOk) return alert('Reward must be a non-negative number.');
       if (!deadlineOk) return alert('Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).');
 
-      // Output nicely formatted JSON ready for data.json
       const cleanLinks = {};
-      for (const k of ['site','twitter','docs']) {
+      for (const k of ['site', 'twitter', 'docs', 'tutorial']) {
         if (data.links[k]) cleanLinks[k] = data.links[k];
       }
       const output = {

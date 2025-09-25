@@ -28,11 +28,9 @@
   </style>
 
   <script>
-    // CONFIG
     const YOUR_SECRET_TOKEN = 'betahryh12';
     const WHITEPAPER_URL = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
 
-    // Apply saved theme early
     (function () {
       try {
         const saved = localStorage.getItem('theme');
@@ -42,7 +40,6 @@
       } catch {}
     })();
 
-    // Capture token in URL to grant owner access, then clean it from URL
     (function () {
       try {
         const params = new URLSearchParams(location.search);
@@ -75,13 +72,11 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Daily Picks -->
     <section id="dailyPicksSection" class="mb-6 hidden">
       <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
       <div id="dailyPicks" class="grid sm:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- Filters row -->
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       <div>
         <label class="block text-xs text-white/60 mb-1">All Status</label>
@@ -118,28 +113,24 @@
       <div class="flex items-end justify-between gap-2">
         <button id="resetBtn" class="btn">Reset</button>
         <label class="flex items-center gap-2 text-sm">
-          <input id="favoritesOnly" type="checkbox" class="accent-cyan-400">
+          <input id="favoritesOnly" type="checkbox" class="accent-cian-400">
           <span>Show Favorites</span>
         </label>
       </div>
     </section>
 
-    <!-- Search -->
     <section class="mb-4">
       <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
-    <!-- Cards -->
     <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
 
-    <!-- Pagination -->
     <section class="flex items-center justify-between mt-6">
       <button id="prevBtn" class="btn">Prev</button>
       <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
       <button id="nextBtn" class="btn">Next</button>
     </section>
 
-    <!-- Whitepaper callout -->
     <section class="mt-10 p-4 rounded-lg callout">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -150,7 +141,6 @@
       </div>
     </section>
 
-    <!-- Safety Tips -->
     <section class="mt-10">
       <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
       <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
@@ -169,7 +159,6 @@
   </main>
 
   <script>
-    // Show Submit link only if owner_access was granted
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
@@ -177,19 +166,10 @@
       } catch {}
     })();
 
-    // Theme persistence
-    function currentTheme() {
-      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-    }
-    function setTheme(mode) {
-      document.documentElement.classList.toggle('dark', mode === 'dark');
-      try { localStorage.setItem('theme', mode); } catch {}
-    }
-    document.getElementById('toggleTheme').addEventListener('click', () => {
-      setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
-    });
+    function currentTheme() { return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
+    function setTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); try { localStorage.setItem('theme', mode); } catch {} }
+    document.getElementById('toggleTheme').addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
 
-    // App State
     let AIRDROPS = [];
     let filtered = [];
     let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
@@ -204,13 +184,11 @@
         const res = await fetch('data/data.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
-        try { AIRDROPS = JSON.parse(txt); } catch (e) { console.error('JSON parse error:', e, txt); throw new Error('Invalid JSON format'); }
-        // Build Daily Picks (up to 3)
+        AIRDROPS = JSON.parse(txt);
         featured = AIRDROPS.filter(x => x.featured === true).slice(0, 3);
         renderFeatured();
         render();
       } catch (e) {
-        console.error('Failed to load data:', e);
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
         document.getElementById('pageInfo').textContent = '0 results';
       }
@@ -218,7 +196,6 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      // Keep featured also in the main pool
       filtered = AIRDROPS.filter(x => {
         if (state.status !== 'all' && x.status !== state.status) return false;
         if (state.chain !== 'all' && x.chain !== state.chain) return false;
@@ -242,10 +219,7 @@
     function renderFeatured() {
       const sec = document.getElementById('dailyPicksSection');
       const wrap = document.getElementById('dailyPicks');
-      if (featured.length === 0) {
-        sec.classList.add('hidden');
-        return;
-      }
+      if (featured.length === 0) { sec.classList.add('hidden'); return; }
       sec.classList.remove('hidden');
       wrap.innerHTML = featured.map(x => cardHtml(x, true)).join('');
     }
@@ -255,12 +229,9 @@
       const start = (state.page - 1) * state.pageSize;
       const items = filtered.slice(start, start + state.pageSize);
       const cards = document.getElementById('cards');
-
-      if (items.length === 0) {
-        cards.innerHTML = `<div class="col-span-full text-white/60">0 results</div>`;
-      } else {
-        cards.innerHTML = items.map(x => cardHtml(x, false)).join('');
-      }
+      cards.innerHTML = items.length === 0
+        ? `<div class="col-span-full text-white/60">0 results</div>`
+        : items.map(x => cardHtml(x, false)).join('');
 
       const total = filtered.length;
       const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -268,7 +239,6 @@
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
 
-      // Rebind favorite toggles after render
       cards.querySelectorAll('button[data-fav]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-fav');
@@ -325,30 +295,27 @@
       `;
     }
 
-    function bindStaticEvents() {
-      document.querySelectorAll('.statusBtn').forEach(btn => {
-        btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
-      });
-      document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
-      document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
-        document.getElementById('chainFilter').value = 'all';
-        document.getElementById('sortBy').value = 'deadlineAsc';
-        document.getElementById('searchInput').value = '';
-        document.getElementById('favoritesOnly').checked = false;
-        render();
-      });
-      document.getElementById('favoritesOnly').addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
-      document.getElementById('searchInput').addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
-      document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
-      document.getElementById('nextBtn').addEventListener('click', () => {
-        const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
-        if (state.page < totalPages) { state.page++; render(); }
-      });
-    }
+    document.querySelectorAll('.statusBtn').forEach(btn => {
+      btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
+    });
+    document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
+    document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
+      document.getElementById('chainFilter').value = 'all';
+      document.getElementById('sortBy').value = 'deadlineAsc';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('favoritesOnly').checked = false;
+      render();
+    });
+    document.getElementById('favoritesOnly')?.addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
+    document.getElementById('searchInput').addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+      if (state.page < totalPages) { state.page++; render(); }
+    });
 
-    bindStaticEvents();
     loadData();
   </script>
 </body>
