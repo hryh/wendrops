@@ -25,12 +25,16 @@
     .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
     .hidden { display: none; }
     .callout { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(255,255,255,0.12); }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1), rgba(255,255,255,0.06)); background-size: 200% 100%; animation: shine 1.2s linear infinite; }
+    @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
 
   <script>
+    // CONFIG
     const YOUR_SECRET_TOKEN = 'betahryh12';
     const WHITEPAPER_URL = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
 
+    // Apply saved theme early
     (function () {
       try {
         const saved = localStorage.getItem('theme');
@@ -40,6 +44,7 @@
       } catch {}
     })();
 
+    // Owner access token capture
     (function () {
       try {
         const params = new URLSearchParams(location.search);
@@ -72,11 +77,15 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Daily Picks -->
     <section id="dailyPicksSection" class="mb-6 hidden">
-      <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
+      </div>
       <div id="dailyPicks" class="grid sm:grid-cols-3 gap-4"></div>
     </section>
 
+    <!-- Filters row -->
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       <div>
         <label class="block text-xs text-white/60 mb-1">All Status</label>
@@ -113,24 +122,28 @@
       <div class="flex items-end justify-between gap-2">
         <button id="resetBtn" class="btn">Reset</button>
         <label class="flex items-center gap-2 text-sm">
-          <input id="favoritesOnly" type="checkbox" class="accent-cian-400">
+          <input id="favoritesOnly" type="checkbox" class="accent-cyan-400">
           <span>Show Favorites</span>
         </label>
       </div>
     </section>
 
+    <!-- Search -->
     <section class="mb-4">
       <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
+    <!-- Cards -->
     <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
 
+    <!-- Pagination -->
     <section class="flex items-center justify-between mt-6">
       <button id="prevBtn" class="btn">Prev</button>
       <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
       <button id="nextBtn" class="btn">Next</button>
     </section>
 
+    <!-- Whitepaper callout -->
     <section class="mt-10 p-4 rounded-lg callout">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -141,6 +154,7 @@
       </div>
     </section>
 
+    <!-- Safety Tips -->
     <section class="mt-10">
       <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
       <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
@@ -158,7 +172,22 @@
     </footer>
   </main>
 
+  <!-- Tutorial modal -->
+  <div id="tutorialModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="w-full max-w-4xl h-[80vh] bg-[#0f1422] border border-white/10 rounded-lg overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between p-3 border-b border-white/10">
+        <h3 id="tutorialTitle" class="font-semibold">Tutorial</h3>
+        <div class="flex items-center gap-2">
+          <a id="openInNewTab" href="#" target="_blank" rel="noopener" class="btn text-cyan-300">Open in new tab</a>
+          <button id="closeTutorial" class="btn">Close</button>
+        </div>
+      </div>
+      <iframe id="tutorialFrame" class="flex-1 w-full" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+  </div>
+
   <script>
+    // Show Submit link only if owner_access was granted
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
@@ -166,27 +195,98 @@
       } catch {}
     })();
 
+    // Persist and restore filters
+    function saveState() { try { localStorage.setItem('filters', JSON.stringify(state)); } catch {} }
+    function restoreState() {
+      try {
+        const qs = new URLSearchParams(location.search);
+        const saved = JSON.parse(localStorage.getItem('filters') || '{}');
+        const initial = {
+          status: (qs.get('status') || saved.status || 'all'),
+          chain: (qs.get('chain') || saved.chain || 'all'),
+          sortBy: (qs.get('sort') || saved.sortBy || 'deadlineAsc'),
+          search: (qs.get('q') || saved.search || ''),
+          page: Number(qs.get('page') || saved.page || 1),
+          pageSize: 9,
+          favoritesOnly: (qs.get('fav') || saved.favoritesOnly) ? (qs.get('fav') === '1' || saved.favoritesOnly === true) : false
+        };
+        return initial;
+      } catch { return { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false }; }
+    }
+    function syncQueryParams() {
+      const url = new URL(location.href);
+      const set = (k, v) => { if (v === 'all' || v === '' || v === undefined || v === false || v === 1 && k==='page') url.searchParams.delete(k); else url.searchParams.set(k, String(v)); };
+      url.searchParams.set('status', state.status);
+      url.searchParams.set('chain', state.chain);
+      url.searchParams.set('sort', state.sortBy);
+      if (state.search) url.searchParams.set('q', state.search); else url.searchParams.delete('q');
+      if (state.favoritesOnly) url.searchParams.set('fav', '1'); else url.searchParams.delete('fav');
+      if (state.page > 1) url.searchParams.set('page', String(state.page)); else url.searchParams.delete('page');
+      history.replaceState({}, '', url.toString());
+    }
+
+    // Theme
     function currentTheme() { return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
     function setTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); try { localStorage.setItem('theme', mode); } catch {} }
     document.getElementById('toggleTheme').addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
 
+    // App State
     let AIRDROPS = [];
     let filtered = [];
     let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
-    let state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
+    let state = restoreState();
     let featured = [];
 
     function fmtDate(iso) { try { return new Date(iso + 'T00:00:00Z').toLocaleDateString(); } catch { return iso; } }
+    function daysUntil(iso) {
+      try {
+        const now = new Date();
+        const end = new Date(iso + 'T23:59:59Z');
+        const diff = (end - now) / (1000 * 60 * 60 * 24);
+        return Math.ceil(diff);
+      } catch { return null; }
+    }
+    function urgencyBadge(iso) {
+      const d = daysUntil(iso);
+      if (d == null || isNaN(d)) return '';
+      const urgent = d <= 3;
+      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
+    }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // Loading skeletons
+    function showSkeletons() {
+      const sk = Array.from({length: 6}).map(() => `
+        <div class="rounded-lg border border-white/10 p-4">
+          <div class="h-5 w-1/2 skeleton rounded mb-3"></div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="h-12 skeleton rounded"></div>
+            <div class="h-12 skeleton rounded"></div>
+          </div>
+          <div class="h-4 w-2/3 skeleton rounded mt-3"></div>
+          <div class="h-4 w-1/3 skeleton rounded mt-2"></div>
+        </div>
+      `).join('');
+      document.getElementById('cards').innerHTML = sk;
+    }
 
     async function loadData() {
       try {
+        showSkeletons();
         const res = await fetch('data/data.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         AIRDROPS = JSON.parse(txt);
-        featured = AIRDROPS.filter(x => x.featured === true).slice(0, 3);
+        // Featured picks with manual order
+        featured = AIRDROPS.filter(x => x.featured === true)
+          .sort((a, b) => (a.featuredOrder ?? 999) - (b.featuredOrder ?? 999))
+          .slice(0, 3);
         renderFeatured();
+        // Restore UI from state
+        document.getElementById('chainFilter').value = state.chain;
+        document.getElementById('sortBy').value = state.sortBy;
+        document.getElementById('searchInput').value = state.search;
+        document.getElementById('favoritesOnly').checked = state.favoritesOnly;
         render();
       } catch (e) {
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
@@ -222,6 +322,8 @@
       if (featured.length === 0) { sec.classList.add('hidden'); return; }
       sec.classList.remove('hidden');
       wrap.innerHTML = featured.map(x => cardHtml(x, true)).join('');
+      // Bind tutorial buttons inside featured too
+      bindTutorialLinks(wrap);
     }
 
     function render() {
@@ -229,9 +331,24 @@
       const start = (state.page - 1) * state.pageSize;
       const items = filtered.slice(start, start + state.pageSize);
       const cards = document.getElementById('cards');
-      cards.innerHTML = items.length === 0
-        ? `<div class="col-span-full text-white/60">0 results</div>`
-        : items.map(x => cardHtml(x, false)).join('');
+
+      if (items.length === 0) {
+        cards.innerHTML = `
+          <div class="col-span-full text-white/70 space-y-3">
+            <div>0 results</div>
+            <button id="clearFilters" class="btn">Clear filters</button>
+          </div>`;
+        document.getElementById('clearFilters').addEventListener('click', () => {
+          state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
+          document.getElementById('chainFilter').value = 'all';
+          document.getElementById('sortBy').value = 'deadlineAsc';
+          document.getElementById('searchInput').value = '';
+          document.getElementById('favoritesOnly').checked = false;
+          saveState(); syncQueryParams(); render();
+        });
+      } else {
+        cards.innerHTML = items.map(x => cardHtml(x, false)).join('');
+      }
 
       const total = filtered.length;
       const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -239,6 +356,7 @@
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
 
+      // Bind interactions
       cards.querySelectorAll('button[data-fav]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-fav');
@@ -248,18 +366,34 @@
           render();
         });
       });
+
+      bindTutorialLinks(cards);
+
+      saveState();
+      syncQueryParams();
+    }
+
+    function bindTutorialLinks(scopeEl) {
+      scopeEl.querySelectorAll('a[data-tutorial]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const url = a.getAttribute('href');
+          openTutorialModal(url, a.getAttribute('data-title') || 'Tutorial');
+        });
+      });
     }
 
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
-      const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured</span>` : '';
+      const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
+      const endsChip = x.deadline ? urgencyBadge(x.deadline) : '';
       return `
         <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
           <div class="flex items-start justify-between gap-3">
             <div class="flex flex-col gap-1">
               <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
               <div class="text-xs text-white/60">${escapeHtml(x.chain)} • ${escapeHtml(x.status)}</div>
-              ${badge}
+              <div class="flex gap-2 mt-1">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
             </div>
             <button data-fav="${escapeHtml(x.id)}" class="text-sm px-2 py-1 rounded border ${fav ? 'border-cyan-400 text-cyan-300' : 'border-white/10 text-white/70'}" title="Toggle favorite">
               ${fav ? '★' : '☆'}
@@ -289,12 +423,35 @@
             ${x?.links?.site ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">Site</a>` : ''}
             ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
             ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
-            ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" target="_blank" rel="noopener">Tutorial</a>` : ''}
+            ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">Tutorial</a>` : ''}
           </div>
         </article>
       `;
     }
 
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      const active = document.activeElement;
+      if (e.key === '/' && (!active || active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      if (e.key.toLowerCase() === 'f' && (!active || active.tagName !== 'INPUT')) {
+        e.preventDefault();
+        const chk = document.getElementById('favoritesOnly');
+        chk.checked = !chk.checked;
+        state.favoritesOnly = chk.checked;
+        state.page = 1;
+        render();
+      }
+      if (e.key === 'ArrowLeft') { if (state.page > 1) { state.page--; render(); } }
+      if (e.key === 'ArrowRight') {
+        const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+        if (state.page < totalPages) { state.page++; render(); }
+      }
+    });
+
+    // Filters bindings
     document.querySelectorAll('.statusBtn').forEach(btn => {
       btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
     });
@@ -308,13 +465,28 @@
       document.getElementById('favoritesOnly').checked = false;
       render();
     });
-    document.getElementById('favoritesOnly')?.addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
+    document.getElementById('favoritesOnly').addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
     document.getElementById('searchInput').addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
-    document.getElementById('prevBtn').addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
-    document.getElementById('nextBtn').addEventListener('click', () => {
-      const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
-      if (state.page < totalPages) { state.page++; render(); }
-    });
+
+    // Tutorial modal controls
+    const modal = document.getElementById('tutorialModal');
+    const frame = document.getElementById('tutorialFrame');
+    const titleEl = document.getElementById('tutorialTitle');
+    const openNew = document.getElementById('openInNewTab');
+    document.getElementById('closeTutorial').addEventListener('click', closeTutorialModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
+    function openTutorialModal(url, title) {
+      titleEl.textContent = title || 'Tutorial';
+      frame.src = url;
+      openNew.href = url;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    function closeTutorialModal() {
+      frame.src = 'about:blank';
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
 
     loadData();
   </script>

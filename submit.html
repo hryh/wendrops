@@ -15,110 +15,133 @@
     .btn:hover { border-color: rgba(255,255,255,0.25); }
     .help { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
     .error { color: #fca5a5; font-size: 0.8rem; }
+    .ok { color: #86efac; font-size: 0.8rem; }
+    .gridish { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .gridish { grid-template-columns: 1fr 1fr; } }
+    .preview { border: 1px solid rgba(255,255,255,0.1); background: #0f1422; border-radius: 0.75rem; padding: 1rem; }
   </style>
 </head>
 <body class="min-h-screen">
-  <main class="max-w-2xl mx-auto px-4 py-8">
+  <main class="max-w-5xl mx-auto px-4 py-8">
     <h1 class="text-2xl font-semibold mb-6">Submit Airdrop</h1>
 
-    <form id="submitForm" class="space-y-4" novalidate>
-      <div>
-        <label class="block text-sm mb-1">Project ID <span class="text-white/50">(lowercase, unique)</span></label>
-        <input name="id" class="w-full btn" placeholder="e.g., aster-dex" required />
-        <p class="help">Lowercase letters, numbers, and hyphens only.</p>
-      </div>
+    <div class="gridish">
+      <!-- Form -->
+      <form id="submitForm" class="space-y-4" novalidate>
+        <div>
+          <label class="block text-sm mb-1">Project ID <span class="text-white/50">(lowercase, unique)</span></label>
+          <input name="id" class="w-full btn" placeholder="e.g., aster-dex" required />
+          <p class="help">Lowercase letters, numbers, and hyphens only.</p>
+          <p id="idStatus" class="help"></p>
+        </div>
 
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm mb-1">Name</label>
-          <input name="name" class="w-full btn" required />
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Name</label>
+            <input name="name" class="w-full btn" required />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Chain</label>
+            <select name="chain" class="w-full btn" required>
+              <option value="">Select</option>
+              <option>Ethereum</option>
+              <option>Solana</option>
+              <option>Arbitrum</option>
+              <option>Base</option>
+              <option>Polygon</option>
+              <option>Aptos</option>
+              <option>BNB</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm mb-1">Chain</label>
-          <select name="chain" class="w-full btn" required>
-            <option value="">Select</option>
-            <option>Ethereum</option>
-            <option>Solana</option>
-            <option>Arbitrum</option>
-            <option>Base</option>
-            <option>Polygon</option>
-            <option>Aptos</option>
-            <option>BNB</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="grid sm:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm mb-1">Reward (USD)</label>
-          <input name="rewardUSD" type="number" min="0" step="1" class="w-full btn" placeholder="e.g., 250" required />
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Reward (USD)</label>
+            <input name="rewardUSD" type="number" min="0" step="1" class="w-full btn" placeholder="e.g., 250" required />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Status</label>
+            <select name="status" class="w-full btn" required>
+              <option value="">Select</option>
+              <option>live</option>
+              <option>upcoming</option>
+              <option>ended</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1 flex items-center justify-between">
+              <span>Deadline</span>
+              <span class="help">YYYY-MM-DD</span>
+            </label>
+            <input name="deadline" class="w-full btn" placeholder="2025-10-05" inputmode="numeric" autocomplete="off" required />
+            <p id="deadlineError" class="error hidden">Please enter a valid date in YYYY-MM-DD format.</p>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm mb-1">Status</label>
-          <select name="status" class="w-full btn" required>
-            <option value="">Select</option>
-            <option>live</option>
-            <option>upcoming</option>
-            <option>ended</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm mb-1 flex items-center justify-between">
-            <span>Deadline</span>
-            <span class="help">YYYY-MM-DD</span>
-          </label>
-          <input name="deadline" class="w-full btn" placeholder="2025-10-05" inputmode="numeric" autocomplete="off" required />
-          <p id="deadlineError" class="error hidden">Please enter a valid date in YYYY-MM-DD format.</p>
-        </div>
-      </div>
 
-      <div>
-        <label class="block text-sm mb-1">Tasks (comma‑separated)</label>
-        <input name="tasks" class="w-full btn" placeholder="Swap 3x, Provide LP, Bridge" />
-      </div>
-
-      <div>
-        <label class="block text-sm mb-1">Tags (comma‑separated)</label>
-        <input name="tags" class="w-full btn" placeholder="dex, defi, bridge" />
-      </div>
-
-      <div class="grid sm:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm mb-1">Site URL</label>
-          <input name="site" class="w-full btn" placeholder="https://example.com" />
+          <label class="block text-sm mb-1">Tasks (comma‑separated)</label>
+          <input name="tasks" class="w-full btn" placeholder="Swap 3x, Provide LP, Bridge" />
         </div>
-        <div>
-          <label class="block text-sm mb-1">Twitter URL</label>
-          <input name="twitter" class="w-full btn" placeholder="https://x.com/..." />
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Docs URL</label>
-          <input name="docs" class="w-full btn" placeholder="https://docs.example.com" />
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Tutorial URL</label>
-          <input name="tutorial" class="w-full btn" placeholder="https://example.com/tutorial" />
-          <p class="help">Optional. When provided, a “Tutorial” link will appear on the card.</p>
-        </div>
-      </div>
 
-      <div class="flex items-center gap-2">
-        <input id="featured" type="checkbox" class="accent-cyan-400" />
-        <label for="featured">Mark as Daily Pick</label>
-      </div>
+        <div>
+          <label class="block text-sm mb-1">Tags (comma‑separated)</label>
+          <input name="tags" class="w-full btn" placeholder="dex, defi, bridge" />
+        </div>
 
-      <div class="pt-2">
-        <button class="btn" type="submit">Validate & Generate JSON</button>
-      </div>
+        <div class="grid sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Site URL</label>
+            <input name="site" class="w-full btn" placeholder="https://example.com" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Twitter URL</label>
+            <input name="twitter" class="w-full btn" placeholder="https://x.com/..." />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Docs URL</label>
+            <input name="docs" class="w-full btn" placeholder="https://docs.example.com" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Tutorial URL</label>
+            <input name="tutorial" class="w-full btn" placeholder="https://example.com/tutorial" />
+            <p class="help">Optional. Appears as a “Tutorial” button on the card and opens in a modal.</p>
+          </div>
+        </div>
 
-      <div id="resultWrap" class="hidden">
-        <h2 class="text-lg font-semibold mt-6 mb-2">Generated JSON</h2>
-        <pre id="result" class="whitespace-pre-wrap bg-black/40 p-3 rounded border border-white/10"></pre>
-      </div>
-    </form>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="flex items-center gap-2">
+            <input id="featured" type="checkbox" class="accent-cyan-400" />
+            <label for="featured">Mark as Daily Pick</label>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Featured Order <span class="text-white/50">(1..3)</span></label>
+            <input name="featuredOrder" type="number" min="1" max="3" step="1" class="w-full btn" placeholder="1" />
+            <p class="help">Lower number appears earlier in Daily Picks. Optional.</p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button class="btn" type="submit">Validate & Generate JSON</button>
+          <button id="copyBtn" type="button" class="btn">Copy JSON</button>
+        </div>
+
+        <div id="resultWrap" class="hidden">
+          <h2 class="text-lg font-semibold mt-6 mb-2">Generated JSON</h2>
+          <pre id="result" class="whitespace-pre-wrap bg-black/40 p-3 rounded border border-white/10"></pre>
+        </div>
+      </form>
+
+      <!-- Live Preview -->
+      <aside class="preview">
+        <h2 class="font-semibold mb-3">Live Preview</h2>
+        <div id="previewCard" class="text-white/80 text-sm">Fill the form to preview…</div>
+      </aside>
+    </div>
   </main>
 
   <script>
+    // Utilities
     function isValidISODate(value) {
       if (typeof value !== 'string') return false;
       const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -129,12 +152,42 @@
       const dt = new Date(Date.UTC(y, mm - 1, dd));
       return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === mm && dt.getUTCDate() === dd;
     }
-
     function splitCSV(s) { return !s ? [] : s.split(',').map(x => x.trim()).filter(Boolean); }
+    function normUrl(u) {
+      if (!u) return '';
+      const v = u.trim();
+      if (/^https?:\/\//i.test(v)) return v;
+      return 'https://' + v;
+    }
+    function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
     const form = document.getElementById('submitForm');
     const deadlineInput = form.elements['deadline'];
     const deadlineError = document.getElementById('deadlineError');
+    const idInput = form.elements['id'];
+    const idStatus = document.getElementById('idStatus');
+    const previewCard = document.getElementById('previewCard');
+    const copyBtn = document.getElementById('copyBtn');
+    let EXISTING_IDS = new Set();
+
+    // Load existing IDs for duplicate guard
+    async function loadExistingIds() {
+      try {
+        const res = await fetch('data/data.json', { cache: 'no-store' });
+        const arr = await res.json();
+        EXISTING_IDS = new Set(arr.map(x => x.id));
+        updateIdStatus();
+      } catch {}
+    }
+
+    function updateIdStatus() {
+      const id = idInput.value.trim();
+      const idOk = /^[a-z0-9-]+$/.test(id);
+      if (!id) { idStatus.textContent = ''; return; }
+      if (!idOk) { idStatus.textContent = 'Invalid: use lowercase letters, numbers, and hyphens only.'; idStatus.className = 'error'; return; }
+      if (EXISTING_IDS.has(id)) { idStatus.textContent = 'This ID already exists in data.json'; idStatus.className = 'error'; }
+      else { idStatus.textContent = 'ID is available'; idStatus.className = 'ok'; }
+    }
 
     function showDeadlineError(show) {
       deadlineError.classList.toggle('hidden', !show);
@@ -146,11 +199,51 @@
       const v = deadlineInput.value.trim();
       showDeadlineError(v.length > 0 && !isValidISODate(v));
     });
+    idInput.addEventListener('input', updateIdStatus);
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    // Live preview
+    form.addEventListener('input', () => {
+      const d = collectData(false);
+      previewCard.innerHTML = `
+        <div class="text-base font-semibold">${esc(d.name || 'Project Name')}</div>
+        <div class="text-xs text-white/60">${esc(d.chain || 'Chain')} • ${esc(d.status || 'status')}</div>
+        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-white/5 rounded p-2">
+            <div class="text-white/60 text-xs">Reward</div>
+            <div class="font-medium">$${Number(d.rewardUSD || 0)}</div>
+          </div>
+          <div class="bg-white/5 rounded p-2">
+            <div class="text-white/60 text-xs">Deadline</div>
+            <div class="font-medium">${esc(d.deadline || 'YYYY-MM-DD')}</div>
+          </div>
+        </div>
+        <ul class="mt-3 text-sm list-disc ml-5 text-white/80">
+          ${d.tasks.slice(0,3).map(t=>`<li>${esc(t)}</li>`).join('')}
+        </ul>
+        <div class="mt-3 flex flex-wrap gap-2">
+          ${d.tags.map(tag => `<span class="inline-block text-xs px-2 py-1 rounded border border-white/10 bg-white/5">${esc(tag)}</span>`).join('')}
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          ${d.links.site ? `<span class="underline text-cyan-300">Site</span>` : ''}
+          ${d.links.twitter ? `<span class="underline text-cyan-300">Twitter</span>` : ''}
+          ${d.links.docs ? `<span class="underline text-cyan-300">Docs</span>` : ''}
+          ${d.links.tutorial ? `<span class="underline text-cyan-300">Tutorial</span>` : ''}
+        </div>
+        ${d.featured ? `<div class="mt-3 text-cyan-300 text-xs">Featured ${d.featuredOrder?`#${d.featuredOrder}`:''}</div>` : ''}
+      `;
+    });
 
-      const data = {
+    function collectData(normalize = true) {
+      const links = {
+        site: form.elements['site'].value.trim(),
+        twitter: form.elements['twitter'].value.trim(),
+        docs: form.elements['docs'].value.trim(),
+        tutorial: form.elements['tutorial'].value.trim()
+      };
+      if (normalize) {
+        for (const k in links) { links[k] = normUrl(links[k]); }
+      }
+      return {
         id: form.elements['id'].value.trim(),
         name: form.elements['name'].value.trim(),
         chain: form.elements['chain'].value,
@@ -161,30 +254,43 @@
         tags: splitCSV(form.elements['tags'].value),
         popularity: 1,
         featured: document.getElementById('featured').checked,
-        links: {
-          site: form.elements['site'].value.trim(),
-          twitter: form.elements['twitter'].value.trim(),
-          docs: form.elements['docs'].value.trim(),
-          tutorial: form.elements['tutorial'].value.trim()
-        }
+        featuredOrder: form.elements['featuredOrder'].value ? Number(form.elements['featuredOrder'].value) : undefined,
+        links
       };
+    }
 
-      const idOk = /^[a-z0-9-]+$/.test(data.id);
-      const chainOk = !!data.chain;
-      const statusOk = ['live', 'upcoming', 'ended'].includes(data.status);
-      const rewardOk = Number.isFinite(data.rewardUSD) && data.rewardUSD >= 0;
+    function validateData(d) {
+      const idOk = /^[a-z0-9-]+$/.test(d.id);
+      if (!idOk) return ['ID must be lowercase letters, numbers, or hyphens only (e.g., aster-dex).'];
+      if (EXISTING_IDS.has(d.id)) return ['This ID already exists in data/data.json. Please choose another.'];
+      if (!d.chain) return ['Please select a chain.'];
+      if (!['live','upcoming','ended'].includes(d.status)) return ['Please select a valid status.'];
+      if (!Number.isFinite(d.rewardUSD) || d.rewardUSD < 0) return ['Reward must be a non-negative number.'];
+      if (!isValidISODate(d.deadline)) return ['Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).'];
+      // Optional URL checks (basic)
+      for (const k of ['site','twitter','docs','tutorial']) {
+        const v = d.links[k];
+        if (v && !/^https?:\/\//i.test(v)) return [`${k[0].toUpperCase()+k.slice(1)} URL must start with http:// or https://`];
+      }
+      if (d.featured && d.featuredOrder !== undefined) {
+        if (!(Number.isInteger(d.featuredOrder) && d.featuredOrder>=1 && d.featuredOrder<=3)) {
+          return ['Featured Order must be an integer between 1 and 3.'];
+        }
+      }
+      return [];
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = collectData(true);
+      const errs = validateData(data);
       const deadlineOk = isValidISODate(data.deadline);
+      document.getElementById('deadlineError').classList.toggle('hidden', deadlineOk);
 
-      showDeadlineError(!deadlineOk);
-
-      if (!idOk) return alert('ID must be lowercase letters, numbers, or hyphens only (e.g., aster-dex).');
-      if (!chainOk) return alert('Please select a chain.');
-      if (!statusOk) return alert('Please select a valid status.');
-      if (!rewardOk) return alert('Reward must be a non-negative number.');
-      if (!deadlineOk) return alert('Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).');
+      if (errs.length) return alert(errs[0]);
 
       const cleanLinks = {};
-      for (const k of ['site', 'twitter', 'docs', 'tutorial']) {
+      for (const k of ['site','twitter','docs','tutorial']) {
         if (data.links[k]) cleanLinks[k] = data.links[k];
       }
       const output = {
@@ -198,6 +304,7 @@
         tags: data.tags,
         popularity: data.popularity,
         ...(data.featured ? { featured: true } : {}),
+        ...(data.featured && data.featuredOrder ? { featuredOrder: data.featuredOrder } : {}),
         links: cleanLinks
       };
 
@@ -205,6 +312,15 @@
       document.getElementById('resultWrap').classList.remove('hidden');
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
+
+    copyBtn.addEventListener('click', async () => {
+      const txt = document.getElementById('result').textContent.trim();
+      if (!txt) return alert('Generate JSON first.');
+      try { await navigator.clipboard.writeText(txt); alert('Copied JSON to clipboard.'); } catch { alert('Copy failed.'); }
+    });
+
+    // Initialize
+    loadExistingIds();
   </script>
 </body>
 </html>
