@@ -74,21 +74,28 @@
 "links": { "site": "#", "twitter": "#", "docs": "#" }
 },
 {
-"id": "aster",
-"name": "ASTER DEX",
-"chain": "BNB",
-"rewardUSD": 1000,
-"status": "live",
-"deadline": "2025-10-05",
-"tasks": ["Deposit ASBNB", "Trade perpetuals (2+ times)"],
-"tags": ["Perpetual Trading", "Deposits", "Fast"],
-"popularity": 50,
-"featured": true,
-"links": {
-"site": "https://spangle-cheshire-e55.notion.site/MULTIPL-AIRDROP-173bdbd8187880508740e67a8afe744b?pvs=143",
-"twitter": "https://x.com/Aster_DEX",
-"docs": "",
-"tutorial": "https://x.com/Aster_DEX"
-}
+  "id": "aster",
+  "name": "ASTER DEX",
+  "chain": "BNB",
+  "rewardUSD": 10000,
+  "status": "live",
+  "deadline": "2025-10-05",
+  "tasks": [
+    "Deposit ASBNB",
+    "Trade Perpetuals and Use 2 asdasdasd"
+  ],
+  "tags": [
+    "Perpetual Trading",
+    "Deposits",
+    "Fast"
+  ],
+  "popularity": 1,
+  "featured": true,
+  "links": {
+    "site": "https://www.asterdex.com/en/referral/529BbA",
+    "twitter": "https://x.com/Aster_DEX",
+    "docs": "https://docs.asterdex.com/",
+    "tutorial": "https://spangle-cheshire-e55.notion.site/ASTER-Season-2-279bdbd8187880608d49c925a57fa26f"
+  }
 }
 ]
