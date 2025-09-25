@@ -67,7 +67,7 @@
       </div>
       <nav class="flex items-center gap-4 text-sm">
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-        <a href="#" id="whitepaperLink" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
+        <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
         <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
         <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
       </nav>
@@ -177,14 +177,6 @@
       } catch {}
     })();
 
-    // Wire Whitepaper link (header) to open in new tab
-    (function bindWhitepaper() {
-      const a = document.getElementById('whitepaperLink');
-      a.href = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
-      a.target = '_blank';
-      a.rel = 'noopener';
-    })();
-
     // Theme persistence
     function currentTheme() {
       return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
@@ -291,7 +283,6 @@
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
       const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured</span>` : '';
-      const whitepaperAnchor = `<a class="underline text-cyan-300" href="${WHITEPAPER_URL}" target="_blank" rel="noopener">Whitepaper</a>`;
       return `
         <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
           <div class="flex items-start justify-between gap-3">
@@ -329,7 +320,6 @@
             ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
             ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
             ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" target="_blank" rel="noopener">Tutorial</a>` : ''}
-            ${whitepaperAnchor}
           </div>
         </article>
       `;

@@ -2,221 +2,212 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Submit Airdrop — Airdrop Hub</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🔒%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { bg:'#0b0f1a', card:'#0f1422' } } } };
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { bg: '#0b0f1a' } } }
+    }
   </script>
   <style>
     :root { color-scheme: dark; }
-    html, body { background: #0b0f1a; }
-    .btn { padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
-    .btn:hover { border-color: rgba(255,255,255,0.2); }
-    .input, select, textarea { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
-    .label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; display: block; }
-    .note { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
-    pre { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.75rem; overflow: auto; }
+    html, body { background: #0b0f1a; color: #fff; }
+    .btn { padding: 0.5rem 0.9rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
+    .btn:hover { border-color: rgba(255,255,255,0.25); }
+    .help { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .error { color: #fca5a5; font-size: 0.8rem; }
   </style>
-  <script>
-    // Gate config: change these
-    const YOUR_SECRET_TOKEN = 'betahryh12'; // set your private token
-    const ALLOWLIST = ['your-github-username']; // optional fallback allowlist
-
-    function isAllowed() {
-      try {
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
-        if (token && token === YOUR_SECRET_TOKEN) return true;
-        // Fallback: simple passphrase dialog (client-side only)
-        const asked = sessionStorage.getItem('submit_access');
-        if (asked === 'granted') return true;
-        const pass = prompt('This page is restricted. Enter passphrase:');
-        if (pass && pass === YOUR_SECRET_TOKEN) {
-          sessionStorage.setItem('submit_access', 'granted');
-          return true;
-        }
-      } catch {}
-      return false;
-    }
-
-    (function guard() {
-      if (!isAllowed()) {
-        document.write(`
-          <main class="min-h-screen flex items-center justify-center p-6 text-center text-white">
-            <div class="max-w-md">
-              <h1 class="text-2xl font-semibold mb-2">Access Restricted</h1>
-              <p class="text-white/70">This submission page is currently available to whitelisted users only.</p>
-              <p class="text-white/60 mt-3">If you believe this is a mistake, contact the site owner.</p>
-              <p class="mt-6"><a href="index.html" class="underline">Return to Home</a></p>
-            </div>
-          </main>
-        `);
-        throw new Error('blocked');
-      }
-    })();
-  </script>
 </head>
-<body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
-        <h1 class="text-lg sm:text-xl font-semibold">Submit Airdrop</h1>
-      </div>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="index.html" class="text-white/80 hover:text-white">Home</a>
-        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-      </nav>
-    </div>
-  </header>
+<body class="min-h-screen">
+  <main class="max-w-2xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-semibold mb-6">Submit Airdrop</h1>
 
-  <main class="max-w-3xl mx-auto px-4 py-6 space-y-6">
-    <p class="note">Only whitelisted users can submit. Use your private link containing a token, like:
-      <code>https://your-site/submit.html?token=YOUR_TOKEN</code></p>
+    <form id="submitForm" class="space-y-4" novalidate>
+      <div>
+        <label class="block text-sm mb-1">Project ID <span class="text-white/50">(lowercase, unique)</span></label>
+        <input name="id" class="w-full btn" placeholder="e.g., aster-dex" required />
+        <p class="help">Lowercase letters, numbers, and hyphens only.</p>
+      </div>
 
-    <form id="airdropForm" class="grid sm:grid-cols-2 gap-4">
-      <div>
-        <label class="label">ID (unique, slug-like)</label>
-        <input class="input" id="id" placeholder="aster" required>
-      </div>
-      <div>
-        <label class="label">Name</label>
-        <input class="input" id="name" placeholder="ASTER DEX" required>
-      </div>
-      <div>
-        <label class="label">Chain</label>
-        <select class="input" id="chain" required>
-          <option value="">Select chain</option>
-          <option>Ethereum</option>
-          <option>Solana</option>
-          <option>Arbitrum</option>
-          <option>Base</option>
-          <option>Polygon</option>
-          <option>Aptos</option>
-          <option>BNB</option>
-        </select>
-      </div>
-      <div>
-        <label class="label">Reward (USD number)</label>
-        <input type="number" min="0" step="1" class="input" id="rewardUSD" placeholder="1000">
-      </div>
-      <div>
-        <label class="label">Status</label>
-        <select class="input" id="status" required>
-          <option value="">Select status</option>
-          <option>live</option>
-          <option>upcoming</option>
-          <option>ended</option>
-        </select>
-      </div>
-      <div>
-        <label class="label">Deadline (YYYY-MM-DD)</label>
-        <input class="input" id="deadline" placeholder="2025-10-05" pattern="\\d{4}-\\d{2}-\\d{2}" required>
-      </div>
-      <div class="sm:col-span-2">
-        <label class="label">Tasks (comma-separated)</label>
-        <input class="input" id="tasks" placeholder="Deposit ASBNB, Trade perpetuals (2+ times)">
-      </div>
-      <div class="sm:col-span-2">
-        <label class="label">Tags (comma-separated)</label>
-        <input class="input" id="tags" placeholder="Perpetual Trading, Deposits, Fast">
-      </div>
-      <div class="sm:col-span-2">
-        <label class="label">Links</label>
-        <div class="grid sm:grid-cols-4 gap-3">
-          <input class="input" id="site" placeholder="https://example.com">
-          <input class="input" id="twitter" placeholder="https://x.com/example">
-          <input class="input" id="docs" placeholder="https://docs.example.com">
-          <input class="input" id="tutorial" placeholder="https://blog.example.com/how-to">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Name</label>
+          <input name="name" class="w-full btn" required />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Chain</label>
+          <select name="chain" class="w-full btn" required>
+            <option value="">Select</option>
+            <option>Ethereum</option>
+            <option>Solana</option>
+            <option>Arbitrum</option>
+            <option>Base</option>
+            <option>Polygon</option>
+            <option>Aptos</option>
+            <option>BNB</option>
+          </select>
         </div>
       </div>
-      <div class="sm:col-span-2">
-        <label class="label">Featured (Daily Picks)</label>
-        <select class="input" id="featured">
-          <option value="false">No</option>
-          <option value="true">Yes</option>
-        </select>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Reward (USD)</label>
+          <input name="rewardUSD" type="number" min="0" step="1" class="w-full btn" placeholder="e.g., 250" required />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Status</label>
+          <select name="status" class="w-full btn" required>
+            <option value="">Select</option>
+            <option>live</option>
+            <option>upcoming</option>
+            <option>ended</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1 flex items-center justify-between">
+            <span>Deadline</span>
+            <span class="help">YYYY-MM-DD</span>
+          </label>
+          <input name="deadline" class="w-full btn" placeholder="2025-10-05" inputmode="numeric" autocomplete="off" required />
+          <p id="deadlineError" class="error hidden">Please enter a valid date in YYYY-MM-DD format.</p>
+        </div>
       </div>
-      <div class="sm:col-span-2 flex flex-wrap gap-2">
-        <button class="btn" type="submit">Preview JSON</button>
-        <button class="btn" type="button" id="copyBtn" disabled>Copy JSON</button>
-        <button class="btn" type="button" id="downloadBtn" disabled>Download JSON</button>
+
+      <div>
+        <label class="block text-sm mb-1">Tasks (comma‑separated)</label>
+        <input name="tasks" class="w-full btn" placeholder="Swap 3x, Provide LP, Bridge" />
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Tags (comma‑separated)</label>
+        <input name="tags" class="w-full btn" placeholder="dex, defi, bridge" />
+      </div>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Site URL</label>
+          <input name="site" class="w-full btn" placeholder="https://example.com" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Twitter URL</label>
+          <input name="twitter" class="w-full btn" placeholder="https://x.com/..." />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Docs URL</label>
+          <input name="docs" class="w-full btn" placeholder="https://docs.example.com" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input id="featured" type="checkbox" class="accent-cyan-400" />
+        <label for="featured">Mark as Daily Pick</label>
+      </div>
+
+      <div class="pt-2">
+        <button class="btn" type="submit">Validate & Generate JSON</button>
+      </div>
+
+      <div id="resultWrap" class="hidden">
+        <h2 class="text-lg font-semibold mt-6 mb-2">Generated JSON</h2>
+        <pre id="result" class="whitespace-pre-wrap bg-black/40 p-3 rounded border border-white/10"></pre>
       </div>
     </form>
-
-    <div>
-      <h2 class="text-white/80 font-semibold mb-2">Preview</h2>
-      <pre id="preview">{ }</pre>
-    </div>
-
-    <section class="note">
-      <p class="mb-2">Add the JSON to data/data.json via Git. Static hosting can’t write server files from the browser.</p>
-    </section>
   </main>
 
   <script>
-    const form = document.getElementById('airdropForm');
-    const preview = document.getElementById('preview');
-    const copyBtn = document.getElementById('copyBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-
-    function sanitizeId(str) {
-      return String(str).trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+    // Robust YYYY-MM-DD validator (no timezone gotchas, strict calendar check)
+    function isValidISODate(value) {
+      if (typeof value !== 'string') return false;
+      const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return false;
+      const y = Number(m[1]), mm = Number(m[2]), dd = Number(m[3]);
+      if (mm < 1 || mm > 12) return false;
+      if (dd < 1 || dd > 31) return false;
+      const dt = new Date(Date.UTC(y, mm - 1, dd));
+      // Ensure no auto-correction (e.g., 2025-02-31 --> Mar 3) and same components
+      return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === mm && dt.getUTCDate() === dd;
     }
 
-    function buildEntry() {
-      const id = sanitizeId(document.getElementById('id').value);
-      const name = document.getElementById('name').value.trim();
-      const chain = document.getElementById('chain').value.trim();
-      const rewardUSD = Number(document.getElementById('rewardUSD').value || 0);
-      const status = document.getElementById('status').value.trim();
-      const deadline = document.getElementById('deadline').value.trim();
-      const tasks = document.getElementById('tasks').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const tags = document.getElementById('tags').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const links = {
-        site: document.getElementById('site').value.trim(),
-        twitter: document.getElementById('twitter').value.trim(),
-        docs: document.getElementById('docs').value.trim(),
-        tutorial: document.getElementById('tutorial').value.trim()
-      };
-      const featured = document.getElementById('featured').value === 'true';
-      if (!id || !name || !chain || !status || !deadline) throw new Error('Please fill required fields.');
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(deadline)) throw new Error('Deadline must be YYYY-MM-DD');
-      return { id, name, chain, rewardUSD, status, deadline, tasks, tags, links, popularity: 0, featured };
+    function splitCSV(s) {
+      if (!s) return [];
+      return s.split(',').map(x => x.trim()).filter(Boolean);
     }
+
+    const form = document.getElementById('submitForm');
+    const deadlineInput = form.elements['deadline'];
+    const deadlineError = document.getElementById('deadlineError');
+
+    function showDeadlineError(show) {
+      deadlineError.classList.toggle('hidden', !show);
+      deadlineInput.classList.toggle('ring-2', show);
+      deadlineInput.classList.toggle('ring-red-400/70', show);
+    }
+
+    deadlineInput.addEventListener('blur', () => {
+      const v = deadlineInput.value.trim();
+      showDeadlineError(v.length > 0 && !isValidISODate(v));
+    });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      try {
-        const entry = buildEntry();
-        const json = JSON.stringify(entry, null, 2);
-        preview.textContent = json;
-        copyBtn.disabled = false;
-        downloadBtn.disabled = false;
-      } catch (err) {
-        alert(err.message);
-      }
-    });
 
-    copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(preview.textContent);
-        copyBtn.textContent = 'Copied!';
-        setTimeout(()=>copyBtn.textContent='Copy JSON', 1500);
-      } catch {
-        alert('Copy failed. Select and copy manually.');
-      }
-    });
+      const data = {
+        id: form.elements['id'].value.trim(),
+        name: form.elements['name'].value.trim(),
+        chain: form.elements['chain'].value,
+        rewardUSD: Number(form.elements['rewardUSD'].value),
+        status: form.elements['status'].value,
+        deadline: form.elements['deadline'].value.trim(),
+        tasks: splitCSV(form.elements['tasks'].value),
+        tags: splitCSV(form.elements['tags'].value),
+        popularity: 1,
+        featured: document.getElementById('featured').checked,
+        links: {
+          site: form.elements['site'].value.trim(),
+          twitter: form.elements['twitter'].value.trim(),
+          docs: form.elements['docs'].value.trim()
+        }
+      };
 
-    downloadBtn.addEventListener('click', () => {
-      const blob = new Blob([preview.textContent], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'airdrop-entry.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      // Field validations
+      const idOk = /^[a-z0-9-]+$/.test(data.id);
+      const chainOk = !!data.chain;
+      const statusOk = ['live', 'upcoming', 'ended'].includes(data.status);
+      const rewardOk = Number.isFinite(data.rewardUSD) && data.rewardUSD >= 0;
+      const deadlineOk = isValidISODate(data.deadline);
+
+      showDeadlineError(!deadlineOk);
+
+      if (!idOk) return alert('ID must be lowercase letters, numbers, or hyphens only (e.g., aster-dex).');
+      if (!chainOk) return alert('Please select a chain.');
+      if (!statusOk) return alert('Please select a valid status.');
+      if (!rewardOk) return alert('Reward must be a non-negative number.');
+      if (!deadlineOk) return alert('Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).');
+
+      // Output nicely formatted JSON ready for data.json
+      const cleanLinks = {};
+      for (const k of ['site','twitter','docs']) {
+        if (data.links[k]) cleanLinks[k] = data.links[k];
+      }
+      const output = {
+        id: data.id,
+        name: data.name,
+        chain: data.chain,
+        rewardUSD: data.rewardUSD,
+        status: data.status,
+        deadline: data.deadline,
+        tasks: data.tasks,
+        tags: data.tags,
+        popularity: data.popularity,
+        ...(data.featured ? { featured: true } : {}),
+        links: cleanLinks
+      };
+
+      document.getElementById('result').textContent = JSON.stringify(output, null, 2);
+      document.getElementById('resultWrap').classList.remove('hidden');
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
   </script>
 </body>
