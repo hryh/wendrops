@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Runs — Airdrop Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class',
+      theme: { extend: { colors: { bg: '#0b0f1a', card: '#0f1422' }, boxShadow: { glow: '0 0 0.6rem rgba(34,211,238,0.35), 0 0 1.2rem rgba(34,211,238,0.2)' } } } }
+  </script>
+  <style>
+    :root { color-scheme: dark; } html, body { background: #0b0f1a; color: #fff; }
+    .btn { padding: 0.45rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
+    .btn:hover { border-color: rgba(255,255,255,0.25); }
+    .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); }
+  </style>
+  <script>
+    (function () { try {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', (saved || (prefersDark ? 'dark' : 'light')) === 'dark');
+    } catch {} })();
+  </script>
+</head>
+<body class="min-h-screen">
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
+        <a href="index.html" class="text-lg sm:text-xl font-semibold">Airdrop Hub</a>
+        <span class="ml-2 text-xs text-white/50">Runs</span>
+      </div>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="index.html" class="text-white/60 hover:text-white">Home</a>
+        <a href="hot.html" class="text-white/60 hover:text-white">Hot on X</a>
+        <a href="runs.html" class="text-white hover:text-white underline">Runs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section class="mb-4 flex items-center gap-2">
+      <button id="newRun" class="btn">New Run</button>
+      <button id="exportRuns" class="btn">Export</button>
+      <button id="importRuns" class="btn">Import</button>
+      <input id="importInput" type="file" accept="application/json" class="hidden" />
+    </section>
+
+    <section id="runsList" class="space-y-4"></section>
+
+    <section class="mt-8 text-white/60 text-xs">
+      Stored locally in your browser. EV estimates are from your current data.json and may change as inputs change.
+    </section>
+  </main>
+
+  <script>
+    let AIRDROPS = [];
+    function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+    function computeEV(x) {
+      const baseVal = Number(x.baseEstTokenValue ?? 0);
+      const pToken = clamp(Number(x.pToken ?? 0),0,1);
+      const pElig = clamp(Number(x.pEligibility ?? 0),0,1);
+      const gas = Number(x.estGasUSD ?? 0);
+      const ev = (pToken * pElig * baseVal) - gas;
+      const hours = Math.max(0.25, Number(x.estHours ?? 0.5));
+      const evhr = ev / hours;
+      return { ev, evhr };
+    }
+    function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function loadRuns(){ try { return JSON.parse(localStorage.getItem('runs') || '[]'); } catch { return []; } }
+    function saveRuns(r){ localStorage.setItem('runs', JSON.stringify(r)); }
+
+    async function loadData() {
+      try {
+        const res = await fetch('data/data.json', { cache: 'no-store' });
+        AIRDROPS = await res.json();
+        renderRuns();
+      } catch (e) {
+        document.getElementById('runsList').innerHTML = `<p class="text-white/70">Failed to load data.json</p>`;
+      }
+    }
+
+    function renderRuns() {
+      const runs = loadRuns();
+      const wrap = document.getElementById('runsList');
+      if (runs.length === 0) {
+        wrap.innerHTML = `<div class="text-white/70">No runs yet. Go to Home and click “Add to Run” on cards.</div>`;
+        return;
+      }
+      wrap.innerHTML = runs.map(r => {
+        const items = r.items.map(id => AIRDROPS.find(x => x.id === id)).filter(Boolean);
+        const totals = items.reduce((acc, x) => {
+          const { ev, evhr } = computeEV(x);
+          acc.ev += ev; acc.hours += Math.max(0.25, Number(x.estHours ?? 0.5)); acc.gas += Number(x.estGasUSD ?? 0);
+          acc.count++; return acc;
+        }, { ev: 0, hours: 0, gas: 0, count: 0 });
+        const evhrRun = totals.ev / Math.max(0.25, totals.hours);
+        return `
+          <article class="rounded-lg border border-white/10 bg-[#0f1422] p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold">${esc(r.name)}</h3>
+                <div class="text-xs text-white/60">${items.length} items • EV $${totals.ev.toFixed(0)} • EV/hr $${evhrRun.toFixed(0)} • Gas $${totals.gas.toFixed(0)}</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn" data-edit="${esc(r.id)}">Rename</button>
+                <button class="btn" data-clear="${esc(r.id)}">Clear</button>
+                <button class="btn" data-delete="${esc(r.id)}">Delete</button>
+              </div>
+            </div>
+            <ul class="mt-3 text-sm list-disc ml-5">
+              ${items.map(x => `<li>${esc(x.name)} <span class="text-white/50">(${esc(x.chain)})</span></li>`).join('')}
+            </ul>
+          </article>
+        `;
+      }).join('');
+      bindRunButtons();
+    }
+
+    function bindRunButtons() {
+      const runs = loadRuns();
+      document.querySelectorAll('button[data-edit]').forEach(b => b.addEventListener('click', () => {
+        const id = b.getAttribute('data-edit');
+        const r = runs.find(x => x.id === id);
+        const name = prompt('Rename run', r?.name || '');
+        if (!name) return;
+        r.name = name; saveRuns(runs); renderRuns();
+      }));
+      document.querySelectorAll('button[data-clear]').forEach(b => b.addEventListener('click', () => {
+        const id = b.getAttribute('data-clear');
+        const r = runs.find(x => x.id === id);
+        if (!r) return; r.items = []; saveRuns(runs); renderRuns();
+      }));
+      document.querySelectorAll('button[data-delete]').forEach(b => b.addEventListener('click', () => {
+        const id = b.getAttribute('data-delete');
+        const idx = runs.findIndex(x => x.id === id);
+        if (idx >= 0) runs.splice(idx,1);
+        saveRuns(runs); renderRuns();
+      }));
+    }
+
+    document.getElementById('newRun').addEventListener('click', () => {
+      const runs = loadRuns();
+      const name = prompt('Run name', 'New Run');
+      if (!name) return;
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      runs.push({ id, name, items: [] });
+      saveRuns(runs); renderRuns();
+    });
+    document.getElementById('exportRuns').addEventListener('click', () => {
+      const blob = new Blob([localStorage.getItem('runs') || '[]'], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'runs.json'; a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    const importInput = document.getElementById('importInput');
+    document.getElementById('importRuns').addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', async () => {
+      const f = importInput.files?.[0]; if (!f) return;
+      try { const txt = await f.text(); const arr = JSON.parse(txt); if (!Array.isArray(arr)) throw new Error('Invalid'); localStorage.setItem('runs', JSON.stringify(arr)); alert('Imported.'); renderRuns(); }
+      catch { alert('Import failed.'); }
+      importInput.value = '';
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
