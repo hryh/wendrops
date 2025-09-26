@@ -27,14 +27,13 @@
     .callout { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(255,255,255,0.12); }
     .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1), rgba(255,255,255,0.06)); background-size: 200% 100%; animation: shine 1.2s linear infinite; }
     @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .tooltip { position: relative; }
+    .tooltip[data-tip]:hover:after { content: attr(data-tip); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #111827; color: #e5e7eb; padding: 0.35rem 0.5rem; border-radius: 0.375rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; font-size: 0.75rem; z-index: 60; }
   </style>
-
   <script>
-    // CONFIG
     const YOUR_SECRET_TOKEN = 'betahryh12';
     const WHITEPAPER_URL = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
 
-    // Apply saved theme early
     (function () {
       try {
         const saved = localStorage.getItem('theme');
@@ -44,7 +43,6 @@
       } catch {}
     })();
 
-    // Owner access token capture
     (function () {
       try {
         const params = new URLSearchParams(location.search);
@@ -63,11 +61,13 @@
   <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="text-cyan-300 font-semibold">AD</span>
-        <h1 class="text-lg sm:text-xl font-semibold">Airdrop Hub</h1>
+        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
+        <a href="index.html" class="text-lg sm:text-xl font-semibold">Airdrop Hub</a>
         <span class="ml-2 text-xs text-white/50">Neon Dark</span>
       </div>
       <nav class="flex items-center gap-4 text-sm">
+        <a href="hot.html" class="text-white/60 hover:text-white">Hot on X</a>
+        <a href="runs.html" class="text-white/60 hover:text-white">Runs</a>
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
         <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
         <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
@@ -77,15 +77,16 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Daily Picks -->
+    <section class="mb-4 flex flex-wrap items-center gap-2">
+      <button id="walletBtn" class="btn">Connect wallet (read‑only)</button>
+      <div id="walletInfo" class="text-white/60 text-sm"></div>
+    </section>
+
     <section id="dailyPicksSection" class="mb-6 hidden">
-      <div class="flex items-center justify-between">
-        <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
-      </div>
+      <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
       <div id="dailyPicks" class="grid sm:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- Filters row -->
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       <div>
         <label class="block text-xs text-white/60 mb-1">All Status</label>
@@ -117,6 +118,9 @@
           <option value="rewardDesc">Reward ↓</option>
           <option value="rewardAsc">Reward ↑</option>
           <option value="popularityDesc">Popularity ↓</option>
+          <option value="evDesc">EV ↓</option>
+          <option value="evhrDesc">EV/hr ↓</option>
+          <option value="snapshotDesc">Snapshot Prob ↓</option>
         </select>
       </div>
       <div class="flex items-end justify-between gap-2">
@@ -128,33 +132,28 @@
       </div>
     </section>
 
-    <!-- Search -->
     <section class="mb-4">
       <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
-    <!-- Cards -->
     <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
 
-    <!-- Pagination -->
     <section class="flex items-center justify-between mt-6">
       <button id="prevBtn" class="btn">Prev</button>
       <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
       <button id="nextBtn" class="btn">Next</button>
     </section>
 
-    <!-- Whitepaper callout -->
     <section class="mt-10 p-4 rounded-lg callout">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 class="text-white/90 font-semibold">Read the Whitepaper</h2>
-          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
+          <p class="text-white/70 text-sm mt-1">EV model, anti‑Sybil scoring, and buyback policy.</p>
         </div>
         <a class="btn border-cyan-400/40 text-cyan-300 hover:text-white hover:border-cyan-300 underline" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">Open Whitepaper</a>
       </div>
     </section>
 
-    <!-- Safety Tips -->
     <section class="mt-10">
       <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
       <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
@@ -183,11 +182,25 @@
         </div>
       </div>
       <iframe id="tutorialFrame" class="flex-1 w-full" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+      <div id="notionNotice" class="p-2 text-xs text-white/70 border-t border-white/10 hidden">Opened in a new tab because the source blocks embedding (CSP frame-ancestors).</div>
+    </div>
+  </div>
+
+  <!-- Coach modal -->
+  <div id="coachModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="w-full max-w-xl bg-[#0f1422] border border-white/10 rounded-lg overflow-hidden">
+      <div class="flex items-center justify-between p-3 border-b border-white/10">
+        <h3 id="coachTitle" class="font-semibold">Activity Coach</h3>
+        <button id="coachClose" class="btn">Close</button>
+      </div>
+      <div class="p-4 text-sm">
+        <div id="coachContent" class="space-y-2"></div>
+        <p id="coachHint" class="text-white/60 text-xs mt-3"></p>
+      </div>
     </div>
   </div>
 
   <script>
-    // Show Submit link only if owner_access was granted
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
@@ -195,13 +208,12 @@
       } catch {}
     })();
 
-    // Persist and restore filters
     function saveState() { try { localStorage.setItem('filters', JSON.stringify(state)); } catch {} }
     function restoreState() {
       try {
         const qs = new URLSearchParams(location.search);
         const saved = JSON.parse(localStorage.getItem('filters') || '{}');
-        const initial = {
+        return {
           status: (qs.get('status') || saved.status || 'all'),
           chain: (qs.get('chain') || saved.chain || 'all'),
           sortBy: (qs.get('sort') || saved.sortBy || 'deadlineAsc'),
@@ -210,12 +222,10 @@
           pageSize: 9,
           favoritesOnly: (qs.get('fav') || saved.favoritesOnly) ? (qs.get('fav') === '1' || saved.favoritesOnly === true) : false
         };
-        return initial;
       } catch { return { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false }; }
     }
     function syncQueryParams() {
       const url = new URL(location.href);
-      const set = (k, v) => { if (v === 'all' || v === '' || v === undefined || v === false || v === 1 && k==='page') url.searchParams.delete(k); else url.searchParams.set(k, String(v)); };
       url.searchParams.set('status', state.status);
       url.searchParams.set('chain', state.chain);
       url.searchParams.set('sort', state.sortBy);
@@ -225,12 +235,10 @@
       history.replaceState({}, '', url.toString());
     }
 
-    // Theme
     function currentTheme() { return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
     function setTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); try { localStorage.setItem('theme', mode); } catch {} }
     document.getElementById('toggleTheme').addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
 
-    // App State
     let AIRDROPS = [];
     let filtered = [];
     let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
@@ -238,23 +246,87 @@
     let featured = [];
 
     function fmtDate(iso) { try { return new Date(iso + 'T00:00:00Z').toLocaleDateString(); } catch { return iso; } }
-    function daysUntil(iso) {
-      try {
-        const now = new Date();
-        const end = new Date(iso + 'T23:59:59Z');
-        const diff = (end - now) / (1000 * 60 * 60 * 24);
-        return Math.ceil(diff);
-      } catch { return null; }
-    }
-    function urgencyBadge(iso) {
-      const d = daysUntil(iso);
-      if (d == null || isNaN(d)) return '';
-      const urgent = d <= 3;
-      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
-    }
+    function daysUntil(iso) { try { const now = new Date(); const end = new Date(iso + 'T23:59:59Z'); return Math.ceil((end - now)/(1000*60*60*24)); } catch { return null; } }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function isNotionUrl(u) { try { const { hostname } = new URL(u); return /(^|\.)notion\.so$/.test(hostname) || /(^|\.)notion\.site$/.test(hostname) || /(^|\.)mail\.notion\.so$/.test(hostname) || /(^|\.)spangle-cheshire-e55\.notion\.site$/.test(hostname); } catch { return false; } }
 
-    // Loading skeletons
+    // EV helpers
+    function computeEV(x, walletBoost = 0) {
+      const baseVal = Number(x.baseEstTokenValue ?? 0);
+      const pToken = clamp(Number(x.pToken ?? 0) + walletBoost, 0, 1);
+      const pElig = clamp(Number(x.pEligibility ?? 0) + walletBoost, 0, 1);
+      const gas = Number(x.estGasUSD ?? 0);
+      const ev = (pToken * pElig * baseVal) - gas;
+      const hours = Math.max(0.25, Number(x.estHours ?? 0) || 0.5);
+      const evhr = ev / hours;
+      return { ev, evhr };
+    }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    // Wallet read-only integration
+    const CHAINS = [
+      { key: 'Ethereum', chainId: '0x1', rpc: 'https://cloudflare-eth.com' },
+      { key: 'Arbitrum', chainId: '0xa4b1', rpc: 'https://arb1.arbitrum.io/rpc' },
+      { key: 'Base', chainId: '0x2105', rpc: 'https://mainnet.base.org' },
+      { key: 'Polygon', chainId: '0x89', rpc: 'https://polygon-rpc.com' }
+    ];
+    let wallet = { address: null, stats: {}, readiness: 0, lastChain: null };
+
+    const walletBtn = document.getElementById('walletBtn');
+    const walletInfo = document.getElementById('walletInfo');
+
+    walletBtn.addEventListener('click', connectWallet);
+
+    async function connectWallet() {
+      if (!window.ethereum) { alert('No wallet found (MetaMask/Rabby). Read-only connect requires a browser wallet.'); return; }
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        wallet.address = accounts[0];
+        walletInfo.textContent = `Connected: ${short(wallet.address)} • Reading recent activity…`;
+        await readWalletStats();
+        walletInfo.textContent = `Connected: ${short(wallet.address)} • Readiness: ${(wallet.readiness*100).toFixed(0)}%`;
+        renderFeatured(); render();
+      } catch (e) {
+        alert('Wallet connection failed: ' + (e.message || e));
+      }
+    }
+
+    function short(addr){ return addr ? addr.slice(0,6)+'…'+addr.slice(-4) : ''; }
+
+    async function readWalletStats() {
+      const clicks = JSON.parse(localStorage.getItem('x_clicks') || '{}'); // just to show how we might mix signals later
+      const stats = {};
+      for (const c of CHAINS) {
+        try {
+          const [bal, txc] = await Promise.all([
+            rpcCall(c.rpc, 'eth_getBalance', [wallet.address, 'latest']),
+            rpcCall(c.rpc, 'eth_getTransactionCount', [wallet.address, 'latest'])
+          ]);
+          const balanceEth = Number(parseInt(bal, 16)) / 1e18;
+          const txCount = parseInt(txc, 16);
+          stats[c.key] = { balanceEth, txCount };
+        } catch { stats[c.key] = { balanceEth: 0, txCount: 0 }; }
+      }
+      wallet.stats = stats;
+      // Simple readiness score: having some tx history and small balances across chains
+      const chainsActive = Object.values(stats).filter(s => s.txCount > 3).length;
+      const hasGas = Object.values(stats).filter(s => s.balanceEth > 0.01).length;
+      wallet.readiness = clamp((chainsActive*0.15 + hasGas*0.1), 0, 0.5); // up to +0.5 boost distributed
+      try { localStorage.setItem('wallet_readiness', JSON.stringify({ addr: wallet.address, stats: wallet.stats, readiness: wallet.readiness, t: Date.now() })); } catch {}
+    }
+
+    async function rpcCall(rpc, method, params) {
+      const res = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+      return json.result;
+    }
+
+    // Skeletons
     function showSkeletons() {
       const sk = Array.from({length: 6}).map(() => `
         <div class="rounded-lg border border-white/10 p-4">
@@ -270,23 +342,33 @@
       document.getElementById('cards').innerHTML = sk;
     }
 
+    let hotClicks = {}; // from Hot on X
+
     async function loadData() {
       try {
         showSkeletons();
+        // Bring in Hot on X topic clicks to boost trending
+        hotClicks = JSON.parse(localStorage.getItem('x_clicks') || '{}');
         const res = await fetch('data/data.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         AIRDROPS = JSON.parse(txt);
+
         // Featured picks with manual order
         featured = AIRDROPS.filter(x => x.featured === true)
           .sort((a, b) => (a.featuredOrder ?? 999) - (b.featuredOrder ?? 999))
           .slice(0, 3);
-        renderFeatured();
-        // Restore UI from state
+
+        // Restore UI
         document.getElementById('chainFilter').value = state.chain;
         document.getElementById('sortBy').value = state.sortBy;
         document.getElementById('searchInput').value = state.search;
         document.getElementById('favoritesOnly').checked = state.favoritesOnly;
+
+        // Restore wallet readiness if present
+        try { const cache = JSON.parse(localStorage.getItem('wallet_readiness') || '{}'); if (cache.addr) { wallet.address = cache.addr; wallet.stats = cache.stats; wallet.readiness = cache.readiness || 0; walletInfo.textContent = `Connected: ${short(wallet.address)} • Readiness: ${(wallet.readiness*100).toFixed(0)}%`; } } catch {}
+
+        renderFeatured();
         render();
       } catch (e) {
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
@@ -296,12 +378,18 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      filtered = AIRDROPS.filter(x => {
+      filtered = AIRDROPS.map(x => {
+        const trendBoost = x.topicId && hotClicks[x.topicId] ? Math.min(5, Math.log10(hotClicks[x.topicId] + 1) * 3) : 0;
+        const popularity = Number(x.popularity ?? 0) + trendBoost;
+        const walletBoost = wallet.readiness || 0;
+        const evRes = computeEV(x, walletBoost);
+        return { ...x, _pop: popularity, _ev: evRes.ev, _evhr: evRes.evhr, _trendBoost: trendBoost };
+      }).filter(x => {
         if (state.status !== 'all' && x.status !== state.status) return false;
         if (state.chain !== 'all' && x.chain !== state.chain) return false;
         if (state.favoritesOnly && !favorites.has(x.id)) return false;
         if (q) {
-          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
+          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')} ${(x.risk||[]).join(' ')}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -312,7 +400,10 @@
         case 'deadlineDesc': filtered.sort((a,b)=>b.deadline.localeCompare(a.deadline)); break;
         case 'rewardDesc': filtered.sort((a,b)=>(b.rewardUSD??0)-(a.rewardUSD??0)); break;
         case 'rewardAsc': filtered.sort((a,b)=>(a.rewardUSD??0)-(b.rewardUSD??0)); break;
-        case 'popularityDesc': filtered.sort((a,b)=>(b.popularity??0)-(a.popularity??0)); break;
+        case 'popularityDesc': filtered.sort((a,b)=>(b._pop??0)-(a._pop??0)); break;
+        case 'evDesc': filtered.sort((a,b)=>(b._ev??-1e9)-(a._ev??-1e9)); break;
+        case 'evhrDesc': filtered.sort((a,b)=>(b._evhr??-1e9)-(a._evhr??-1e9)); break;
+        case 'snapshotDesc': filtered.sort((a,b)=>(b.snapshotProb??0)-(a.snapshotProb??0)); break;
       }
     }
 
@@ -322,8 +413,28 @@
       if (featured.length === 0) { sec.classList.add('hidden'); return; }
       sec.classList.remove('hidden');
       wrap.innerHTML = featured.map(x => cardHtml(x, true)).join('');
-      // Bind tutorial buttons inside featured too
-      bindTutorialLinks(wrap);
+      bindInteractive(wrap);
+    }
+
+    function urgencyBadge(iso) {
+      const d = daysUntil(iso);
+      if (d == null || isNaN(d)) return '';
+      const urgent = d <= 3;
+      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
+    }
+    function newBadge(addedDate) {
+      try { const d = new Date(addedDate); const days = Math.floor((Date.now() - d.getTime())/(1000*60*60*24)); if (days <= 7) return `<span class="chip border-green-400/40 text-green-300">New</span>`; } catch {}
+      return '';
+    }
+    function riskChips(risks) {
+      if (!Array.isArray(risks) || risks.length === 0) return '';
+      return risks.slice(0,3).map(r => {
+        const t = String(r).toLowerCase();
+        const cls = t.includes('phish') || t.includes('drainer') || t.includes('scam') ? 'border-red-400/40 text-red-300'
+                  : t.includes('audit') || t.includes('new contract') ? 'border-yellow-400/40 text-yellow-300'
+                  : 'border-white/10 text-white/70';
+        return `<span class="chip ${cls}">${escapeHtml(r)}</span>`;
+      }).join('');
     }
 
     function render() {
@@ -356,54 +467,93 @@
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
 
-      // Bind interactions
-      cards.querySelectorAll('button[data-fav]').forEach(btn => {
+      bindInteractive(cards);
+      saveState(); syncQueryParams();
+    }
+
+    function bindInteractive(scope) {
+      scope.querySelectorAll('button[data-fav]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-fav');
           if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
           localStorage.setItem('favorites', JSON.stringify([...favorites]));
-          renderFeatured();
-          render();
+          renderFeatured(); render();
         });
       });
-
-      bindTutorialLinks(cards);
-
-      saveState();
-      syncQueryParams();
-    }
-
-    function bindTutorialLinks(scopeEl) {
-      scopeEl.querySelectorAll('a[data-tutorial]').forEach(a => {
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          const url = a.getAttribute('href');
-          openTutorialModal(url, a.getAttribute('data-title') || 'Tutorial');
+      // Tutorial links: Notion fallback
+      scope.querySelectorAll('a[data-tutorial]').forEach(a => {
+        const url = a.getAttribute('href');
+        const title = a.getAttribute('data-title') || 'Tutorial';
+        if (isNotionUrl(url)) {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener');
+          a.classList.add('tooltip');
+          a.setAttribute('data-tip', 'Opens in new tab (embedding blocked by source)');
+          a.addEventListener('click', () => document.getElementById('notionNotice').classList.remove('hidden'));
+        } else {
+          a.addEventListener('click', (e) => { e.preventDefault(); openTutorialModal(url, title); });
+        }
+      });
+      // Coach buttons
+      scope.querySelectorAll('button[data-coach]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-coach');
+          const item = AIRDROPS.find(x => x.id === id);
+          openCoach(item);
+        });
+      });
+      // Add to Run buttons
+      scope.querySelectorAll('button[data-run]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-run');
+          const runs = JSON.parse(localStorage.getItem('runs') || '[]');
+          let run = runs.find(r => r.id === 'default');
+          if (!run) { run = { id: 'default', name: 'My Run', items: [] }; runs.push(run); }
+          if (!run.items.includes(id)) run.items.push(id);
+          localStorage.setItem('runs', JSON.stringify(runs));
+          btn.textContent = 'Added';
+          setTimeout(()=>btn.textContent='Add to Run', 1200);
         });
       });
     }
 
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
-      const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
       const endsChip = x.deadline ? urgencyBadge(x.deadline) : '';
+      const newChip = x.addedDate ? newBadge(x.addedDate) : '';
+      const snapshotChip = (typeof x.snapshotProb === 'number') ? `<span class="chip ${x.snapshotProb>=60?'border-yellow-400/40 text-yellow-300':'text-white/70'}">Snapshot ${x.snapshotProb}%${x.snapshotWindowDays?` • ${x.snapshotWindowDays}d`:''}</span>` : '';
+      const risk = riskChips(x.risk);
+      const trend = x.topicId && hotClicks[x.topicId] ? `<span class="chip border-pink-400/40 text-pink-300">Trending from X</span>` : '';
+      // Derived EV using current wallet readiness
+      const { ev, evhr } = computeEV(x, wallet.readiness || 0);
       return `
-        <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
+        <article class="rounded-lg border border-white/10 bg-[#0f1422] p-4 hover:shadow-glow transition-shadow">
           <div class="flex items-start justify-between gap-3">
             <div class="flex flex-col gap-1">
               <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
               <div class="text-xs text-white/60">${escapeHtml(x.chain)} • ${escapeHtml(x.status)}</div>
-              <div class="flex gap-2 mt-1">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
+              <div class="flex flex-wrap gap-2 mt-1">
+                ${isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : ''}
+                ${endsChip}
+                ${snapshotChip}
+                ${newChip}
+                ${trend}
+                ${risk}
+              </div>
             </div>
             <button data-fav="${escapeHtml(x.id)}" class="text-sm px-2 py-1 rounded border ${fav ? 'border-cyan-400 text-cyan-300' : 'border-white/10 text-white/70'}" title="Toggle favorite">
               ${fav ? '★' : '☆'}
             </button>
           </div>
 
-          <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
             <div class="bg-white/5 rounded p-2">
               <div class="text-white/60 text-xs">Reward</div>
               <div class="font-medium">$${Number(x.rewardUSD ?? 0)}</div>
+            </div>
+            <div class="bg-white/5 rounded p-2">
+              <div class="text-white/60 text-xs">EV</div>
+              <div class="font-medium">$${(ev).toFixed(0)} <span class="text-white/50 text-xs">(hr: $${(evhr).toFixed(0)})</span></div>
             </div>
             <div class="bg-white/5 rounded p-2">
               <div class="text-white/60 text-xs">Deadline</div>
@@ -424,6 +574,8 @@
             ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
             ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
             ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">Tutorial</a>` : ''}
+            <button data-coach="${escapeHtml(x.id)}" class="btn">Coach</button>
+            <button data-run="${escapeHtml(x.id)}" class="btn">Add to Run</button>
           </div>
         </article>
       `;
@@ -432,10 +584,7 @@
     // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       const active = document.activeElement;
-      if (e.key === '/' && (!active || active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
-        e.preventDefault();
-        document.getElementById('searchInput').focus();
-      }
+      if (e.key === '/' && (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA'))) { e.preventDefault(); document.getElementById('searchInput').focus(); }
       if (e.key.toLowerCase() === 'f' && (!active || active.tagName !== 'INPUT')) {
         e.preventDefault();
         const chk = document.getElementById('favoritesOnly');
@@ -452,9 +601,7 @@
     });
 
     // Filters bindings
-    document.querySelectorAll('.statusBtn').forEach(btn => {
-      btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
-    });
+    document.querySelectorAll('.statusBtn').forEach(btn => { btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); }); });
     document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
     document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
     document.getElementById('resetBtn').addEventListener('click', () => {
@@ -473,20 +620,33 @@
     const frame = document.getElementById('tutorialFrame');
     const titleEl = document.getElementById('tutorialTitle');
     const openNew = document.getElementById('openInNewTab');
+    const notionNotice = document.getElementById('notionNotice');
     document.getElementById('closeTutorial').addEventListener('click', closeTutorialModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
-    function openTutorialModal(url, title) {
-      titleEl.textContent = title || 'Tutorial';
-      frame.src = url;
-      openNew.href = url;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function openTutorialModal(url, title) { notionNotice.classList.add('hidden'); titleEl.textContent = title || 'Tutorial'; frame.src = url; openNew.href = url; modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    function closeTutorialModal() { frame.src = 'about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+    // Activity Coach modal
+    const coachModal = document.getElementById('coachModal');
+    const coachTitle = document.getElementById('coachTitle');
+    const coachContent = document.getElementById('coachContent');
+    const coachHint = document.getElementById('coachHint');
+    document.getElementById('coachClose').addEventListener('click', closeCoach);
+    coachModal.addEventListener('click', (e) => { if (e.target === coachModal) closeCoach(); });
+    function openCoach(item) {
+      coachTitle.textContent = `${item.name} — Activity Coach`;
+      const baseSteps = Array.isArray(item.coachSteps) ? item.coachSteps : [];
+      const dynamic = [];
+      // Dynamic hints based on wallet.readiness and chain stats
+      if ((wallet.stats[item.chain]?.txCount || 0) < 3) dynamic.push(`Do 3+ distinct txs on ${item.chain} over separate days to raise eligibility.`);
+      if ((wallet.stats[item.chain]?.balanceEth || 0) < 0.02) dynamic.push(`Keep at least ~$5 gas on ${item.chain} to avoid failed txs.`);
+      if (item.tags?.includes('bridge')) dynamic.push('Bridge from a different source chain once to diversify flow.');
+      const steps = [...baseSteps, ...dynamic].slice(0, 6);
+      coachContent.innerHTML = steps.map(s => `<div class="flex items-start gap-2"><input type="checkbox" class="mt-1"/><span>${escapeHtml(s)}</span></div>`).join('');
+      coachHint.textContent = 'Tip: Readiness is estimated locally from your wallet’s public data. No signing, no private info.';
+      coachModal.classList.remove('hidden'); coachModal.classList.add('flex');
     }
-    function closeTutorialModal() {
-      frame.src = 'about:blank';
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+    function closeCoach() { coachModal.classList.add('hidden'); coachModal.classList.remove('flex'); }
 
     loadData();
   </script>
