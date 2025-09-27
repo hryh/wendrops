@@ -101,70 +101,14 @@
     }
     
     .hidden { display: none; }
-    
-    .callout { 
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1)); 
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      backdrop-filter: blur(10px);
-    }
-    
-    .skeleton { 
-      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.12), rgba(255,255,255,0.06)); 
-      background-size: 200% 100%; 
-      animation: shine 1.5s linear infinite; 
-    }
-    
-    @keyframes shine { 
-      0% { background-position: 200% 0; } 
-      100% { background-position: -200% 0; } 
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card {
-      background: rgba(17, 24, 39, 0.8);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      border-color: rgba(59, 130, 246, 0.3);
-    }
-    
-    .status-live { color: #10b981; }
-    .status-upcoming { color: #f59e0b; }
-    .status-ended { color: #6b7280; }
-    
-    .search-input {
-      background: rgba(17, 24, 39, 0.8);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.2s ease;
-    }
-    
-    .search-input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
+    .callout { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(255,255,255,0.12); }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1), rgba(255,255,255,0.06)); background-size: 200% 100%; animation: shine 1.2s linear infinite; }
+    @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
-
   <script>
-    // CONFIG
     const YOUR_SECRET_TOKEN = 'betahryh12';
     const WHITEPAPER_URL = 'https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc';
 
-    // Apply saved theme early
     (function () {
       try {
         const saved = localStorage.getItem('theme');
@@ -174,7 +118,6 @@
       } catch {}
     })();
 
-    // Owner access token capture
     (function () {
       try {
         const params = new URLSearchParams(location.search);
@@ -190,139 +133,95 @@
   </script>
 </head>
 <body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-          <span class="text-white font-bold text-lg">🪂</span>
-        </div>
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold text-white">Airdrop Hub</h1>
-          <p class="text-xs text-white/60 hidden sm:block">Discover & Track Crypto Airdrops</p>
-        </div>
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-cyan-300 font-semibold">AD</span>
+        <h1 class="text-lg sm:text-xl font-semibold">Airdrop Hub</h1>
+        <span class="ml-2 text-xs text-white/50">Neon Dark</span>
       </div>
-      <nav class="flex items-center gap-2 sm:gap-4 text-sm">
-        <a href="terms.html" class="text-white/70 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">Terms</a>
-        <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors px-3 py-2 rounded-lg hover:bg-blue-500/10">Whitepaper</a>
-        <a id="submitLink" href="submit.html" class="btn-primary hidden">Submit Airdrop</a>
-        <button id="toggleTheme" class="btn text-white/80 hover:text-white">
-          <span class="hidden sm:inline">Toggle Theme</span>
-          <span class="sm:hidden">🌙</span>
-        </button>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
+        <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
+        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
+        <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Hero Section -->
-    <section class="text-center mb-12 animate-fade-in">
-      <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-        Discover Crypto Airdrops
-      </h2>
-      <p class="text-lg text-white/70 max-w-2xl mx-auto mb-8">
-        Track live, upcoming, and ended airdrops across multiple blockchains. Find your next opportunity with detailed information and tutorials.
-      </p>
-    </section>
-
+  <main class="max-w-6xl mx-auto px-4 py-6">
     <!-- Daily Picks -->
-    <section id="dailyPicksSection" class="mb-8 hidden animate-slide-up">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-          <span class="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></span>
-          Daily Picks
-        </h3>
-        <span class="text-sm text-white/60">Handpicked opportunities</span>
+    <section id="dailyPicksSection" class="mb-6 hidden">
+      <div class="flex items-center justify-between">
+        <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
       </div>
-      <div id="dailyPicks" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="dailyPicks" class="grid sm:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- Filters Section -->
-    <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/10">
-      <h3 class="text-lg font-semibold text-white mb-6">Filter & Search</h3>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-white/80 mb-2">Status</label>
-          <div class="flex flex-wrap gap-2">
-            <button data-status="all" class="statusBtn btn text-sm">All</button>
-            <button data-status="live" class="statusBtn btn text-sm status-live">Live</button>
-            <button data-status="upcoming" class="statusBtn btn text-sm status-upcoming">Upcoming</button>
-            <button data-status="ended" class="statusBtn btn text-sm status-ended">Ended</button>
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-white/80 mb-2">Blockchain</label>
-          <select id="chainFilter" class="w-full search-input rounded-lg px-3 py-2 text-white">
-            <option value="all">All Chains</option>
-            <option>Ethereum</option>
-            <option>Solana</option>
-            <option>Arbitrum</option>
-            <option>Base</option>
-            <option>Polygon</option>
-            <option>Aptos</option>
-            <option>BNB</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-white/80 mb-2">Sort By</label>
-          <select id="sortBy" class="w-full search-input rounded-lg px-3 py-2 text-white">
-            <option value="deadlineAsc">Deadline ↑</option>
-            <option value="deadlineDesc">Deadline ↓</option>
-            <option value="rewardDesc">Reward ↓</option>
-            <option value="rewardAsc">Reward ↑</option>
-            <option value="popularityDesc">Popularity ↓</option>
-          </select>
-        </div>
-        <div class="flex flex-col justify-end gap-3">
-          <button id="resetBtn" class="btn text-sm">Reset Filters</button>
-          <label class="flex items-center gap-2 text-sm text-white/80">
-            <input id="favoritesOnly" type="checkbox" class="accent-blue-500">
-            <span>Favorites Only</span>
-          </label>
+    <!-- Filters row -->
+    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      <div>
+        <label class="block text-xs text-white/60 mb-1">All Status</label>
+        <div class="flex flex-wrap gap-2">
+          <button data-status="all" class="statusBtn btn">All</button>
+          <button data-status="live" class="statusBtn btn">Live</button>
+          <button data-status="upcoming" class="statusBtn btn">Upcoming</button>
+          <button data-status="ended" class="statusBtn btn">Ended</button>
         </div>
       </div>
-      
-      <!-- Search -->
-      <div class="relative">
-        <input id="searchInput" placeholder="Search airdrops by name, chain, or tags..." class="w-full search-input rounded-lg px-4 py-3 text-white pl-10" />
-        <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-        </div>
+      <div>
+        <label class="block text-xs text-white/60 mb-1">All Chains</label>
+        <select id="chainFilter" class="w-full btn">
+          <option value="all">All</option>
+          <option>Ethereum</option>
+          <option>Solana</option>
+          <option>Arbitrum</option>
+          <option>Base</option>
+          <option>Polygon</option>
+          <option>Aptos</option>
+          <option>BNB</option>
+        </select>
       </div>
+      <div>
+        <label class="block text-xs text-white/60 mb-1">Sort</label>
+        <select id="sortBy" class="w-full btn">
+          <option value="deadlineAsc">Deadline ↑</option>
+          <option value="deadlineDesc">Deadline ↓</option>
+          <option value="rewardDesc">Reward ↓</option>
+          <option value="rewardAsc">Reward ↑</option>
+          <option value="popularityDesc">Popularity ↓</option>
+        </select>
+      </div>
+      <div class="flex items-end justify-between gap-2">
+        <button id="resetBtn" class="btn">Reset</button>
+        <label class="flex items-center gap-2 text-sm">
+          <input id="favoritesOnly" type="checkbox" class="accent-cyan-400">
+          <span>Show Favorites</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Search -->
+    <section class="mb-4">
+      <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
     <!-- Cards -->
-    <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px]"></section>
+    <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
 
     <!-- Pagination -->
-    <section class="flex items-center justify-between mt-12">
-      <button id="prevBtn" class="btn disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Previous
-      </button>
-      <div id="pageInfo" class="text-white/70 text-sm font-medium">0 results</div>
-      <button id="nextBtn" class="btn disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-        Next
-        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
-      </button>
+    <section class="flex items-center justify-between mt-6">
+      <button id="prevBtn" class="btn">Prev</button>
+      <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
+      <button id="nextBtn" class="btn">Next</button>
     </section>
 
     <!-- Whitepaper callout -->
-    <section class="mt-16 p-8 rounded-2xl callout">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-        <div class="flex-1">
-          <h3 class="text-2xl font-bold text-white mb-3">Read the Whitepaper</h3>
-          <p class="text-white/80 text-lg mb-4">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
-          <div class="flex flex-wrap gap-2">
-            <span class="chip">Executive Summary</span>
-            <span class="chip">Anti-Sybil Scoring</span>
-            <span class="chip">Token Economics</span>
-          </div>
+    <section class="mt-10 p-4 rounded-lg callout">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-white/90 font-semibold">Read the Whitepaper</h2>
+          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
         </div>
         <a class="btn-primary px-6 py-3 text-lg font-semibold" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">
           Read Whitepaper
@@ -334,31 +233,14 @@
     </section>
 
     <!-- Safety Tips -->
-    <section class="mt-16">
-      <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-        </svg>
-        Safety Tips
-      </h3>
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 class="font-semibold text-white mb-2">Verify Links</h4>
-          <p class="text-white/70 text-sm">Only use official links. Double-check domains and always verify through official channels.</p>
-        </div>
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 class="font-semibold text-white mb-2">Protect Keys</h4>
-          <p class="text-white/70 text-sm">Never share seed phrases or private keys. Use hardware wallets when possible.</p>
-        </div>
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 class="font-semibold text-white mb-2">Test Safely</h4>
-          <p class="text-white/70 text-sm">Use burner wallets for testing unknown dApps. Start with small amounts.</p>
-        </div>
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 class="font-semibold text-white mb-2">Beware Scams</h4>
-          <p class="text-white/70 text-sm">Beware of "support" DMs. Always verify before signing transactions.</p>
-        </div>
-      </div>
+    <section class="mt-10">
+      <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
+      <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
+        <li>Only use official links. Double-check domains.</li>
+        <li>Never share seed phrases or private keys.</li>
+        <li>Use a burner wallet for testing unknown dApps.</li>
+        <li>Beware of “support” DMs. Verify before signing.</li>
+      </ul>
     </section>
 
     <footer class="mt-16 pt-8 border-t border-white/10 text-center">
@@ -380,11 +262,25 @@
         </div>
       </div>
       <iframe id="tutorialFrame" class="flex-1 w-full" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+      <div id="notionNotice" class="p-2 text-xs text-white/70 border-t border-white/10 hidden">Opened in a new tab because the source blocks embedding (CSP frame-ancestors).</div>
+    </div>
+  </div>
+
+  <!-- Coach modal -->
+  <div id="coachModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="w-full max-w-xl bg-[#0f1422] border border-white/10 rounded-lg overflow-hidden">
+      <div class="flex items-center justify-between p-3 border-b border-white/10">
+        <h3 id="coachTitle" class="font-semibold">Activity Coach</h3>
+        <button id="coachClose" class="btn">Close</button>
+      </div>
+      <div class="p-4 text-sm">
+        <div id="coachContent" class="space-y-2"></div>
+        <p id="coachHint" class="text-white/60 text-xs mt-3"></p>
+      </div>
     </div>
   </div>
 
   <script>
-    // Show Submit link only if owner_access was granted
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
@@ -392,13 +288,12 @@
       } catch {}
     })();
 
-    // Persist and restore filters
     function saveState() { try { localStorage.setItem('filters', JSON.stringify(state)); } catch {} }
     function restoreState() {
       try {
         const qs = new URLSearchParams(location.search);
         const saved = JSON.parse(localStorage.getItem('filters') || '{}');
-        const initial = {
+        return {
           status: (qs.get('status') || saved.status || 'all'),
           chain: (qs.get('chain') || saved.chain || 'all'),
           sortBy: (qs.get('sort') || saved.sortBy || 'deadlineAsc'),
@@ -407,12 +302,10 @@
           pageSize: 9,
           favoritesOnly: (qs.get('fav') || saved.favoritesOnly) ? (qs.get('fav') === '1' || saved.favoritesOnly === true) : false
         };
-        return initial;
       } catch { return { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false }; }
     }
     function syncQueryParams() {
       const url = new URL(location.href);
-      const set = (k, v) => { if (v === 'all' || v === '' || v === undefined || v === false || v === 1 && k==='page') url.searchParams.delete(k); else url.searchParams.set(k, String(v)); };
       url.searchParams.set('status', state.status);
       url.searchParams.set('chain', state.chain);
       url.searchParams.set('sort', state.sortBy);
@@ -422,12 +315,10 @@
       history.replaceState({}, '', url.toString());
     }
 
-    // Theme
     function currentTheme() { return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
     function setTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); try { localStorage.setItem('theme', mode); } catch {} }
     document.getElementById('toggleTheme').addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
 
-    // App State
     let AIRDROPS = [];
     let filtered = [];
     let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
@@ -435,23 +326,87 @@
     let featured = [];
 
     function fmtDate(iso) { try { return new Date(iso + 'T00:00:00Z').toLocaleDateString(); } catch { return iso; } }
-    function daysUntil(iso) {
-      try {
-        const now = new Date();
-        const end = new Date(iso + 'T23:59:59Z');
-        const diff = (end - now) / (1000 * 60 * 60 * 24);
-        return Math.ceil(diff);
-      } catch { return null; }
-    }
-    function urgencyBadge(iso) {
-      const d = daysUntil(iso);
-      if (d == null || isNaN(d)) return '';
-      const urgent = d <= 3;
-      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
-    }
+    function daysUntil(iso) { try { const now = new Date(); const end = new Date(iso + 'T23:59:59Z'); return Math.ceil((end - now)/(1000*60*60*24)); } catch { return null; } }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function isNotionUrl(u) { try { const { hostname } = new URL(u); return /(^|\.)notion\.so$/.test(hostname) || /(^|\.)notion\.site$/.test(hostname) || /(^|\.)mail\.notion\.so$/.test(hostname) || /(^|\.)spangle-cheshire-e55\.notion\.site$/.test(hostname); } catch { return false; } }
 
-    // Loading skeletons
+    // EV helpers
+    function computeEV(x, walletBoost = 0) {
+      const baseVal = Number(x.baseEstTokenValue ?? 0);
+      const pToken = clamp(Number(x.pToken ?? 0) + walletBoost, 0, 1);
+      const pElig = clamp(Number(x.pEligibility ?? 0) + walletBoost, 0, 1);
+      const gas = Number(x.estGasUSD ?? 0);
+      const ev = (pToken * pElig * baseVal) - gas;
+      const hours = Math.max(0.25, Number(x.estHours ?? 0) || 0.5);
+      const evhr = ev / hours;
+      return { ev, evhr };
+    }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    // Wallet read-only integration
+    const CHAINS = [
+      { key: 'Ethereum', chainId: '0x1', rpc: 'https://cloudflare-eth.com' },
+      { key: 'Arbitrum', chainId: '0xa4b1', rpc: 'https://arb1.arbitrum.io/rpc' },
+      { key: 'Base', chainId: '0x2105', rpc: 'https://mainnet.base.org' },
+      { key: 'Polygon', chainId: '0x89', rpc: 'https://polygon-rpc.com' }
+    ];
+    let wallet = { address: null, stats: {}, readiness: 0, lastChain: null };
+
+    const walletBtn = document.getElementById('walletBtn');
+    const walletInfo = document.getElementById('walletInfo');
+
+    walletBtn.addEventListener('click', connectWallet);
+
+    async function connectWallet() {
+      if (!window.ethereum) { alert('No wallet found (MetaMask/Rabby). Read-only connect requires a browser wallet.'); return; }
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        wallet.address = accounts[0];
+        walletInfo.textContent = `Connected: ${short(wallet.address)} • Reading recent activity…`;
+        await readWalletStats();
+        walletInfo.textContent = `Connected: ${short(wallet.address)} • Readiness: ${(wallet.readiness*100).toFixed(0)}%`;
+        renderFeatured(); render();
+      } catch (e) {
+        alert('Wallet connection failed: ' + (e.message || e));
+      }
+    }
+
+    function short(addr){ return addr ? addr.slice(0,6)+'…'+addr.slice(-4) : ''; }
+
+    async function readWalletStats() {
+      const clicks = JSON.parse(localStorage.getItem('x_clicks') || '{}'); // just to show how we might mix signals later
+      const stats = {};
+      for (const c of CHAINS) {
+        try {
+          const [bal, txc] = await Promise.all([
+            rpcCall(c.rpc, 'eth_getBalance', [wallet.address, 'latest']),
+            rpcCall(c.rpc, 'eth_getTransactionCount', [wallet.address, 'latest'])
+          ]);
+          const balanceEth = Number(parseInt(bal, 16)) / 1e18;
+          const txCount = parseInt(txc, 16);
+          stats[c.key] = { balanceEth, txCount };
+        } catch { stats[c.key] = { balanceEth: 0, txCount: 0 }; }
+      }
+      wallet.stats = stats;
+      // Simple readiness score: having some tx history and small balances across chains
+      const chainsActive = Object.values(stats).filter(s => s.txCount > 3).length;
+      const hasGas = Object.values(stats).filter(s => s.balanceEth > 0.01).length;
+      wallet.readiness = clamp((chainsActive*0.15 + hasGas*0.1), 0, 0.5); // up to +0.5 boost distributed
+      try { localStorage.setItem('wallet_readiness', JSON.stringify({ addr: wallet.address, stats: wallet.stats, readiness: wallet.readiness, t: Date.now() })); } catch {}
+    }
+
+    async function rpcCall(rpc, method, params) {
+      const res = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+      return json.result;
+    }
+
+    // Skeletons
     function showSkeletons() {
       const sk = Array.from({length: 6}).map(() => `
         <div class="rounded-lg border border-white/10 p-4">
@@ -467,26 +422,28 @@
       document.getElementById('cards').innerHTML = sk;
     }
 
+    let hotClicks = {}; // from Hot on X
+
     async function loadData() {
       try {
         showSkeletons();
+        // Bring in Hot on X topic clicks to boost trending
+        hotClicks = JSON.parse(localStorage.getItem('x_clicks') || '{}');
         const res = await fetch('data/data.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         AIRDROPS = JSON.parse(txt);
+
         // Featured picks with manual order
         featured = AIRDROPS.filter(x => x.featured === true)
           .sort((a, b) => (a.featuredOrder ?? 999) - (b.featuredOrder ?? 999))
           .slice(0, 3);
-        renderFeatured();
-        // Restore UI from state
+
+        // Restore UI
         document.getElementById('chainFilter').value = state.chain;
         document.getElementById('sortBy').value = state.sortBy;
         document.getElementById('searchInput').value = state.search;
         document.getElementById('favoritesOnly').checked = state.favoritesOnly;
-        // Set active status button
-        document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
-        document.querySelector(`[data-status="${state.status}"]`).classList.add('btn-primary');
         render();
       } catch (e) {
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
@@ -496,12 +453,18 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      filtered = AIRDROPS.filter(x => {
+      filtered = AIRDROPS.map(x => {
+        const trendBoost = x.topicId && hotClicks[x.topicId] ? Math.min(5, Math.log10(hotClicks[x.topicId] + 1) * 3) : 0;
+        const popularity = Number(x.popularity ?? 0) + trendBoost;
+        const walletBoost = wallet.readiness || 0;
+        const evRes = computeEV(x, walletBoost);
+        return { ...x, _pop: popularity, _ev: evRes.ev, _evhr: evRes.evhr, _trendBoost: trendBoost };
+      }).filter(x => {
         if (state.status !== 'all' && x.status !== state.status) return false;
         if (state.chain !== 'all' && x.chain !== state.chain) return false;
         if (state.favoritesOnly && !favorites.has(x.id)) return false;
         if (q) {
-          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
+          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')} ${(x.risk||[]).join(' ')}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -512,7 +475,10 @@
         case 'deadlineDesc': filtered.sort((a,b)=>b.deadline.localeCompare(a.deadline)); break;
         case 'rewardDesc': filtered.sort((a,b)=>(b.rewardUSD??0)-(a.rewardUSD??0)); break;
         case 'rewardAsc': filtered.sort((a,b)=>(a.rewardUSD??0)-(b.rewardUSD??0)); break;
-        case 'popularityDesc': filtered.sort((a,b)=>(b.popularity??0)-(a.popularity??0)); break;
+        case 'popularityDesc': filtered.sort((a,b)=>(b._pop??0)-(a._pop??0)); break;
+        case 'evDesc': filtered.sort((a,b)=>(b._ev??-1e9)-(a._ev??-1e9)); break;
+        case 'evhrDesc': filtered.sort((a,b)=>(b._evhr??-1e9)-(a._evhr??-1e9)); break;
+        case 'snapshotDesc': filtered.sort((a,b)=>(b.snapshotProb??0)-(a.snapshotProb??0)); break;
       }
     }
 
@@ -522,8 +488,28 @@
       if (featured.length === 0) { sec.classList.add('hidden'); return; }
       sec.classList.remove('hidden');
       wrap.innerHTML = featured.map(x => cardHtml(x, true)).join('');
-      // Bind tutorial buttons inside featured too
-      bindTutorialLinks(wrap);
+      bindInteractive(wrap);
+    }
+
+    function urgencyBadge(iso) {
+      const d = daysUntil(iso);
+      if (d == null || isNaN(d)) return '';
+      const urgent = d <= 3;
+      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
+    }
+    function newBadge(addedDate) {
+      try { const d = new Date(addedDate); const days = Math.floor((Date.now() - d.getTime())/(1000*60*60*24)); if (days <= 7) return `<span class="chip border-green-400/40 text-green-300">New</span>`; } catch {}
+      return '';
+    }
+    function riskChips(risks) {
+      if (!Array.isArray(risks) || risks.length === 0) return '';
+      return risks.slice(0,3).map(r => {
+        const t = String(r).toLowerCase();
+        const cls = t.includes('phish') || t.includes('drainer') || t.includes('scam') ? 'border-red-400/40 text-red-300'
+                  : t.includes('audit') || t.includes('new contract') ? 'border-yellow-400/40 text-yellow-300'
+                  : 'border-white/10 text-white/70';
+        return `<span class="chip ${cls}">${escapeHtml(r)}</span>`;
+      }).join('');
     }
 
     function render() {
@@ -556,49 +542,67 @@
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
 
-      // Bind interactions
-      cards.querySelectorAll('button[data-fav]').forEach(btn => {
+      bindInteractive(cards);
+      saveState(); syncQueryParams();
+    }
+
+    function bindInteractive(scope) {
+      scope.querySelectorAll('button[data-fav]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-fav');
           if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
           localStorage.setItem('favorites', JSON.stringify([...favorites]));
-          renderFeatured();
-          render();
+          renderFeatured(); render();
         });
       });
-
-      bindTutorialLinks(cards);
-
-      saveState();
-      syncQueryParams();
-    }
-
-    function bindTutorialLinks(scopeEl) {
-      scopeEl.querySelectorAll('a[data-tutorial]').forEach(a => {
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          const url = a.getAttribute('href');
-          openTutorialModal(url, a.getAttribute('data-title') || 'Tutorial');
+      // Tutorial links: Notion fallback
+      scope.querySelectorAll('a[data-tutorial]').forEach(a => {
+        const url = a.getAttribute('href');
+        const title = a.getAttribute('data-title') || 'Tutorial';
+        if (isNotionUrl(url)) {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener');
+          a.classList.add('tooltip');
+          a.setAttribute('data-tip', 'Opens in new tab (embedding blocked by source)');
+          a.addEventListener('click', () => document.getElementById('notionNotice').classList.remove('hidden'));
+        } else {
+          a.addEventListener('click', (e) => { e.preventDefault(); openTutorialModal(url, title); });
+        }
+      });
+      // Coach buttons
+      scope.querySelectorAll('button[data-coach]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-coach');
+          const item = AIRDROPS.find(x => x.id === id);
+          openCoach(item);
+        });
+      });
+      // Add to Run buttons
+      scope.querySelectorAll('button[data-run]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-run');
+          const runs = JSON.parse(localStorage.getItem('runs') || '[]');
+          let run = runs.find(r => r.id === 'default');
+          if (!run) { run = { id: 'default', name: 'My Run', items: [] }; runs.push(run); }
+          if (!run.items.includes(id)) run.items.push(id);
+          localStorage.setItem('runs', JSON.stringify(runs));
+          btn.textContent = 'Added';
+          setTimeout(()=>btn.textContent='Add to Run', 1200);
         });
       });
     }
 
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
-      const badge = isFeatured ? `<span class="chip bg-gradient-to-r from-yellow-400/20 to-orange-500/20 text-yellow-300 border-yellow-400/40">⭐ Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
+      const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
       const endsChip = x.deadline ? urgencyBadge(x.deadline) : '';
-      const statusClass = x.status === 'live' ? 'status-live' : x.status === 'upcoming' ? 'status-upcoming' : 'status-ended';
-      
       return `
-        <article class="card rounded-xl p-6 animate-fade-in">
-          <div class="flex items-start justify-between gap-3 mb-4">
-            <div class="flex-1">
-              <h3 class="text-lg font-bold text-white mb-1">${escapeHtml(x.name)}</h3>
-              <div class="flex items-center gap-2 text-sm">
-                <span class="px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80">${escapeHtml(x.chain)}</span>
-                <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass} bg-${x.status === 'live' ? 'green' : x.status === 'upcoming' ? 'yellow' : 'gray'}-500/20">${escapeHtml(x.status)}</span>
-              </div>
-              <div class="flex gap-2 mt-2">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
+        <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
+              <div class="text-xs text-white/60">${escapeHtml(x.chain)} • ${escapeHtml(x.status)}</div>
+              <div class="flex gap-2 mt-1">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
             </div>
             <button data-fav="${escapeHtml(x.id)}" class="p-2 rounded-lg transition-all ${fav ? 'text-yellow-400 bg-yellow-400/10' : 'text-white/40 hover:text-yellow-400 hover:bg-yellow-400/10'}" title="Toggle favorite">
               <svg class="w-5 h-5" fill="${fav ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
@@ -607,14 +611,14 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="bg-white/5 rounded-lg p-3">
-              <div class="text-white/60 text-xs font-medium mb-1">Reward</div>
-              <div class="text-lg font-bold text-green-400">$${Number(x.rewardUSD ?? 0).toLocaleString()}</div>
+          <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div class="bg-white/5 rounded p-2">
+              <div class="text-white/60 text-xs">Reward</div>
+              <div class="font-medium">$${Number(x.rewardUSD ?? 0)}</div>
             </div>
-            <div class="bg-white/5 rounded-lg p-3">
-              <div class="text-white/60 text-xs font-medium mb-1">Deadline</div>
-              <div class="text-sm font-semibold text-white">${escapeHtml(fmtDate(x.deadline))}</div>
+            <div class="bg-white/5 rounded p-2">
+              <div class="text-white/60 text-xs">Deadline</div>
+              <div class="font-medium">${escapeHtml(fmtDate(x.deadline))}</div>
             </div>
           </div>
 
@@ -629,23 +633,11 @@
             ${(x.tags ?? []).map(tag => `<span class="chip text-xs">${escapeHtml(tag)}</span>`).join('')}
           </div>
 
-          <div class="flex flex-wrap items-center gap-3 text-sm pt-4 border-t border-white/10">
-            ${x?.links?.site ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-              Site
-            </a>` : ''}
-            ${x?.links?.twitter ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
-              Twitter
-            </a>` : ''}
-            ${x?.links?.docs ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              Docs
-            </a>` : ''}
-            ${x?.links?.tutorial ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-              Tutorial
-            </a>` : ''}
+          <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            ${x?.links?.site ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">Site</a>` : ''}
+            ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
+            ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
+            ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">Tutorial</a>` : ''}
           </div>
         </article>
       `;
@@ -654,10 +646,7 @@
     // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       const active = document.activeElement;
-      if (e.key === '/' && (!active || active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
-        e.preventDefault();
-        document.getElementById('searchInput').focus();
-      }
+      if (e.key === '/' && (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA'))) { e.preventDefault(); document.getElementById('searchInput').focus(); }
       if (e.key.toLowerCase() === 'f' && (!active || active.tagName !== 'INPUT')) {
         e.preventDefault();
         const chk = document.getElementById('favoritesOnly');
@@ -675,15 +664,7 @@
 
     // Filters bindings
     document.querySelectorAll('.statusBtn').forEach(btn => {
-      btn.addEventListener('click', () => { 
-        // Remove active class from all status buttons
-        document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
-        // Add active class to clicked button
-        btn.classList.add('btn-primary');
-        state.status = btn.dataset.status; 
-        state.page = 1; 
-        render(); 
-      });
+      btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
     });
     document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
     document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
@@ -706,20 +687,33 @@
     const frame = document.getElementById('tutorialFrame');
     const titleEl = document.getElementById('tutorialTitle');
     const openNew = document.getElementById('openInNewTab');
+    const notionNotice = document.getElementById('notionNotice');
     document.getElementById('closeTutorial').addEventListener('click', closeTutorialModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
-    function openTutorialModal(url, title) {
-      titleEl.textContent = title || 'Tutorial';
-      frame.src = url;
-      openNew.href = url;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function openTutorialModal(url, title) { notionNotice.classList.add('hidden'); titleEl.textContent = title || 'Tutorial'; frame.src = url; openNew.href = url; modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    function closeTutorialModal() { frame.src = 'about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+    // Activity Coach modal
+    const coachModal = document.getElementById('coachModal');
+    const coachTitle = document.getElementById('coachTitle');
+    const coachContent = document.getElementById('coachContent');
+    const coachHint = document.getElementById('coachHint');
+    document.getElementById('coachClose').addEventListener('click', closeCoach);
+    coachModal.addEventListener('click', (e) => { if (e.target === coachModal) closeCoach(); });
+    function openCoach(item) {
+      coachTitle.textContent = `${item.name} — Activity Coach`;
+      const baseSteps = Array.isArray(item.coachSteps) ? item.coachSteps : [];
+      const dynamic = [];
+      // Dynamic hints based on wallet.readiness and chain stats
+      if ((wallet.stats[item.chain]?.txCount || 0) < 3) dynamic.push(`Do 3+ distinct txs on ${item.chain} over separate days to raise eligibility.`);
+      if ((wallet.stats[item.chain]?.balanceEth || 0) < 0.02) dynamic.push(`Keep at least ~$5 gas on ${item.chain} to avoid failed txs.`);
+      if (item.tags?.includes('bridge')) dynamic.push('Bridge from a different source chain once to diversify flow.');
+      const steps = [...baseSteps, ...dynamic].slice(0, 6);
+      coachContent.innerHTML = steps.map(s => `<div class="flex items-start gap-2"><input type="checkbox" class="mt-1"/><span>${escapeHtml(s)}</span></div>`).join('');
+      coachHint.textContent = 'Tip: Readiness is estimated locally from your wallet’s public data. No signing, no private info.';
+      coachModal.classList.remove('hidden'); coachModal.classList.add('flex');
     }
-    function closeTutorialModal() {
-      frame.src = 'about:blank';
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+    function closeCoach() { coachModal.classList.add('hidden'); coachModal.classList.remove('flex'); }
 
     loadData();
   </script>

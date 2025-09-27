@@ -5,19 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Submit Airdrop — Airdrop Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' }
-  </script>
+  <script> tailwind.config = { darkMode: 'class' } </script>
   <style>
-    :root { color-scheme: dark; }
-    html, body { background: #0b0f1a; color: #fff; }
+    :root { color-scheme: dark; } html, body { background: #0b0f1a; color: #fff; }
     .btn { padding: 0.5rem 0.9rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
     .btn:hover { border-color: rgba(255,255,255,0.25); }
     .help { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
     .error { color: #fca5a5; font-size: 0.8rem; }
     .ok { color: #86efac; font-size: 0.8rem; }
-    .gridish { display: grid; gap: 1rem; grid-template-columns: 1fr; }
-    @media (min-width: 900px) { .gridish { grid-template-columns: 1fr 1fr; } }
+    .gridish { display: grid; gap: 1rem; grid-template-columns: 1fr; } @media (min-width: 980px) { .gridish { grid-template-columns: 1fr 1fr; } }
     .preview { border: 1px solid rgba(255,255,255,0.1); background: #0f1422; border-radius: 0.75rem; padding: 1rem; }
   </style>
 </head>
@@ -26,7 +22,6 @@
     <h1 class="text-2xl font-semibold mb-6">Submit Airdrop</h1>
 
     <div class="gridish">
-      <!-- Form -->
       <form id="submitForm" class="space-y-4" novalidate>
         <div>
           <label class="block text-sm mb-1">Project ID <span class="text-white/50">(lowercase, unique)</span></label>
@@ -44,13 +39,7 @@
             <label class="block text-sm mb-1">Chain</label>
             <select name="chain" class="w-full btn" required>
               <option value="">Select</option>
-              <option>Ethereum</option>
-              <option>Solana</option>
-              <option>Arbitrum</option>
-              <option>Base</option>
-              <option>Polygon</option>
-              <option>Aptos</option>
-              <option>BNB</option>
+              <option>Ethereum</option><option>Solana</option><option>Arbitrum</option><option>Base</option><option>Polygon</option><option>Aptos</option><option>BNB</option>
             </select>
           </div>
         </div>
@@ -63,19 +52,56 @@
           <div>
             <label class="block text-sm mb-1">Status</label>
             <select name="status" class="w-full btn" required>
-              <option value="">Select</option>
-              <option>live</option>
-              <option>upcoming</option>
-              <option>ended</option>
+              <option value="">Select</option><option>live</option><option>upcoming</option><option>ended</option>
             </select>
           </div>
           <div>
             <label class="block text-sm mb-1 flex items-center justify-between">
-              <span>Deadline</span>
-              <span class="help">YYYY-MM-DD</span>
+              <span>Deadline</span><span class="help">YYYY-MM-DD</span>
             </label>
             <input name="deadline" class="w-full btn" placeholder="2025-10-05" inputmode="numeric" autocomplete="off" required />
             <p id="deadlineError" class="error hidden">Please enter a valid date in YYYY-MM-DD format.</p>
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Est. Token Value (USD)</label>
+            <input name="baseEstTokenValue" type="number" min="0" step="1" class="w-full btn" placeholder="e.g., 500" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">P(Token)</label>
+            <input name="pToken" type="number" min="0" max="1" step="0.05" class="w-full btn" placeholder="0.5" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">P(Eligibility)</label>
+            <input name="pEligibility" type="number" min="0" max="1" step="0.05" class="w-full btn" placeholder="0.6" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Est. Hours</label>
+            <input name="estHours" type="number" min="0" step="0.25" class="w-full btn" placeholder="2" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Est. Gas (USD)</label>
+            <input name="estGasUSD" type="number" min="0" step="0.5" class="w-full btn" placeholder="5" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Snapshot Probability (%)</label>
+            <input name="snapshotProb" type="number" min="0" max="100" step="5" class="w-full btn" placeholder="60" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Snapshot Window (days)</label>
+            <input name="snapshotWindowDays" type="number" min="0" step="1" class="w-full btn" placeholder="30" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Added Date</label>
+            <input name="addedDate" class="w-full btn" placeholder="YYYY-MM-DD" />
           </div>
         </div>
 
@@ -83,13 +109,22 @@
           <label class="block text-sm mb-1">Tasks (comma‑separated)</label>
           <input name="tasks" class="w-full btn" placeholder="Swap 3x, Provide LP, Bridge" />
         </div>
-
         <div>
           <label class="block text-sm mb-1">Tags (comma‑separated)</label>
           <input name="tags" class="w-full btn" placeholder="dex, defi, bridge" />
         </div>
 
-        <div class="grid sm:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Risks (comma‑separated)</label>
+          <input name="risk" class="w-full btn" placeholder="No audit, New contract < 30d" />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">Coach Steps (comma‑separated)</label>
+          <input name="coachSteps" class="w-full btn" placeholder="Bridge from chain A, Do 3 txs on base, Provide LP for 7d" />
+        </div>
+
+        <div class="grid sm:grid-cols-5 gap-4">
           <div>
             <label class="block text-sm mb-1">Site URL</label>
             <input name="site" class="w-full btn" placeholder="https://example.com" />
@@ -105,7 +140,10 @@
           <div>
             <label class="block text-sm mb-1">Tutorial URL</label>
             <input name="tutorial" class="w-full btn" placeholder="https://example.com/tutorial" />
-            <p class="help">Optional. Appears as a “Tutorial” button on the card and opens in a modal.</p>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Hot on X Topic ID</label>
+            <input name="topicId" class="w-full btn" placeholder="e.g., layerzeroszn" />
           </div>
         </div>
 
@@ -115,9 +153,8 @@
             <label for="featured">Mark as Daily Pick</label>
           </div>
           <div>
-            <label class="block text-sm mb-1">Featured Order <span class="text-white/50">(1..3)</span></label>
+            <label class="block text-sm mb-1">Featured Order (1..3)</label>
             <input name="featuredOrder" type="number" min="1" max="3" step="1" class="w-full btn" placeholder="1" />
-            <p class="help">Lower number appears earlier in Daily Picks. Optional.</p>
           </div>
         </div>
 
@@ -132,7 +169,6 @@
         </div>
       </form>
 
-      <!-- Live Preview -->
       <aside class="preview">
         <h2 class="font-semibold mb-3">Live Preview</h2>
         <div id="previewCard" class="text-white/80 text-sm">Fill the form to preview…</div>
@@ -141,24 +177,16 @@
   </main>
 
   <script>
-    // Utilities
     function isValidISODate(value) {
       if (typeof value !== 'string') return false;
       const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!m) return false;
       const y = Number(m[1]), mm = Number(m[2]), dd = Number(m[3]);
-      if (mm < 1 || mm > 12) return false;
-      if (dd < 1 || dd > 31) return false;
       const dt = new Date(Date.UTC(y, mm - 1, dd));
       return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === mm && dt.getUTCDate() === dd;
     }
     function splitCSV(s) { return !s ? [] : s.split(',').map(x => x.trim()).filter(Boolean); }
-    function normUrl(u) {
-      if (!u) return '';
-      const v = u.trim();
-      if (/^https?:\/\//i.test(v)) return v;
-      return 'https://' + v;
-    }
+    function normUrl(u) { if (!u) return ''; const v=u.trim(); if (/^https?:\/\//i.test(v)) return v; return 'https://' + v; }
     function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
     const form = document.getElementById('submitForm');
@@ -170,67 +198,21 @@
     const copyBtn = document.getElementById('copyBtn');
     let EXISTING_IDS = new Set();
 
-    // Load existing IDs for duplicate guard
     async function loadExistingIds() {
-      try {
-        const res = await fetch('data/data.json', { cache: 'no-store' });
-        const arr = await res.json();
-        EXISTING_IDS = new Set(arr.map(x => x.id));
-        updateIdStatus();
-      } catch {}
+      try { const res = await fetch('data/data.json', { cache: 'no-store' }); const arr = await res.json(); EXISTING_IDS = new Set(arr.map(x => x.id)); updateIdStatus(); } catch {}
     }
-
     function updateIdStatus() {
       const id = idInput.value.trim();
-      const idOk = /^[a-z0-9-]+$/.test(id);
+      const ok = /^[a-z0-9-]+$/.test(id);
       if (!id) { idStatus.textContent = ''; return; }
-      if (!idOk) { idStatus.textContent = 'Invalid: use lowercase letters, numbers, and hyphens only.'; idStatus.className = 'error'; return; }
+      if (!ok) { idStatus.textContent = 'Invalid: use lowercase letters, numbers, and hyphens only.'; idStatus.className = 'error'; return; }
       if (EXISTING_IDS.has(id)) { idStatus.textContent = 'This ID already exists in data.json'; idStatus.className = 'error'; }
       else { idStatus.textContent = 'ID is available'; idStatus.className = 'ok'; }
     }
-
-    function showDeadlineError(show) {
-      deadlineError.classList.toggle('hidden', !show);
-      deadlineInput.classList.toggle('ring-2', show);
-      deadlineInput.classList.toggle('ring-red-400/70', show);
-    }
-
+    idInput.addEventListener('input', updateIdStatus);
     deadlineInput.addEventListener('blur', () => {
       const v = deadlineInput.value.trim();
-      showDeadlineError(v.length > 0 && !isValidISODate(v));
-    });
-    idInput.addEventListener('input', updateIdStatus);
-
-    // Live preview
-    form.addEventListener('input', () => {
-      const d = collectData(false);
-      previewCard.innerHTML = `
-        <div class="text-base font-semibold">${esc(d.name || 'Project Name')}</div>
-        <div class="text-xs text-white/60">${esc(d.chain || 'Chain')} • ${esc(d.status || 'status')}</div>
-        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-          <div class="bg-white/5 rounded p-2">
-            <div class="text-white/60 text-xs">Reward</div>
-            <div class="font-medium">$${Number(d.rewardUSD || 0)}</div>
-          </div>
-          <div class="bg-white/5 rounded p-2">
-            <div class="text-white/60 text-xs">Deadline</div>
-            <div class="font-medium">${esc(d.deadline || 'YYYY-MM-DD')}</div>
-          </div>
-        </div>
-        <ul class="mt-3 text-sm list-disc ml-5 text-white/80">
-          ${d.tasks.slice(0,3).map(t=>`<li>${esc(t)}</li>`).join('')}
-        </ul>
-        <div class="mt-3 flex flex-wrap gap-2">
-          ${d.tags.map(tag => `<span class="inline-block text-xs px-2 py-1 rounded border border-white/10 bg-white/5">${esc(tag)}</span>`).join('')}
-        </div>
-        <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          ${d.links.site ? `<span class="underline text-cyan-300">Site</span>` : ''}
-          ${d.links.twitter ? `<span class="underline text-cyan-300">Twitter</span>` : ''}
-          ${d.links.docs ? `<span class="underline text-cyan-300">Docs</span>` : ''}
-          ${d.links.tutorial ? `<span class="underline text-cyan-300">Tutorial</span>` : ''}
-        </div>
-        ${d.featured ? `<div class="mt-3 text-cyan-300 text-xs">Featured ${d.featuredOrder?`#${d.featuredOrder}`:''}</div>` : ''}
-      `;
+      deadlineError.classList.toggle('hidden', !(v.length > 0 && !isValidISODate(v)));
     });
 
     function collectData(normalize = true) {
@@ -240,9 +222,8 @@
         docs: form.elements['docs'].value.trim(),
         tutorial: form.elements['tutorial'].value.trim()
       };
-      if (normalize) {
-        for (const k in links) { links[k] = normUrl(links[k]); }
-      }
+      if (normalize) for (const k in links) links[k] = normUrl(links[k]);
+
       return {
         id: form.elements['id'].value.trim(),
         name: form.elements['name'].value.trim(),
@@ -250,49 +231,79 @@
         rewardUSD: Number(form.elements['rewardUSD'].value),
         status: form.elements['status'].value,
         deadline: form.elements['deadline'].value.trim(),
+        baseEstTokenValue: Number(form.elements['baseEstTokenValue'].value),
+        pToken: Number(form.elements['pToken'].value),
+        pEligibility: Number(form.elements['pEligibility'].value),
+        estHours: Number(form.elements['estHours'].value),
+        estGasUSD: Number(form.elements['estGasUSD'].value),
+        snapshotProb: form.elements['snapshotProb'].value ? Number(form.elements['snapshotProb'].value) : undefined,
+        snapshotWindowDays: form.elements['snapshotWindowDays'].value ? Number(form.elements['snapshotWindowDays'].value) : undefined,
+        addedDate: form.elements['addedDate'].value.trim(),
         tasks: splitCSV(form.elements['tasks'].value),
         tags: splitCSV(form.elements['tags'].value),
+        risk: splitCSV(form.elements['risk'].value),
+        coachSteps: splitCSV(form.elements['coachSteps'].value),
         popularity: 1,
         featured: document.getElementById('featured').checked,
         featuredOrder: form.elements['featuredOrder'].value ? Number(form.elements['featuredOrder'].value) : undefined,
+        topicId: form.elements['topicId'].value.trim(),
         links
       };
     }
 
     function validateData(d) {
-      const idOk = /^[a-z0-9-]+$/.test(d.id);
-      if (!idOk) return ['ID must be lowercase letters, numbers, or hyphens only (e.g., aster-dex).'];
-      if (EXISTING_IDS.has(d.id)) return ['This ID already exists in data/data.json. Please choose another.'];
-      if (!d.chain) return ['Please select a chain.'];
-      if (!['live','upcoming','ended'].includes(d.status)) return ['Please select a valid status.'];
-      if (!Number.isFinite(d.rewardUSD) || d.rewardUSD < 0) return ['Reward must be a non-negative number.'];
-      if (!isValidISODate(d.deadline)) return ['Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).'];
-      // Optional URL checks (basic)
-      for (const k of ['site','twitter','docs','tutorial']) {
-        const v = d.links[k];
-        if (v && !/^https?:\/\//i.test(v)) return [`${k[0].toUpperCase()+k.slice(1)} URL must start with http:// or https://`];
-      }
+      const errs = [];
+      if (!/^[a-z0-9-]+$/.test(d.id)) errs.push('ID must be lowercase letters, numbers, or hyphens only (e.g., aster-dex).');
+      if (EXISTING_IDS.has(d.id)) errs.push('This ID already exists in data/data.json. Please choose another.');
+      if (!d.chain) errs.push('Please select a chain.');
+      if (!['live','upcoming','ended'].includes(d.status)) errs.push('Please select a valid status.');
+      if (!Number.isFinite(d.rewardUSD) || d.rewardUSD < 0) errs.push('Reward must be a non-negative number.');
+      if (!isValidISODate(d.deadline)) errs.push('Deadline must be a valid date in YYYY-MM-DD (e.g., 2025-10-05).');
+      if (d.addedDate && !isValidISODate(d.addedDate)) errs.push('Added Date must be YYYY-MM-DD.');
+      for (const k of ['site','twitter','docs','tutorial']) { const v = d.links[k]; if (v && !/^https?:\/\//i.test(v)) errs.push(`${k} must start with http(s)://`); }
       if (d.featured && d.featuredOrder !== undefined) {
-        if (!(Number.isInteger(d.featuredOrder) && d.featuredOrder>=1 && d.featuredOrder<=3)) {
-          return ['Featured Order must be an integer between 1 and 3.'];
-        }
+        if (!(Number.isInteger(d.featuredOrder) && d.featuredOrder>=1 && d.featuredOrder<=3)) errs.push('Featured Order must be 1..3.');
       }
-      return [];
+      return errs;
     }
+
+    function computeEV(d) {
+      const baseVal = Number(d.baseEstTokenValue || 0);
+      const pToken = Number(d.pToken || 0);
+      const pElig = Number(d.pEligibility || 0);
+      const gas = Number(d.estGasUSD || 0);
+      const ev = (pToken * pElig * baseVal) - gas;
+      const hours = Math.max(0.25, Number(d.estHours || 0.5));
+      const evhr = ev / hours;
+      return { ev, evhr };
+    }
+
+    // Live preview
+    form.addEventListener('input', () => {
+      const d = collectData(false);
+      const { ev, evhr } = computeEV(d);
+      previewCard.innerHTML = `
+        <div class="text-base font-semibold">${esc(d.name || 'Project Name')}</div>
+        <div class="text-xs text-white/60">${esc(d.chain || 'Chain')} • ${esc(d.status || 'status')}</div>
+        <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
+          <div class="bg-white/5 rounded p-2"><div class="text-white/60 text-xs">Reward</div><div class="font-medium">$${Number(d.rewardUSD || 0)}</div></div>
+          <div class="bg-white/5 rounded p-2"><div class="text-white/60 text-xs">EV</div><div class="font-medium">$${ev.toFixed(0)} <span class="text-white/50 text-xs">(hr: $${evhr.toFixed(0)})</span></div></div>
+          <div class="bg-white/5 rounded p-2"><div class="text-white/60 text-xs">Deadline</div><div class="font-medium">${esc(d.deadline || 'YYYY-MM-DD')}</div></div>
+        </div>
+        <ul class="mt-3 text-sm list-disc ml-5 text-white/80">${d.tasks.slice(0,3).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+        <div class="mt-3 flex flex-wrap gap-2">${d.tags.map(tag => `<span class="inline-block text-xs px-2 py-1 rounded border border-white/10 bg-white/5">${esc(tag)}</span>`).join('')}</div>
+      `;
+    });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = collectData(true);
       const errs = validateData(data);
-      const deadlineOk = isValidISODate(data.deadline);
-      document.getElementById('deadlineError').classList.toggle('hidden', deadlineOk);
-
       if (errs.length) return alert(errs[0]);
 
       const cleanLinks = {};
-      for (const k of ['site','twitter','docs','tutorial']) {
-        if (data.links[k]) cleanLinks[k] = data.links[k];
-      }
+      for (const k of ['site','twitter','docs','tutorial']) if (data.links[k]) cleanLinks[k] = data.links[k];
+
       const output = {
         id: data.id,
         name: data.name,
@@ -303,6 +314,17 @@
         tasks: data.tasks,
         tags: data.tags,
         popularity: data.popularity,
+        ...(data.baseEstTokenValue ? { baseEstTokenValue: data.baseEstTokenValue } : {}),
+        ...(isFinite(data.pToken) ? { pToken: data.pToken } : {}),
+        ...(isFinite(data.pEligibility) ? { pEligibility: data.pEligibility } : {}),
+        ...(isFinite(data.estHours) ? { estHours: data.estHours } : {}),
+        ...(isFinite(data.estGasUSD) ? { estGasUSD: data.estGasUSD } : {}),
+        ...(isFinite(data.snapshotProb) ? { snapshotProb: data.snapshotProb } : {}),
+        ...(isFinite(data.snapshotWindowDays) ? { snapshotWindowDays: data.snapshotWindowDays } : {}),
+        ...(data.addedDate ? { addedDate: data.addedDate } : {}),
+        ...(data.risk && data.risk.length ? { risk: data.risk } : {}),
+        ...(data.coachSteps && data.coachSteps.length ? { coachSteps: data.coachSteps } : {}),
+        ...(data.topicId ? { topicId: data.topicId } : {}),
         ...(data.featured ? { featured: true } : {}),
         ...(data.featured && data.featuredOrder ? { featuredOrder: data.featuredOrder } : {}),
         links: cleanLinks
@@ -316,10 +338,9 @@
     copyBtn.addEventListener('click', async () => {
       const txt = document.getElementById('result').textContent.trim();
       if (!txt) return alert('Generate JSON first.');
-      try { await navigator.clipboard.writeText(txt); alert('Copied JSON to clipboard.'); } catch { alert('Copy failed.'); }
+      try { await navigator.clipboard.writeText(txt); alert('Copied JSON.'); } catch { alert('Copy failed.'); }
     });
 
-    // Initialize
     loadExistingIds();
   </script>
 </body>
