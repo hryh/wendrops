@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Hub - Simple Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0e1a; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Airdrop Hub - Simple Test</h1>
+        <div id="status">Loading...</div>
+        <div id="cards" class="grid gap-4 mt-4"></div>
+    </div>
+
+    <script>
+        console.log('Script starting...');
+        
+        async function loadData() {
+            try {
+                console.log('Fetching data...');
+                const res = await fetch('data/data.json');
+                console.log('Response:', res.status);
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                console.log('Data loaded:', data.length, 'airdrops');
+                
+                document.getElementById('status').textContent = `Loaded ${data.length} airdrops`;
+                
+                // Render simple cards
+                const cards = document.getElementById('cards');
+                cards.innerHTML = data.map(item => `
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 class="font-bold">${item.name}</h3>
+                        <p>Chain: ${item.chain} | Status: ${item.status}</p>
+                        <p>Reward: $${item.rewardUSD}</p>
+                    </div>
+                `).join('');
+                
+            } catch (e) {
+                console.error('Error:', e);
+                document.getElementById('status').textContent = `Error: ${e.message}`;
+            }
+        }
+        
+        console.log('Calling loadData...');
+        loadData();
+        console.log('Script loaded');
+    </script>
+</body>
+</html>

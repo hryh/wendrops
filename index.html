@@ -317,7 +317,10 @@
 
     function currentTheme() { return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
     function setTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); try { localStorage.setItem('theme', mode); } catch {} }
-    document.getElementById('toggleTheme').addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
+    const toggleTheme = document.getElementById('toggleTheme');
+    if (toggleTheme) {
+      toggleTheme.addEventListener('click', () => { setTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
+    }
 
     let AIRDROPS = [];
     let filtered = [];
@@ -354,7 +357,9 @@
     const walletBtn = document.getElementById('walletBtn');
     const walletInfo = document.getElementById('walletInfo');
 
-    walletBtn.addEventListener('click', connectWallet);
+    if (walletBtn) {
+      walletBtn.addEventListener('click', connectWallet);
+    }
 
     async function connectWallet() {
       if (!window.ethereum) { alert('No wallet found (MetaMask/Rabby). Read-only connect requires a browser wallet.'); return; }
@@ -679,21 +684,40 @@
     document.querySelectorAll('.statusBtn').forEach(btn => {
       btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
     });
-    document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
-    document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
-      document.getElementById('chainFilter').value = 'all';
-      document.getElementById('sortBy').value = 'deadlineAsc';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('favoritesOnly').checked = false;
-      // Reset status button styling
-      document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
-      document.querySelector('[data-status="all"]').classList.add('btn-primary');
-      render();
-    });
-    document.getElementById('favoritesOnly').addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
-    document.getElementById('searchInput').addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
+    const chainFilter = document.getElementById('chainFilter');
+    if (chainFilter) {
+      chainFilter.addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
+    }
+    const sortBy = document.getElementById('sortBy');
+    if (sortBy) {
+      sortBy.addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
+    }
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
+        if (chainFilter) chainFilter.value = 'all';
+        if (sortBy) sortBy.value = 'deadlineAsc';
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+        const favoritesOnly = document.getElementById('favoritesOnly');
+        if (favoritesOnly) favoritesOnly.checked = false;
+        // Reset status button styling
+        document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
+        const allStatusBtn = document.querySelector('[data-status="all"]');
+        if (allStatusBtn) allStatusBtn.classList.add('btn-primary');
+        render();
+      });
+    }
+    const favoritesOnly = document.getElementById('favoritesOnly');
+    if (favoritesOnly) {
+      favoritesOnly.addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });
+    }
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => { state.search = e.target.value; state.page = 1; render(); });
+    }
 
     // Tutorial modal controls
     const modal = document.getElementById('tutorialModal');
@@ -701,8 +725,14 @@
     const titleEl = document.getElementById('tutorialTitle');
     const openNew = document.getElementById('openInNewTab');
     const notionNotice = document.getElementById('notionNotice');
-    document.getElementById('closeTutorial').addEventListener('click', closeTutorialModal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
+    const closeTutorial = document.getElementById('closeTutorial');
+    if (closeTutorial) {
+      closeTutorial.addEventListener('click', closeTutorialModal);
+    }
+    
+    if (modal) {
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
+    }
     function openTutorialModal(url, title) { notionNotice.classList.add('hidden'); titleEl.textContent = title || 'Tutorial'; frame.src = url; openNew.href = url; modal.classList.remove('hidden'); modal.classList.add('flex'); }
     function closeTutorialModal() { frame.src = 'about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
 
@@ -711,8 +741,15 @@
     const coachTitle = document.getElementById('coachTitle');
     const coachContent = document.getElementById('coachContent');
     const coachHint = document.getElementById('coachHint');
-    document.getElementById('coachClose').addEventListener('click', closeCoach);
-    coachModal.addEventListener('click', (e) => { if (e.target === coachModal) closeCoach(); });
+    
+    const coachClose = document.getElementById('coachClose');
+    if (coachClose) {
+      coachClose.addEventListener('click', closeCoach);
+    }
+    
+    if (coachModal) {
+      coachModal.addEventListener('click', (e) => { if (e.target === coachModal) closeCoach(); });
+    }
     function openCoach(item) {
       coachTitle.textContent = `${item.name} — Activity Coach`;
       const baseSteps = Array.isArray(item.coachSteps) ? item.coachSteps : [];

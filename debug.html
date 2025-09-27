@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Airdrop Hub</title>
+    <style>
+        body { background: #0a0e1a; color: white; font-family: Arial; padding: 20px; }
+        .debug { background: #111; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+    </style>
+</head>
+<body>
+    <h1>Debug Airdrop Hub</h1>
+    <div id="debug"></div>
+    <div id="cards"></div>
+    
+    <script>
+        const debug = document.getElementById('debug');
+        const cards = document.getElementById('cards');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `debug ${type}`;
+            div.textContent = message;
+            debug.appendChild(div);
+            console.log(message);
+        }
+        
+        async function debugLoad() {
+            try {
+                log('Starting data load...');
+                
+                const res = await fetch('data/data.json');
+                log(`Fetch response: ${res.status} ${res.statusText}`);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+                }
+                
+                const txt = await res.text();
+                log(`Raw data length: ${txt.length} characters`);
+                
+                const data = JSON.parse(txt);
+                log(`Parsed data: ${data.length} airdrops`, 'success');
+                
+                // Show first airdrop
+                if (data.length > 0) {
+                    log(`First airdrop: ${JSON.stringify(data[0], null, 2)}`);
+                }
+                
+                // Render cards
+                cards.innerHTML = data.map(item => `
+                    <div style="background: #222; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                        <h3>${item.name}</h3>
+                        <p>Chain: ${item.chain} | Status: ${item.status}</p>
+                        <p>Reward: $${item.rewardUSD}</p>
+                    </div>
+                `).join('');
+                
+            } catch (e) {
+                log(`ERROR: ${e.message}`, 'error');
+                console.error(e);
+            }
+        }
+        
+        debugLoad();
+    </script>
+</body>
+</html>
