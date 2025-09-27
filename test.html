@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <div id="test">Loading...</div>
+    <script>
+        async function test() {
+            try {
+                const res = await fetch('data/data.json');
+                const data = await res.json();
+                document.getElementById('test').innerHTML = `Loaded ${data.length} airdrops`;
+                console.log('Data:', data);
+            } catch (e) {
+                document.getElementById('test').innerHTML = `Error: ${e.message}`;
+                console.error(e);
+            }
+        }
+        test();
+    </script>
+</body>
+</html>

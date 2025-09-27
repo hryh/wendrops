@@ -327,7 +327,6 @@
 
     function fmtDate(iso) { try { return new Date(iso + 'T00:00:00Z').toLocaleDateString(); } catch { return iso; } }
     function daysUntil(iso) { try { const now = new Date(); const end = new Date(iso + 'T23:59:59Z'); return Math.ceil((end - now)/(1000*60*60*24)); } catch { return null; } }
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function isNotionUrl(u) { try { const { hostname } = new URL(u); return /(^|\.)notion\.so$/.test(hostname) || /(^|\.)notion\.site$/.test(hostname) || /(^|\.)mail\.notion\.so$/.test(hostname) || /(^|\.)spangle-cheshire-e55\.notion\.site$/.test(hostname); } catch { return false; } }
 
     // EV helpers
@@ -433,6 +432,7 @@
         if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         const txt = await res.text();
         AIRDROPS = JSON.parse(txt);
+        console.log('Loaded airdrops:', AIRDROPS.length);
 
         // Featured picks with manual order
         featured = AIRDROPS.filter(x => x.featured === true)
@@ -444,6 +444,7 @@
         document.getElementById('sortBy').value = state.sortBy;
         document.getElementById('searchInput').value = state.search;
         document.getElementById('favoritesOnly').checked = state.favoritesOnly;
+        renderFeatured();
         render();
       } catch (e) {
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
@@ -453,18 +454,14 @@
 
     function applyFilters() {
       const q = state.search.trim().toLowerCase();
-      filtered = AIRDROPS.map(x => {
-        const trendBoost = x.topicId && hotClicks[x.topicId] ? Math.min(5, Math.log10(hotClicks[x.topicId] + 1) * 3) : 0;
-        const popularity = Number(x.popularity ?? 0) + trendBoost;
-        const walletBoost = wallet.readiness || 0;
-        const evRes = computeEV(x, walletBoost);
-        return { ...x, _pop: popularity, _ev: evRes.ev, _evhr: evRes.evhr, _trendBoost: trendBoost };
-      }).filter(x => {
+      console.log('Applying filters to', AIRDROPS.length, 'airdrops');
+      console.log('State:', state);
+      filtered = AIRDROPS.filter(x => {
         if (state.status !== 'all' && x.status !== state.status) return false;
         if (state.chain !== 'all' && x.chain !== state.chain) return false;
         if (state.favoritesOnly && !favorites.has(x.id)) return false;
         if (q) {
-          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')} ${(x.risk||[]).join(' ')}`.toLowerCase();
+          const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -475,11 +472,9 @@
         case 'deadlineDesc': filtered.sort((a,b)=>b.deadline.localeCompare(a.deadline)); break;
         case 'rewardDesc': filtered.sort((a,b)=>(b.rewardUSD??0)-(a.rewardUSD??0)); break;
         case 'rewardAsc': filtered.sort((a,b)=>(a.rewardUSD??0)-(b.rewardUSD??0)); break;
-        case 'popularityDesc': filtered.sort((a,b)=>(b._pop??0)-(a._pop??0)); break;
-        case 'evDesc': filtered.sort((a,b)=>(b._ev??-1e9)-(a._ev??-1e9)); break;
-        case 'evhrDesc': filtered.sort((a,b)=>(b._evhr??-1e9)-(a._evhr??-1e9)); break;
-        case 'snapshotDesc': filtered.sort((a,b)=>(b.snapshotProb??0)-(a.snapshotProb??0)); break;
+        case 'popularityDesc': filtered.sort((a,b)=>(b.popularity??0)-(a.popularity??0)); break;
       }
+      console.log('After filtering:', filtered.length, 'airdrops remain');
     }
 
     function renderFeatured() {
@@ -488,17 +483,27 @@
       if (featured.length === 0) { sec.classList.add('hidden'); return; }
       sec.classList.remove('hidden');
       wrap.innerHTML = featured.map(x => cardHtml(x, true)).join('');
-      bindInteractive(wrap);
     }
 
     function urgencyBadge(iso) {
-      const d = daysUntil(iso);
-      if (d == null || isNaN(d)) return '';
-      const urgent = d <= 3;
-      return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${d <= 0 ? 'Ends today' : `Ends in ${d} day${d===1?'':'s'}`}</span>`;
+      try {
+        const d = new Date(iso);
+        const now = new Date();
+        const diffTime = d - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (isNaN(diffDays)) return '';
+        const urgent = diffDays <= 3;
+        return `<span class="chip ${urgent ? 'border-red-400/40 text-red-300' : 'border-white/10 text-white/70'}">${diffDays <= 0 ? 'Ends today' : `Ends in ${diffDays} day${diffDays===1?'':'s'}`}</span>`;
+      } catch {
+        return '';
+      }
     }
     function newBadge(addedDate) {
-      try { const d = new Date(addedDate); const days = Math.floor((Date.now() - d.getTime())/(1000*60*60*24)); if (days <= 7) return `<span class="chip border-green-400/40 text-green-300">New</span>`; } catch {}
+      try { 
+        const d = new Date(addedDate); 
+        const days = Math.floor((Date.now() - d.getTime())/(1000*60*60*24)); 
+        if (days <= 7) return `<span class="chip border-green-400/40 text-green-300">New</span>`; 
+      } catch {}
       return '';
     }
     function riskChips(risks) {
@@ -514,8 +519,10 @@
 
     function render() {
       applyFilters();
+      console.log('Filtered airdrops:', filtered.length);
       const start = (state.page - 1) * state.pageSize;
       const items = filtered.slice(start, start + state.pageSize);
+      console.log('Items to render:', items.length);
       const cards = document.getElementById('cards');
 
       if (items.length === 0) {
@@ -534,6 +541,7 @@
         });
       } else {
         cards.innerHTML = items.map(x => cardHtml(x, false)).join('');
+        bindInteractive(cards);
       }
 
       const total = filtered.length;
@@ -542,8 +550,13 @@
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
 
-      bindInteractive(cards);
       saveState(); syncQueryParams();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     function bindInteractive(scope) {
@@ -704,13 +717,13 @@
       coachTitle.textContent = `${item.name} — Activity Coach`;
       const baseSteps = Array.isArray(item.coachSteps) ? item.coachSteps : [];
       const dynamic = [];
-      // Dynamic hints based on wallet.readiness and chain stats
-      if ((wallet.stats[item.chain]?.txCount || 0) < 3) dynamic.push(`Do 3+ distinct txs on ${item.chain} over separate days to raise eligibility.`);
-      if ((wallet.stats[item.chain]?.balanceEth || 0) < 0.02) dynamic.push(`Keep at least ~$5 gas on ${item.chain} to avoid failed txs.`);
+      // General hints
       if (item.tags?.includes('bridge')) dynamic.push('Bridge from a different source chain once to diversify flow.');
+      if (item.chain) dynamic.push(`Do 3+ distinct txs on ${item.chain} over separate days to raise eligibility.`);
+      dynamic.push(`Keep at least ~$5 gas on ${item.chain || 'the chain'} to avoid failed txs.`);
       const steps = [...baseSteps, ...dynamic].slice(0, 6);
       coachContent.innerHTML = steps.map(s => `<div class="flex items-start gap-2"><input type="checkbox" class="mt-1"/><span>${escapeHtml(s)}</span></div>`).join('');
-      coachHint.textContent = 'Tip: Readiness is estimated locally from your wallet’s public data. No signing, no private info.';
+      coachHint.textContent = 'Follow these steps to maximize your airdrop eligibility.';
       coachModal.classList.remove('hidden'); coachModal.classList.add('flex');
     }
     function closeCoach() { coachModal.classList.add('hidden'); coachModal.classList.remove('flex'); }
