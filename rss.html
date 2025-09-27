@@ -3,29 +3,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RSS Reader — Airdrop Hub</title>
+  <title>RSS Feed — Airdrop Hub</title>
+  <meta name="description" content="RSS feed for Airdrop Hub. Subscribe to get the latest airdrop updates and announcements." />
+  
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E📰%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:'class'};</script>
-  <style>:root{color-scheme:dark}html,body{background:#0b0f1a}</style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { 
+            bg: '#0a0e1a', 
+            card: '#111827', 
+            edge: '#1f2937', 
+            accent: '#3b82f6',
+            accentHover: '#2563eb',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root { 
+      color-scheme: dark; 
+      --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    html, body { 
+      background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
+      min-height: 100vh;
+    }
+    
+    .btn { 
+      padding: 0.5rem 1rem; 
+      border-radius: 0.75rem; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      background: rgba(255,255,255,0.05); 
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .btn:hover { 
+      border-color: rgba(59, 130, 246, 0.5); 
+      background: rgba(59, 130, 246, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .card {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+  </style>
 </head>
 <body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
-        <h1 class="text-lg sm:text-xl font-semibold">RSS Reader</h1>
+  <header class="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+          <span class="text-white font-bold text-lg">🪂</span>
+        </a>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white">RSS Feed</h1>
+          <p class="text-xs text-white/60 hidden sm:block">Subscribe to airdrop updates</p>
+        </div>
       </div>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="index.html" class="text-white/80 hover:text-white">Home</a>
-        <a href="rss.xml" class="text-white/60 hover:text-white">Raw RSS</a>
+      <nav class="flex items-center gap-2 sm:gap-4 text-sm">
+        <a href="index.html" class="text-white/70 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">← Back to Hub</a>
+        <a href="rss.xml" class="btn text-white/80 hover:text-white">Raw RSS</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-3xl mx-auto px-4 py-6">
-    <p class="text-white/70 mb-4">This page displays the site’s RSS feed in a readable format. RSS is for apps like Feedly, Inoreader, etc.</p>
-    <div id="list" class="space-y-4"></div>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        RSS Feed
+      </h2>
+      <p class="text-lg text-white/70 max-w-2xl mx-auto mb-8">
+        Subscribe to our RSS feed to get the latest airdrop updates and announcements. Perfect for RSS readers like Feedly, Inoreader, and more.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="rss.xml" class="btn-primary px-6 py-3 text-lg font-semibold">
+          <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4.259 3.09c1.187-1.187 2.8-1.89 4.5-1.89s3.313.703 4.5 1.89c1.187 1.187 1.89 2.8 1.89 4.5s-.703 3.313-1.89 4.5c-1.187 1.187-2.8 1.89-4.5 1.89s-3.313-.703-4.5-1.89c-1.187-1.187-1.89-2.8-1.89-4.5s.703-3.313 1.89-4.5zm2.5 2.5c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5zm-2.5 6.5c0-1.105.895-2 2-2s2 .895 2 2-.895 2-2 2-2-.895-2-2z"/>
+          </svg>
+          Subscribe to RSS
+        </a>
+        <a href="rss.xml" class="btn text-white/80 hover:text-white">
+          <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+          View Raw XML
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 mb-8">
+      <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        How to Subscribe
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-6">
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">RSS Readers</h4>
+          <p class="text-white/70 text-sm mb-3">Use popular RSS readers to subscribe:</p>
+          <ul class="text-white/60 text-sm space-y-1">
+            <li>• Feedly</li>
+            <li>• Inoreader</li>
+            <li>• NewsBlur</li>
+            <li>• The Old Reader</li>
+          </ul>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">Browser Extensions</h4>
+          <p class="text-white/70 text-sm mb-3">Or use browser extensions:</p>
+          <ul class="text-white/60 text-sm space-y-1">
+            <li>• RSS Subscription Extension</li>
+            <li>• Feed Reader</li>
+            <li>• RSS Feed Reader</li>
+            <li>• Feedbro</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="list" class="space-y-6"></div>
   </main>
 
   <script>
@@ -47,10 +167,22 @@
           const date = it.querySelector('pubDate')?.textContent || '';
           const desc = it.querySelector('description')?.textContent || '';
           return `
-            <article class="rounded border border-white/10 bg-black/30 p-4">
-              <a class="text-cyan-300 underline font-medium" href="${link}" target="_blank" rel="noopener">${title}</a>
-              <div class="text-xs text-white/60 mt-1">${date}</div>
-              <p class="text-white/80 mt-2">${desc}</p>
+            <article class="card rounded-xl p-6">
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <h3 class="text-lg font-bold text-white flex-1">${title}</h3>
+                <a href="${link}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                </a>
+              </div>
+              <div class="text-sm text-white/60 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                ${date}
+              </div>
+              <p class="text-white/80 leading-relaxed">${desc}</p>
             </article>
           `;
         }).join('');

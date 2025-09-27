@@ -3,14 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terms — Airdrop Hub</title>
+  <title>Terms of Service — Airdrop Hub</title>
+  <meta name="description" content="Terms of Service for Airdrop Hub. Learn about our educational use policy, safety guidelines, and data handling practices." />
+  
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E📃%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:'class'};</script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { 
+            bg: '#0a0e1a', 
+            card: '#111827', 
+            edge: '#1f2937', 
+            accent: '#3b82f6',
+            accentHover: '#2563eb',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444'
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root { color-scheme: dark; }
-    html, body { background:#0b0f1a; }
-    .hidden { display:none; }
+    :root { 
+      color-scheme: dark; 
+      --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    html, body { 
+      background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
+      min-height: 100vh;
+    }
+    
+    .btn { 
+      padding: 0.5rem 1rem; 
+      border-radius: 0.75rem; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      background: rgba(255,255,255,0.05); 
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .btn:hover { 
+      border-color: rgba(59, 130, 246, 0.5); 
+      background: rgba(59, 130, 246, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .hidden { display: none; }
   </style>
 
   <script>
@@ -43,36 +90,107 @@
   </script>
 </head>
 <body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <a href="index.html" class="text-cyan-300 font-semibold">AD</a>
-        <h1 class="text-lg sm:text-xl font-semibold">Terms</h1>
+  <header class="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+          <span class="text-white font-bold text-lg">🪂</span>
+        </a>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white">Terms of Service</h1>
+          <p class="text-xs text-white/60 hidden sm:block">Legal information and guidelines</p>
+        </div>
       </div>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="index.html" class="text-white/80 hover:text-white">Home</a>
-        <a id="submitLink" href="submit.html" class="text-white/60 hover:text-white hidden">Submit</a>
-        <button id="toggleTheme" class="px-3 py-1 rounded border border-white/10 bg-white/5 text-white/80">Toggle Theme</button>
+      <nav class="flex items-center gap-2 sm:gap-4 text-sm">
+        <a href="index.html" class="text-white/70 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">← Back to Hub</a>
+        <a id="submitLink" href="submit.html" class="btn-primary hidden">Submit Airdrop</a>
+        <button id="toggleTheme" class="btn text-white/80 hover:text-white">
+          <span class="hidden sm:inline">Toggle Theme</span>
+          <span class="sm:hidden">🌙</span>
+        </button>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-3xl mx-auto px-4 py-6 prose prose-invert">
-    <h2>Educational Use Only</h2>
-    <p>Airdrop Hub provides sample data for learning purposes. Nothing here is financial advice. Always do your own research (DYOR) before interacting with any protocol.</p>
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        Terms of Service
+      </h2>
+      <p class="text-lg text-white/70 max-w-2xl mx-auto">
+        Please read these terms carefully before using Airdrop Hub. By using our service, you agree to these terms.
+      </p>
+    </div>
 
-    <h3>Safety</h3>
-    <ul>
-      <li>Verify official links and domains.</li>
-      <li>Never share seed phrases or private keys.</li>
-      <li>Prefer using burner wallets for testing unknown dApps.</li>
-    </ul>
+    <div class="space-y-8">
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          Educational Use Only
+        </h3>
+        <p class="text-white/80 text-lg leading-relaxed">
+          Airdrop Hub provides sample data for learning purposes. Nothing here is financial advice. Always do your own research (DYOR) before interacting with any protocol.
+        </p>
+      </section>
 
-    <h3>Data</h3>
-    <p>Listings may contain third‑party links. We do not guarantee accuracy or availability. No personal data is collected by this static site.</p>
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+          Safety Guidelines
+        </h3>
+        <div class="grid sm:grid-cols-2 gap-6">
+          <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h4 class="font-semibold text-white mb-2">Verify Links</h4>
+            <p class="text-white/70 text-sm">Always verify official links and domains before interacting with any protocol.</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h4 class="font-semibold text-white mb-2">Protect Keys</h4>
+            <p class="text-white/70 text-sm">Never share seed phrases or private keys with anyone or any service.</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h4 class="font-semibold text-white mb-2">Use Burner Wallets</h4>
+            <p class="text-white/70 text-sm">Prefer using burner wallets for testing unknown dApps and protocols.</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h4 class="font-semibold text-white mb-2">Start Small</h4>
+            <p class="text-white/70 text-sm">Begin with small amounts when testing new protocols or airdrops.</p>
+          </div>
+        </div>
+      </section>
 
-    <h3>Contact</h3>
-    <p>Open an issue or pull request on the repository to suggest changes.</p>
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+          </svg>
+          Data & Privacy
+        </h3>
+        <div class="space-y-4">
+          <p class="text-white/80 text-lg leading-relaxed">
+            Listings may contain third‑party links. We do not guarantee accuracy or availability of any information provided.
+          </p>
+          <p class="text-white/80 text-lg leading-relaxed">
+            No personal data is collected by this static site. All data is stored locally in your browser.
+          </p>
+        </div>
+      </section>
+
+      <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+          Contact & Support
+        </h3>
+        <p class="text-white/80 text-lg leading-relaxed">
+          Open an issue or pull request on the repository to suggest changes, report bugs, or request new features.
+        </p>
+      </section>
+    </div>
   </main>
 
   <script>

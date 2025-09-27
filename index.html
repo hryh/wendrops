@@ -3,30 +3,160 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Airdrop Hub — Neon Dark</title>
+  <title>Airdrop Hub — Discover & Track Crypto Airdrops</title>
+  <meta name="description" content="Discover the latest crypto airdrops across multiple blockchains. Track live, upcoming, and ended airdrops with detailed information and tutorials." />
+  <meta name="keywords" content="crypto airdrops, blockchain, ethereum, solana, arbitrum, base, polygon, aptos, bnb, defi, nft" />
+  <meta property="og:title" content="Airdrop Hub — Discover & Track Crypto Airdrops" />
+  <meta property="og:description" content="Discover the latest crypto airdrops across multiple blockchains. Track live, upcoming, and ended airdrops with detailed information and tutorials." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Airdrop Hub — Discover & Track Crypto Airdrops" />
+  <meta name="twitter:description" content="Discover the latest crypto airdrops across multiple blockchains. Track live, upcoming, and ended airdrops with detailed information and tutorials." />
+  
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🪂%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          colors: { bg: '#0b0f1a', card: '#0f1422', edge: '#1a2337', accent: '#22d3ee' },
-          boxShadow: { glow: '0 0 0.6rem rgba(34,211,238,0.35), 0 0 1.2rem rgba(34,211,238,0.2)' }
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: { 
+            bg: '#0a0e1a', 
+            card: '#111827', 
+            edge: '#1f2937', 
+            accent: '#3b82f6',
+            accentHover: '#2563eb',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444'
+          },
+          boxShadow: { 
+            glow: '0 0 20px rgba(59, 130, 246, 0.15), 0 0 40px rgba(59, 130, 246, 0.1)',
+            card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            cardHover: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
         }
       }
     }
   </script>
   <style>
-    :root { color-scheme: dark; }
-    html, body { background: #0b0f1a; }
-    .btn { padding: 0.375rem 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
-    .btn:hover { border-color: rgba(255,255,255,0.2); }
-    .chip { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+    :root { 
+      color-scheme: dark; 
+      --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    html, body { 
+      background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
+      min-height: 100vh;
+    }
+    
+    .btn { 
+      padding: 0.5rem 1rem; 
+      border-radius: 0.75rem; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      background: rgba(255,255,255,0.05); 
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .btn:hover { 
+      border-color: rgba(59, 130, 246, 0.5); 
+      background: rgba(59, 130, 246, 0.1);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--gradient-primary);
+      border-color: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-1px);
+    }
+    
+    .chip { 
+      font-size: 0.75rem; 
+      padding: 0.375rem 0.75rem; 
+      border-radius: 0.5rem; 
+      background: rgba(255,255,255,0.08); 
+      border: 1px solid rgba(255,255,255,0.15);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .chip:hover {
+      background: rgba(255,255,255,0.12);
+      transform: scale(1.05);
+    }
+    
     .hidden { display: none; }
-    .callout { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(255,255,255,0.12); }
-    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.1), rgba(255,255,255,0.06)); background-size: 200% 100%; animation: shine 1.2s linear infinite; }
-    @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    .callout { 
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1)); 
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .skeleton { 
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.12), rgba(255,255,255,0.06)); 
+      background-size: 200% 100%; 
+      animation: shine 1.5s linear infinite; 
+    }
+    
+    @keyframes shine { 
+      0% { background-position: 200% 0; } 
+      100% { background-position: -200% 0; } 
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    
+    .status-live { color: #10b981; }
+    .status-upcoming { color: #f59e0b; }
+    .status-ended { color: #6b7280; }
+    
+    .search-input {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+    }
+    
+    .search-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
   </style>
 
   <script>
@@ -60,114 +190,181 @@
   </script>
 </head>
 <body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-cyan-300 font-semibold">AD</span>
-        <h1 class="text-lg sm:text-xl font-semibold">Airdrop Hub</h1>
-        <span class="ml-2 text-xs text-white/50">Neon Dark</span>
+  <header class="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+          <span class="text-white font-bold text-lg">🪂</span>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white">Airdrop Hub</h1>
+          <p class="text-xs text-white/60 hidden sm:block">Discover & Track Crypto Airdrops</p>
+        </div>
       </div>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-        <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
-        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit</a>
-        <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
+      <nav class="flex items-center gap-2 sm:gap-4 text-sm">
+        <a href="terms.html" class="text-white/70 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">Terms</a>
+        <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors px-3 py-2 rounded-lg hover:bg-blue-500/10">Whitepaper</a>
+        <a id="submitLink" href="submit.html" class="btn-primary hidden">Submit Airdrop</a>
+        <button id="toggleTheme" class="btn text-white/80 hover:text-white">
+          <span class="hidden sm:inline">Toggle Theme</span>
+          <span class="sm:hidden">🌙</span>
+        </button>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Daily Picks -->
-    <section id="dailyPicksSection" class="mb-6 hidden">
-      <div class="flex items-center justify-between">
-        <h2 class="text-white/80 font-semibold mb-3">Daily Picks</h2>
-      </div>
-      <div id="dailyPicks" class="grid sm:grid-cols-3 gap-4"></div>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <section class="text-center mb-12 animate-fade-in">
+      <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        Discover Crypto Airdrops
+      </h2>
+      <p class="text-lg text-white/70 max-w-2xl mx-auto mb-8">
+        Track live, upcoming, and ended airdrops across multiple blockchains. Find your next opportunity with detailed information and tutorials.
+      </p>
     </section>
 
-    <!-- Filters row -->
-    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      <div>
-        <label class="block text-xs text-white/60 mb-1">All Status</label>
-        <div class="flex flex-wrap gap-2">
-          <button data-status="all" class="statusBtn btn">All</button>
-          <button data-status="live" class="statusBtn btn">Live</button>
-          <button data-status="upcoming" class="statusBtn btn">Upcoming</button>
-          <button data-status="ended" class="statusBtn btn">Ended</button>
+    <!-- Daily Picks -->
+    <section id="dailyPicksSection" class="mb-8 hidden animate-slide-up">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+          <span class="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></span>
+          Daily Picks
+        </h3>
+        <span class="text-sm text-white/60">Handpicked opportunities</span>
+      </div>
+      <div id="dailyPicks" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/10">
+      <h3 class="text-lg font-semibold text-white mb-6">Filter & Search</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-2">Status</label>
+          <div class="flex flex-wrap gap-2">
+            <button data-status="all" class="statusBtn btn text-sm">All</button>
+            <button data-status="live" class="statusBtn btn text-sm status-live">Live</button>
+            <button data-status="upcoming" class="statusBtn btn text-sm status-upcoming">Upcoming</button>
+            <button data-status="ended" class="statusBtn btn text-sm status-ended">Ended</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-2">Blockchain</label>
+          <select id="chainFilter" class="w-full search-input rounded-lg px-3 py-2 text-white">
+            <option value="all">All Chains</option>
+            <option>Ethereum</option>
+            <option>Solana</option>
+            <option>Arbitrum</option>
+            <option>Base</option>
+            <option>Polygon</option>
+            <option>Aptos</option>
+            <option>BNB</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-2">Sort By</label>
+          <select id="sortBy" class="w-full search-input rounded-lg px-3 py-2 text-white">
+            <option value="deadlineAsc">Deadline ↑</option>
+            <option value="deadlineDesc">Deadline ↓</option>
+            <option value="rewardDesc">Reward ↓</option>
+            <option value="rewardAsc">Reward ↑</option>
+            <option value="popularityDesc">Popularity ↓</option>
+          </select>
+        </div>
+        <div class="flex flex-col justify-end gap-3">
+          <button id="resetBtn" class="btn text-sm">Reset Filters</button>
+          <label class="flex items-center gap-2 text-sm text-white/80">
+            <input id="favoritesOnly" type="checkbox" class="accent-blue-500">
+            <span>Favorites Only</span>
+          </label>
         </div>
       </div>
-      <div>
-        <label class="block text-xs text-white/60 mb-1">All Chains</label>
-        <select id="chainFilter" class="w-full btn">
-          <option value="all">All</option>
-          <option>Ethereum</option>
-          <option>Solana</option>
-          <option>Arbitrum</option>
-          <option>Base</option>
-          <option>Polygon</option>
-          <option>Aptos</option>
-          <option>BNB</option>
-        </select>
+      
+      <!-- Search -->
+      <div class="relative">
+        <input id="searchInput" placeholder="Search airdrops by name, chain, or tags..." class="w-full search-input rounded-lg px-4 py-3 text-white pl-10" />
+        <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
       </div>
-      <div>
-        <label class="block text-xs text-white/60 mb-1">Sort</label>
-        <select id="sortBy" class="w-full btn">
-          <option value="deadlineAsc">Deadline ↑</option>
-          <option value="deadlineDesc">Deadline ↓</option>
-          <option value="rewardDesc">Reward ↓</option>
-          <option value="rewardAsc">Reward ↑</option>
-          <option value="popularityDesc">Popularity ↓</option>
-        </select>
-      </div>
-      <div class="flex items-end justify-between gap-2">
-        <button id="resetBtn" class="btn">Reset</button>
-        <label class="flex items-center gap-2 text-sm">
-          <input id="favoritesOnly" type="checkbox" class="accent-cyan-400">
-          <span>Show Favorites</span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Search -->
-    <section class="mb-4">
-      <input id="searchInput" placeholder="Search airdrops..." class="w-full btn" />
     </section>
 
     <!-- Cards -->
-    <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[120px]"></section>
+    <section id="cards" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px]"></section>
 
     <!-- Pagination -->
-    <section class="flex items-center justify-between mt-6">
-      <button id="prevBtn" class="btn">Prev</button>
-      <div id="pageInfo" class="text-white/60 text-sm">0 results</div>
-      <button id="nextBtn" class="btn">Next</button>
+    <section class="flex items-center justify-between mt-12">
+      <button id="prevBtn" class="btn disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Previous
+      </button>
+      <div id="pageInfo" class="text-white/70 text-sm font-medium">0 results</div>
+      <button id="nextBtn" class="btn disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        Next
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
     </section>
 
     <!-- Whitepaper callout -->
-    <section class="mt-10 p-4 rounded-lg callout">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 class="text-white/90 font-semibold">Read the Whitepaper</h2>
-          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
+    <section class="mt-16 p-8 rounded-2xl callout">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div class="flex-1">
+          <h3 class="text-2xl font-bold text-white mb-3">Read the Whitepaper</h3>
+          <p class="text-white/80 text-lg mb-4">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="chip">Executive Summary</span>
+            <span class="chip">Anti-Sybil Scoring</span>
+            <span class="chip">Token Economics</span>
+          </div>
         </div>
-        <a class="btn border-cyan-400/40 text-cyan-300 hover:text-white hover:border-cyan-300 underline" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">Open Whitepaper</a>
+        <a class="btn-primary px-6 py-3 text-lg font-semibold" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">
+          Read Whitepaper
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </a>
       </div>
     </section>
 
     <!-- Safety Tips -->
-    <section class="mt-10">
-      <h2 class="text-white/80 font-semibold mb-2">Safety Tips</h2>
-      <ul class="list-disc ml-6 text-white/70 space-y-1 text-sm">
-        <li>Only use official links. Double-check domains.</li>
-        <li>Never share seed phrases or private keys.</li>
-        <li>Use a burner wallet for testing unknown dApps.</li>
-        <li>Beware of “support” DMs. Verify before signing.</li>
-      </ul>
+    <section class="mt-16">
+      <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        Safety Tips
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">Verify Links</h4>
+          <p class="text-white/70 text-sm">Only use official links. Double-check domains and always verify through official channels.</p>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">Protect Keys</h4>
+          <p class="text-white/70 text-sm">Never share seed phrases or private keys. Use hardware wallets when possible.</p>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">Test Safely</h4>
+          <p class="text-white/70 text-sm">Use burner wallets for testing unknown dApps. Start with small amounts.</p>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h4 class="font-semibold text-white mb-2">Beware Scams</h4>
+          <p class="text-white/70 text-sm">Beware of "support" DMs. Always verify before signing transactions.</p>
+        </div>
+      </div>
     </section>
 
-    <footer class="mt-10 text-white/60 text-sm">
-      <p>Built for learning. Data is sample only. Always DYOR. •
-        <a class="underline" href="terms.html">Terms</a>
+    <footer class="mt-16 pt-8 border-t border-white/10 text-center">
+      <p class="text-white/60 text-sm">
+        Built for learning. Data is sample only. Always DYOR. • 
+        <a class="text-blue-400 hover:text-blue-300 transition-colors" href="terms.html">Terms</a>
       </p>
     </footer>
   </main>
@@ -287,6 +484,9 @@
         document.getElementById('sortBy').value = state.sortBy;
         document.getElementById('searchInput').value = state.search;
         document.getElementById('favoritesOnly').checked = state.favoritesOnly;
+        // Set active status button
+        document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
+        document.querySelector(`[data-status="${state.status}"]`).classList.add('btn-primary');
         render();
       } catch (e) {
         document.getElementById('cards').innerHTML = `<p class="text-white/70">Failed to load data: ${escapeHtml(e.message)}</p>`;
@@ -385,45 +585,67 @@
 
     function cardHtml(x, isFeatured) {
       const fav = favorites.has(x.id);
-      const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
+      const badge = isFeatured ? `<span class="chip bg-gradient-to-r from-yellow-400/20 to-orange-500/20 text-yellow-300 border-yellow-400/40">⭐ Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
       const endsChip = x.deadline ? urgencyBadge(x.deadline) : '';
+      const statusClass = x.status === 'live' ? 'status-live' : x.status === 'upcoming' ? 'status-upcoming' : 'status-ended';
+      
       return `
-        <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex flex-col gap-1">
-              <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
-              <div class="text-xs text-white/60">${escapeHtml(x.chain)} • ${escapeHtml(x.status)}</div>
-              <div class="flex gap-2 mt-1">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
+        <article class="card rounded-xl p-6 animate-fade-in">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-1">${escapeHtml(x.name)}</h3>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80">${escapeHtml(x.chain)}</span>
+                <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass} bg-${x.status === 'live' ? 'green' : x.status === 'upcoming' ? 'yellow' : 'gray'}-500/20">${escapeHtml(x.status)}</span>
+              </div>
+              <div class="flex gap-2 mt-2">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
             </div>
-            <button data-fav="${escapeHtml(x.id)}" class="text-sm px-2 py-1 rounded border ${fav ? 'border-cyan-400 text-cyan-300' : 'border-white/10 text-white/70'}" title="Toggle favorite">
-              ${fav ? '★' : '☆'}
+            <button data-fav="${escapeHtml(x.id)}" class="p-2 rounded-lg transition-all ${fav ? 'text-yellow-400 bg-yellow-400/10' : 'text-white/40 hover:text-yellow-400 hover:bg-yellow-400/10'}" title="Toggle favorite">
+              <svg class="w-5 h-5" fill="${fav ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+              </svg>
             </button>
           </div>
 
-          <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-            <div class="bg-white/5 rounded p-2">
-              <div class="text-white/60 text-xs">Reward</div>
-              <div class="font-medium">$${Number(x.rewardUSD ?? 0)}</div>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-white/5 rounded-lg p-3">
+              <div class="text-white/60 text-xs font-medium mb-1">Reward</div>
+              <div class="text-lg font-bold text-green-400">$${Number(x.rewardUSD ?? 0).toLocaleString()}</div>
             </div>
-            <div class="bg-white/5 rounded p-2">
-              <div class="text-white/60 text-xs">Deadline</div>
-              <div class="font-medium">${escapeHtml(fmtDate(x.deadline))}</div>
+            <div class="bg-white/5 rounded-lg p-3">
+              <div class="text-white/60 text-xs font-medium mb-1">Deadline</div>
+              <div class="text-sm font-semibold text-white">${escapeHtml(fmtDate(x.deadline))}</div>
             </div>
           </div>
 
-          <ul class="mt-3 text-sm list-disc ml-5 text-white/80">
-            ${(x.tasks ?? []).slice(0,3).map(t=>`<li>${escapeHtml(t)}</li>`).join('')}
-          </ul>
-
-          <div class="mt-3 flex flex-wrap gap-2">
-            ${(x.tags ?? []).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join('')}
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-white/80 mb-2">Tasks</h4>
+            <ul class="text-sm text-white/70 space-y-1">
+              ${(x.tasks ?? []).slice(0,3).map(t=>`<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>${escapeHtml(t)}</li>`).join('')}
+            </ul>
           </div>
 
-          <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
-            ${x?.links?.site ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">Site</a>` : ''}
-            ${x?.links?.twitter ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">Twitter</a>` : ''}
-            ${x?.links?.docs ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">Docs</a>` : ''}
-            ${x?.links?.tutorial ? `<a class="underline text-cyan-300" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">Tutorial</a>` : ''}
+          <div class="flex flex-wrap gap-2 mb-4">
+            ${(x.tags ?? []).map(tag => `<span class="chip text-xs">${escapeHtml(tag)}</span>`).join('')}
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-sm pt-4 border-t border-white/10">
+            ${x?.links?.site ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.site)}" target="_blank" rel="noopener">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              Site
+            </a>` : ''}
+            ${x?.links?.twitter ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.twitter)}" target="_blank" rel="noopener">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path></svg>
+              Twitter
+            </a>` : ''}
+            ${x?.links?.docs ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.docs)}" target="_blank" rel="noopener">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              Docs
+            </a>` : ''}
+            ${x?.links?.tutorial ? `<a class="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" href="${escapeHtml(x.links.tutorial)}" data-tutorial data-title="${escapeHtml(x.name)} Tutorial">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              Tutorial
+            </a>` : ''}
           </div>
         </article>
       `;
@@ -453,7 +675,15 @@
 
     // Filters bindings
     document.querySelectorAll('.statusBtn').forEach(btn => {
-      btn.addEventListener('click', () => { state.status = btn.dataset.status; state.page = 1; render(); });
+      btn.addEventListener('click', () => { 
+        // Remove active class from all status buttons
+        document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
+        // Add active class to clicked button
+        btn.classList.add('btn-primary');
+        state.status = btn.dataset.status; 
+        state.page = 1; 
+        render(); 
+      });
     });
     document.getElementById('chainFilter').addEventListener('change', e => { state.chain = e.target.value; state.page = 1; render(); });
     document.getElementById('sortBy').addEventListener('change', e => { state.sortBy = e.target.value; state.page = 1; render(); });
@@ -463,6 +693,9 @@
       document.getElementById('sortBy').value = 'deadlineAsc';
       document.getElementById('searchInput').value = '';
       document.getElementById('favoritesOnly').checked = false;
+      // Reset status button styling
+      document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
+      document.querySelector('[data-status="all"]').classList.add('btn-primary');
       render();
     });
     document.getElementById('favoritesOnly').addEventListener('change', e => { state.favoritesOnly = e.target.checked; state.page = 1; render(); });

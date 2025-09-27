@@ -1,101 +1,248 @@
 [
-{
-"id": "zkwave",
-"name": "ZK Wave",
-"chain": "Ethereum",
-"rewardUSD": 250,
-"status": "live",
-"deadline": "2025-10-15",
-"tasks": ["Bridge testnet", "Provide LP", "Quest campaign"],
-"tags": ["zk", "defi"],
-"popularity": 86,
-"featured": true,
-"links": { "site": "#", "twitter": "#", "docs": "#", "tutorial": "#" }
-},
-{
-"id": "solbird",
-"name": "SolBird",
-"chain": "Solana",
-"rewardUSD": 80,
-"status": "upcoming",
-"deadline": "2025-11-03",
-"tasks": ["Mint test NFT", "Stake token"],
-"tags": ["nft", "gaming"],
-"popularity": 71,
-"featured": true,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
-},
-{
-"id": "arbvault",
-"name": "ArbVault",
-"chain": "Arbitrum",
-"rewardUSD": 140,
-"status": "live",
-"deadline": "2025-09-30",
-"tasks": ["Deposit vault", "Referral quests"],
-"tags": ["yield", "defi"],
-"popularity": 64,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
-},
-{
-"id": "basebyte",
-"name": "BaseByte",
-"chain": "Base",
-"rewardUSD": 60,
-"status": "upcoming",
-"deadline": "2025-10-05",
-"tasks": ["Bridge to Base", "Swap 3x"],
-"tags": ["l2", "dex"],
-"popularity": 58,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
-},
-{
-"id": "polyquest",
-"name": "PolyQuest",
-"chain": "Polygon",
-"rewardUSD": 45,
-"status": "ended",
-"deadline": "2025-08-20",
-"tasks": ["Galxe campaign", "Social tasks"],
-"tags": ["quest"],
-"popularity": 77,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
-},
-{
-"id": "aptosky",
-"name": "AptoSky",
-"chain": "Aptos",
-"rewardUSD": 120,
-"status": "live",
-"deadline": "2025-10-02",
-"tasks": ["Faucet + swap", "Provide LP"],
-"tags": ["move", "defi"],
-"popularity": 52,
-"links": { "site": "#", "twitter": "#", "docs": "#" }
-},
-{
-  "id": "aster",
-  "name": "ASTER DEX",
-  "chain": "BNB",
-  "rewardUSD": 10000,
-  "status": "live",
-  "deadline": "2025-10-05",
-  "tasks": [
-    "Deposit ASBNB",
-    "Trade Perpetuals and Use 2 asdasdasd"
-  ],
-  "tags": [
-    "Perpetual Trading",
-    "Deposits",
-    "Fast"
-  ],
-  "popularity": 1,
-  "featured": true,
-  "links": {
-    "site": "https://www.asterdex.com/en/referral/529BbA",
-    "twitter": "https://x.com/Aster_DEX",
-    "docs": "https://docs.asterdex.com/",
-    "tutorial": "https://spangle-cheshire-e55.notion.site/ASTER-Season-2-279bdbd8187880608d49c925a57fa26f"
+  {
+    "id": "zkwave",
+    "name": "ZK Wave",
+    "chain": "Ethereum",
+    "rewardUSD": 250,
+    "status": "live",
+    "deadline": "2025-10-15",
+    "tasks": ["Bridge testnet tokens", "Provide liquidity on ZK Wave", "Complete quest campaign", "Stake ZKW tokens"],
+    "tags": ["zk", "defi", "l2", "bridge"],
+    "popularity": 86,
+    "featured": true,
+    "featuredOrder": 1,
+    "description": "ZK Wave is a zero-knowledge proof based DeFi protocol offering high-yield staking and cross-chain bridging.",
+    "links": { 
+      "site": "https://zkwave.io", 
+      "twitter": "https://twitter.com/zkwave_io", 
+      "docs": "https://docs.zkwave.io", 
+      "tutorial": "https://zkwave.io/tutorial" 
+    }
+  },
+  {
+    "id": "solbird",
+    "name": "SolBird",
+    "chain": "Solana",
+    "rewardUSD": 80,
+    "status": "upcoming",
+    "deadline": "2025-11-03",
+    "tasks": ["Mint test NFT collection", "Stake SOLB tokens", "Complete social tasks", "Trade on SolBird DEX"],
+    "tags": ["nft", "gaming", "dex", "solana"],
+    "popularity": 71,
+    "featured": true,
+    "featuredOrder": 2,
+    "description": "SolBird is a gamified DeFi platform on Solana featuring NFT collections and yield farming.",
+    "links": { 
+      "site": "https://solbird.io", 
+      "twitter": "https://twitter.com/solbird_io", 
+      "docs": "https://docs.solbird.io" 
+    }
+  },
+  {
+    "id": "arbvault",
+    "name": "ArbVault",
+    "chain": "Arbitrum",
+    "rewardUSD": 140,
+    "status": "live",
+    "deadline": "2025-09-30",
+    "tasks": ["Deposit into vault", "Complete referral quests", "Stake ARB tokens", "Trade on Arbitrum"],
+    "tags": ["yield", "defi", "arbitrum", "vault"],
+    "popularity": 64,
+    "description": "ArbVault offers high-yield vault strategies on Arbitrum with automated yield optimization.",
+    "links": { 
+      "site": "https://arbvault.finance", 
+      "twitter": "https://twitter.com/arbvault", 
+      "docs": "https://docs.arbvault.finance" 
+    }
+  },
+  {
+    "id": "basebyte",
+    "name": "BaseByte",
+    "chain": "Base",
+    "rewardUSD": 60,
+    "status": "upcoming",
+    "deadline": "2025-10-05",
+    "tasks": ["Bridge to Base network", "Swap tokens 3 times", "Provide liquidity", "Complete quests"],
+    "tags": ["l2", "dex", "base", "bridge"],
+    "popularity": 58,
+    "description": "BaseByte is a decentralized exchange built on Coinbase's Base L2 network.",
+    "links": { 
+      "site": "https://basebyte.xyz", 
+      "twitter": "https://twitter.com/basebyte_xyz", 
+      "docs": "https://docs.basebyte.xyz" 
+    }
+  },
+  {
+    "id": "polyquest",
+    "name": "PolyQuest",
+    "chain": "Polygon",
+    "rewardUSD": 45,
+    "status": "ended",
+    "deadline": "2025-08-20",
+    "tasks": ["Complete Galxe campaign", "Social media tasks", "Bridge to Polygon", "Stake MATIC"],
+    "tags": ["quest", "polygon", "galxe", "social"],
+    "popularity": 77,
+    "description": "PolyQuest was a community-driven quest platform on Polygon with gamified rewards.",
+    "links": { 
+      "site": "https://polyquest.io", 
+      "twitter": "https://twitter.com/polyquest_io", 
+      "docs": "https://docs.polyquest.io" 
+    }
+  },
+  {
+    "id": "aptosky",
+    "name": "AptoSky",
+    "chain": "Aptos",
+    "rewardUSD": 120,
+    "status": "live",
+    "deadline": "2025-10-02",
+    "tasks": ["Use testnet faucet", "Swap tokens on AptoSky", "Provide liquidity", "Stake APT tokens"],
+    "tags": ["move", "defi", "aptos", "dex"],
+    "popularity": 52,
+    "description": "AptoSky is a DeFi platform on Aptos blockchain offering DEX and yield farming services.",
+    "links": { 
+      "site": "https://aptosky.io", 
+      "twitter": "https://twitter.com/aptosky_io", 
+      "docs": "https://docs.aptosky.io" 
+    }
+  },
+  {
+    "id": "aster",
+    "name": "ASTER DEX",
+    "chain": "BNB",
+    "rewardUSD": 10000,
+    "status": "live",
+    "deadline": "2025-10-05",
+    "tasks": ["Deposit ASBNB tokens", "Trade perpetuals", "Complete trading quests", "Refer friends"],
+    "tags": ["perpetual", "trading", "derivatives", "bnb"],
+    "popularity": 95,
+    "featured": true,
+    "featuredOrder": 3,
+    "description": "ASTER DEX is a high-performance perpetual trading platform on BNB Chain with advanced trading features.",
+    "links": {
+      "site": "https://www.asterdex.com/en/referral/529BbA",
+      "twitter": "https://x.com/Aster_DEX",
+      "docs": "https://docs.asterdex.com/",
+      "tutorial": "https://spangle-cheshire-e55.notion.site/ASTER-Season-2-279bdbd8187880608d49c925a57fa26f"
+    }
+  },
+  {
+    "id": "ethereum-l2",
+    "name": "Ethereum L2 Hub",
+    "chain": "Ethereum",
+    "rewardUSD": 300,
+    "status": "live",
+    "deadline": "2025-12-01",
+    "tasks": ["Bridge to multiple L2s", "Complete cross-chain quests", "Stake ETH", "Trade on L2 DEXs"],
+    "tags": ["ethereum", "l2", "bridge", "defi"],
+    "popularity": 88,
+    "description": "Ethereum L2 Hub aggregates opportunities across all major Layer 2 solutions.",
+    "links": { 
+      "site": "https://l2hub.eth", 
+      "twitter": "https://twitter.com/ethereum_l2", 
+      "docs": "https://docs.l2hub.eth" 
+    }
+  },
+  {
+    "id": "solana-defi",
+    "name": "Solana DeFi Suite",
+    "chain": "Solana",
+    "rewardUSD": 150,
+    "status": "upcoming",
+    "deadline": "2025-11-15",
+    "tasks": ["Use Solana DEXs", "Stake SOL", "Mint NFTs", "Complete DeFi quests"],
+    "tags": ["solana", "defi", "nft", "dex"],
+    "popularity": 73,
+    "description": "Comprehensive DeFi platform on Solana with multiple yield opportunities.",
+    "links": { 
+      "site": "https://solanadefi.io", 
+      "twitter": "https://twitter.com/solanadefi", 
+      "docs": "https://docs.solanadefi.io" 
+    }
+  },
+  {
+    "id": "arbitrum-ecosystem",
+    "name": "Arbitrum Ecosystem",
+    "chain": "Arbitrum",
+    "rewardUSD": 200,
+    "status": "live",
+    "deadline": "2025-10-30",
+    "tasks": ["Bridge to Arbitrum", "Use Arbitrum DEXs", "Stake ARB", "Complete ecosystem quests"],
+    "tags": ["arbitrum", "ecosystem", "defi", "l2"],
+    "popularity": 82,
+    "description": "Explore the full Arbitrum ecosystem with rewards for using various protocols.",
+    "links": { 
+      "site": "https://arbitrum.ecosystem", 
+      "twitter": "https://twitter.com/arbitrum", 
+      "docs": "https://docs.arbitrum.io" 
+    }
+  },
+  {
+    "id": "base-ecosystem",
+    "name": "Base Ecosystem",
+    "chain": "Base",
+    "rewardUSD": 100,
+    "status": "upcoming",
+    "deadline": "2025-11-20",
+    "tasks": ["Bridge to Base", "Use Base DEXs", "Complete quests", "Stake ETH"],
+    "tags": ["base", "ecosystem", "l2", "coinbase"],
+    "popularity": 69,
+    "description": "Discover and use protocols built on Coinbase's Base L2 network.",
+    "links": { 
+      "site": "https://base.ecosystem", 
+      "twitter": "https://twitter.com/base", 
+      "docs": "https://docs.base.org" 
+    }
+  },
+  {
+    "id": "polygon-ecosystem",
+    "name": "Polygon Ecosystem",
+    "chain": "Polygon",
+    "rewardUSD": 75,
+    "status": "live",
+    "deadline": "2025-09-15",
+    "tasks": ["Bridge to Polygon", "Use Polygon DEXs", "Stake MATIC", "Complete quests"],
+    "tags": ["polygon", "ecosystem", "defi", "pos"],
+    "popularity": 61,
+    "description": "Explore the Polygon ecosystem with rewards for using various protocols.",
+    "links": { 
+      "site": "https://polygon.ecosystem", 
+      "twitter": "https://twitter.com/0xPolygon", 
+      "docs": "https://docs.polygon.technology" 
+    }
+  },
+  {
+    "id": "aptos-ecosystem",
+    "name": "Aptos Ecosystem",
+    "chain": "Aptos",
+    "rewardUSD": 90,
+    "status": "upcoming",
+    "deadline": "2025-11-10",
+    "tasks": ["Use Aptos testnet", "Trade on Aptos DEXs", "Stake APT", "Complete quests"],
+    "tags": ["aptos", "ecosystem", "move", "defi"],
+    "popularity": 55,
+    "description": "Explore the Aptos blockchain ecosystem with various DeFi opportunities.",
+    "links": { 
+      "site": "https://aptos.ecosystem", 
+      "twitter": "https://twitter.com/aptoslabs", 
+      "docs": "https://docs.aptos.dev" 
+    }
+  },
+  {
+    "id": "bnb-ecosystem",
+    "name": "BNB Chain Ecosystem",
+    "chain": "BNB",
+    "rewardUSD": 110,
+    "status": "live",
+    "deadline": "2025-10-25",
+    "tasks": ["Use BNB Chain DEXs", "Stake BNB", "Complete quests", "Trade tokens"],
+    "tags": ["bnb", "ecosystem", "defi", "bsc"],
+    "popularity": 67,
+    "description": "Discover opportunities across the BNB Chain ecosystem.",
+    "links": { 
+      "site": "https://bnb.ecosystem", 
+      "twitter": "https://twitter.com/BNBCHAIN", 
+      "docs": "https://docs.bnbchain.org" 
+    }
   }
-}
 ]
