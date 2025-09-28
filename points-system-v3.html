@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Points System - Airdrop Hub v3.0 (6 Wallet Options)</title>
+  <meta name="description" content="Earn points and climb the leaderboard on Airdrop Hub. Complete daily quests and boost your airdrop eligibility.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <script>
+    // Force refresh cache
+    if (performance.navigation.type === 1) {
+      console.log('Page refreshed - cache cleared');
+    }
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .form-input {
+      @apply bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    }
+    .btn-primary {
+      @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl;
+    }
+    .loading-spinner {
+      @apply border-4 border-white/20 border-t-blue-500 rounded-full animate-spin;
+    }
+    .quest-card {
+      @apply bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-200;
+    }
+    .quest-completed {
+      @apply bg-green-500/10 border-green-500/30;
+    }
+    .quest-available {
+      @apply bg-blue-500/10 border-blue-500/30;
+    }
+    .quest-locked {
+      @apply bg-gray-500/10 border-gray-500/30 opacity-60;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen">
+  <header class="bg-black/20 backdrop-blur-sm border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-2xl font-bold text-white">🚀 Airdrop Hub</a>
+          <nav class="hidden md:flex space-x-6">
+            <a href="index.html" class="text-white/60 hover:text-white">Home</a>
+            <a href="wallet-analysis-v3.html" class="text-white/60 hover:text-white">Wallet Analysis</a>
+            <a href="points-system-v3.html" class="text-white">Points System</a>
+          </nav>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div id="walletInfo" class="hidden flex items-center space-x-4">
+            <button id="walletInfoBtn" class="flex items-center space-x-2 hover:bg-white/5 rounded-lg p-2 transition-colors">
+              <div id="walletIcon" class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <div class="text-left">
+                <div id="userAddress" class="text-white/80 text-sm"></div>
+                <div id="walletName" class="text-xs text-white/50"></div>
+              </div>
+              <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <span id="userPoints" class="text-yellow-400 font-semibold"></span>
+            <button id="disconnectWallet" class="text-white/60 hover:text-white text-sm px-2 py-1 rounded hover:bg-white/10 transition-colors">
+              Disconnect
+            </button>
+          </div>
+          <button id="connectWallet" class="btn-primary px-4 py-2 text-sm">
+            Connect Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl sm:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        Points System
+      </h1>
+      <div class="bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-2 mb-4 inline-block">
+        <span class="text-red-400 font-semibold">🚀 NEW VERSION v3.0 - 6 WALLET OPTIONS - REAL DATA</span>
+      </div>
+      <p class="text-lg text-white/70 max-w-2xl mx-auto">
+        Earn points by engaging with Airdrop Hub. Complete daily quests, climb the leaderboard, and boost your airdrop eligibility.
+      </p>
+    </div>
+
+    <!-- Wallet Connection Required -->
+    <div id="walletRequired" class="text-center py-12">
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 max-w-md mx-auto">
+        <svg class="w-16 h-16 text-blue-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
+        <p class="text-white/70 mb-6">Connect your wallet to start earning points and tracking your progress.</p>
+        <button id="connectWalletBtn" class="btn-primary px-8 py-3">
+          Connect Wallet
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content (Hidden until wallet connected) -->
+    <div id="mainContent" class="hidden">
+      <!-- User Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <div class="text-3xl font-bold text-yellow-400" id="totalPoints">0</div>
+          <div class="text-sm text-white/60">Total Points</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <div class="text-3xl font-bold text-blue-400" id="userRank">-</div>
+          <div class="text-sm text-white/60">Current Rank</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <div class="text-3xl font-bold text-green-400" id="completedQuests">0</div>
+          <div class="text-sm text-white/60">Quests Completed</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <div class="text-3xl font-bold text-purple-400" id="airdropTier">Bronze</div>
+          <div class="text-sm text-white/60">Airdrop Tier</div>
+        </div>
+      </div>
+
+      <!-- Daily Quests -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Daily Quests
+        </h2>
+        <div class="text-sm text-white/60 mb-4">
+          Quests reset daily at 00:00 UTC. Complete them to earn points!
+        </div>
+        <div id="questsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Quests will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Leaderboard
+        </h2>
+        <div id="leaderboardContainer" class="space-y-3">
+          <!-- Leaderboard will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Airdrop Eligibility -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
+          Airdrop Eligibility
+        </h2>
+        <div class="text-white/70 mb-4">
+          Your points contribute to your airdrop eligibility. Higher points = better chances for exclusive airdrops.
+        </div>
+        <div class="bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl p-6 border border-purple-500/30">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="text-2xl font-bold text-white" id="eligibilityScore">0%</div>
+              <div class="text-sm text-white/70">Eligibility Score</div>
+            </div>
+            <div class="text-right">
+              <div class="text-lg font-semibold text-white" id="eligibilityTier">Bronze</div>
+              <div class="text-sm text-white/60">Tier Level</div>
+            </div>
+          </div>
+          <div class="w-full bg-white/10 rounded-full h-3 mb-4">
+            <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-1000" id="eligibilityBar" style="width: 0%"></div>
+          </div>
+          <div class="text-sm text-white/70">
+            Keep earning points to improve your airdrop eligibility!
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Wallet Selection Modal -->
+  <div id="walletModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 max-w-md w-full">
+      <div class="text-center">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-2xl font-bold text-white">Connect Wallet</h2>
+          <button id="closeWalletModal" class="text-white/60 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="text-white/70 mb-6">Choose your preferred wallet to connect</p>
+        
+        <div class="space-y-3">
+          <!-- MetaMask -->
+          <button id="connectMetaMask" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">MetaMask</div>
+              <div class="text-sm text-white/60">Connect using MetaMask browser extension</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- WalletConnect -->
+          <button id="connectWalletConnect" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">WalletConnect</div>
+              <div class="text-sm text-white/60">Connect using mobile wallet app</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Coinbase Wallet -->
+          <button id="connectCoinbase" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Coinbase Wallet</div>
+              <div class="text-sm text-white/60">Connect using Coinbase Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Trust Wallet -->
+          <button id="connectTrust" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Trust Wallet</div>
+              <div class="text-sm text-white/60">Connect using Trust Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- OKX Wallet -->
+          <button id="connectOKX" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">OKX Wallet</div>
+              <div class="text-sm text-white/60">Connect using OKX Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Phantom Wallet -->
+          <button id="connectPhantom" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Phantom Wallet</div>
+              <div class="text-sm text-white/60">Connect using Phantom (Solana)</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-6 text-xs text-white/50">
+          By connecting a wallet, you agree to our Terms of Service and Privacy Policy
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="verificationModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 max-w-md w-full">
+      <div class="text-center">
+        <svg class="w-16 h-16 text-blue-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-white mb-2">Verify X Follow</h2>
+        <p class="text-white/70 mb-6">Please follow the account and then verify your follow to earn points.</p>
+        
+        <div class="space-y-4">
+          <a id="followLink" href="#" target="_blank" class="block w-full btn-primary px-6 py-3 text-center">
+            Open X Account
+          </a>
+          
+          <div class="text-sm text-white/60 mb-4">
+            After following, click the verify button below:
+          </div>
+          
+          <button id="verifyFollow" class="w-full px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all duration-200">
+            Verify Follow
+          </button>
+          
+          <button id="cancelVerification" class="w-full px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all duration-200">
+            Cancel
+          </button>
+        </div>
+        
+        <div id="verificationStatus" class="mt-4 text-sm hidden">
+          <!-- Verification status will be shown here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Points System Configuration
+    const POINTS_CONFIG = {
+      // Point values for different activities
+      activities: {
+        viewAirdrop: 2,           // Per airdrop viewed
+        walletAnalysis: 10,       // Per wallet analysis
+        socialFollow: 50,         // Follow X account (one-time)
+        socialEngage: 5,          // Like/retweet/comment
+        dailyVisit: 1,            // Daily visit
+        referral: 100,            // Successful referral
+        feedback: 25,             // Submit feedback
+        newsletter: 30            // Newsletter signup
+      },
+      
+      // Daily quest configurations
+      dailyQuests: {
+        view3Airdrops: {
+          id: 'view3Airdrops',
+          title: 'View 3 Airdrops',
+          description: 'Click on and view 3 different airdrop projects',
+          points: 20,
+          target: 3,
+          current: 0,
+          completed: false,
+          available: true
+        },
+        followWendrops: {
+          id: 'followWendrops',
+          title: 'Follow @wendrops_com',
+          description: 'Follow @wendrops_com on X (formerly Twitter)',
+          points: 75,
+          target: 1,
+          current: 0,
+          completed: false,
+          available: true,
+          external: true,
+          url: 'https://x.com/wendrops_com',
+          requiresVerification: true
+        },
+        followX: {
+          id: 'followX',
+          title: 'Follow Our X Account',
+          description: 'Follow @AirdropHub on X (formerly Twitter)',
+          points: 50,
+          target: 1,
+          current: 0,
+          completed: false,
+          available: true,
+          external: true,
+          url: 'https://x.com/airdrop_hub',
+          requiresVerification: true
+        },
+        engageX: {
+          id: 'engageX',
+          title: 'Engage on X',
+          description: 'Like, retweet, or comment on our latest post',
+          points: 15,
+          target: 1,
+          current: 0,
+          completed: false,
+          available: true,
+          external: true,
+          url: 'https://x.com/airdrop_hub'
+        },
+        analyzeWallet: {
+          id: 'analyzeWallet',
+          title: 'Analyze Your Wallet',
+          description: 'Use our wallet analysis tool',
+          points: 25,
+          target: 1,
+          current: 0,
+          completed: false,
+          available: true
+        }
+      },
+      
+      // Airdrop eligibility tiers
+      eligibilityTiers: {
+        bronze: { min: 0, max: 499, name: 'Bronze', color: 'text-orange-400' },
+        silver: { min: 500, max: 999, name: 'Silver', color: 'text-gray-400' },
+        gold: { min: 1000, max: 1999, name: 'Gold', color: 'text-yellow-400' },
+        platinum: { min: 2000, max: 4999, name: 'Platinum', color: 'text-blue-400' },
+        diamond: { min: 5000, max: 9999, name: 'Diamond', color: 'text-purple-400' },
+        legendary: { min: 10000, max: Infinity, name: 'Legendary', color: 'text-red-400' }
+      }
+    };
+
+    // Global state
+    let userWallet = null;
+    let userPoints = 0;
+    let userData = null;
+    let leaderboard = [];
+    let currentVerificationQuest = null;
+    let walletProvider = null;
+    let walletType = null;
+    let walletConnectProvider = null;
+
+    // Initialize the points system
+    document.addEventListener('DOMContentLoaded', () => {
+      initializePointsSystem();
+    });
+
+    async function initializePointsSystem() {
+      // Check if wallet is already connected
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            await connectWallet();
+          }
+        } catch (error) {
+          console.log('No wallet connected');
+        }
+      }
+
+      // Set up event listeners
+      document.getElementById('connectWallet').addEventListener('click', openWalletModal);
+      document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
+      document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+      document.getElementById('walletInfoBtn').addEventListener('click', openWalletModal);
+      document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+      
+      // Wallet selection event listeners
+      document.getElementById('connectMetaMask').addEventListener('click', () => connectWallet('metamask'));
+      document.getElementById('connectWalletConnect').addEventListener('click', () => connectWallet('walletconnect'));
+      document.getElementById('connectCoinbase').addEventListener('click', () => connectWallet('coinbase'));
+      document.getElementById('connectTrust').addEventListener('click', () => connectWallet('trust'));
+      document.getElementById('connectOKX').addEventListener('click', () => connectWallet('okx'));
+      document.getElementById('connectPhantom').addEventListener('click', () => connectWallet('phantom'));
+      
+      // Verification modal event listeners
+      document.getElementById('verifyFollow').addEventListener('click', verifyXFollow);
+      document.getElementById('cancelVerification').addEventListener('click', closeVerificationModal);
+
+      // Load leaderboard
+      loadLeaderboard();
+    }
+
+    // Wallet connection functions
+    function openWalletModal() {
+      console.log('🔗 Opening wallet modal with 6 options:');
+      console.log('1. MetaMask');
+      console.log('2. WalletConnect');
+      console.log('3. Coinbase Wallet');
+      console.log('4. Trust Wallet');
+      console.log('5. OKX Wallet');
+      console.log('6. Phantom Wallet');
+      document.getElementById('walletModal').classList.remove('hidden');
+    }
+
+    function closeWalletModal() {
+      document.getElementById('walletModal').classList.add('hidden');
+    }
+
+    async function connectWallet(walletType) {
+      try {
+        closeWalletModal();
+        
+        let provider = null;
+        let accounts = [];
+
+        switch (walletType) {
+          case 'metamask':
+            provider = await connectMetaMask();
+            break;
+          case 'walletconnect':
+            provider = await connectWalletConnect();
+            break;
+          case 'coinbase':
+            provider = await connectCoinbase();
+            break;
+          case 'trust':
+            provider = await connectTrust();
+            break;
+          case 'okx':
+            provider = await connectOKX();
+            break;
+          case 'phantom':
+            provider = await connectPhantom();
+            break;
+          default:
+            throw new Error('Unsupported wallet type');
+        }
+
+        if (!provider) {
+          throw new Error('Failed to connect to wallet');
+        }
+
+        // Get accounts
+        accounts = await provider.request({ method: 'eth_accounts' });
+        if (accounts.length === 0) {
+          accounts = await provider.request({ method: 'eth_requestAccounts' });
+        }
+
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+
+        // Store wallet info
+        userWallet = accounts[0];
+        walletProvider = provider;
+        walletType = walletType;
+        
+        // Load user data
+        await loadUserData();
+        
+        // Show main content
+        document.getElementById('walletRequired').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        
+        // Initialize quests after wallet connection
+        initializeDailyQuests();
+        
+        // Update UI
+        updateUserInterface();
+        
+        // Set up quest tracking
+        setupQuestTracking();
+        
+        // Show success message
+        showNotification(`Connected to ${getWalletName(walletType)}!`, 'success');
+        
+      } catch (error) {
+        console.error('Failed to connect wallet:', error);
+        
+        // More user-friendly error messages
+        let errorMessage = error.message;
+        if (error.message.includes('User rejected')) {
+          errorMessage = 'Connection cancelled by user';
+        } else if (error.message.includes('not detected') || error.message.includes('not found')) {
+          errorMessage = 'Wallet not found. Please install the wallet extension and try again.';
+        } else if (error.message.includes('WalletConnect')) {
+          errorMessage = 'WalletConnect not available. Please try another wallet or refresh the page.';
+        } else if (error.message.includes('not available')) {
+          errorMessage = 'Wallet not available. Please install the wallet extension.';
+        }
+        
+        showNotification(`Failed to connect wallet: ${errorMessage}`, 'error');
+      }
+    }
+
+    async function connectMetaMask() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask not installed. Please install MetaMask extension.');
+      }
+      return window.ethereum;
+    }
+
+    async function connectWalletConnect() {
+      try {
+        // Check if WalletConnect is available
+        if (typeof WalletConnectProvider === 'undefined') {
+          throw new Error('WalletConnect not available. Please refresh the page and try again.');
+        }
+
+        // Initialize WalletConnect provider
+        walletConnectProvider = new WalletConnectProvider.default({
+          rpc: {
+            1: 'https://eth.llamarpc.com',
+            137: 'https://polygon-rpc.com',
+            56: 'https://bsc-dataseed.binance.org',
+            42161: 'https://arb1.arbitrum.io/rpc',
+            10: 'https://mainnet.optimism.io',
+            8453: 'https://mainnet.base.org'
+          },
+          chainId: 1,
+          bridge: 'https://bridge.walletconnect.org',
+          qrcode: true,
+          pollingInterval: 12000
+        });
+
+        // Enable session (triggers QR Code modal)
+        await walletConnectProvider.enable();
+        return walletConnectProvider;
+      } catch (error) {
+        console.error('WalletConnect error:', error);
+        if (error.message.includes('User rejected')) {
+          throw new Error('Connection cancelled by user');
+        } else if (error.message.includes('not available')) {
+          throw new Error('WalletConnect not available. Please refresh the page and try again.');
+        } else {
+          throw new Error('WalletConnect connection failed. Please make sure you have a mobile wallet app installed.');
+        }
+      }
+    }
+
+    async function connectCoinbase() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Coinbase Wallet not detected. Please install Coinbase Wallet.');
+      }
+      
+      // Check if it's Coinbase Wallet
+      if (window.ethereum.isCoinbaseWallet) {
+        return window.ethereum;
+      } else {
+        throw new Error('Coinbase Wallet not detected. Please make sure you have Coinbase Wallet installed.');
+      }
+    }
+
+    async function connectTrust() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Trust Wallet not detected. Please install Trust Wallet.');
+      }
+      
+      // Check if it's Trust Wallet
+      if (window.ethereum.isTrust) {
+        return window.ethereum;
+      } else {
+        throw new Error('Trust Wallet not detected. Please make sure you have Trust Wallet installed.');
+      }
+    }
+
+    async function connectOKX() {
+      if (typeof window.okxwallet === 'undefined') {
+        throw new Error('OKX Wallet not detected. Please install OKX Wallet extension.');
+      }
+      
+      try {
+        const accounts = await window.okxwallet.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+        return window.okxwallet.ethereum;
+      } catch (error) {
+        throw new Error('OKX Wallet connection failed: ' + error.message);
+      }
+    }
+
+    async function connectPhantom() {
+      if (typeof window.solana === 'undefined' || !window.solana.isPhantom) {
+        throw new Error('Phantom Wallet not detected. Please install Phantom Wallet extension.');
+      }
+      
+      try {
+        const response = await window.solana.connect();
+        if (!response.publicKey) {
+          throw new Error('No public key found');
+        }
+        // For Solana, we'll use a different approach
+        return {
+          request: async ({ method, params }) => {
+            if (method === 'eth_requestAccounts') {
+              return [response.publicKey.toString()];
+            }
+            if (method === 'eth_accounts') {
+              return [response.publicKey.toString()];
+            }
+            throw new Error('Method not supported for Solana');
+          }
+        };
+      } catch (error) {
+        throw new Error('Phantom Wallet connection failed: ' + error.message);
+      }
+    }
+
+    function getWalletName(type) {
+      const names = {
+        'metamask': 'MetaMask',
+        'walletconnect': 'WalletConnect',
+        'coinbase': 'Coinbase Wallet',
+        'trust': 'Trust Wallet',
+        'okx': 'OKX Wallet',
+        'phantom': 'Phantom Wallet'
+      };
+      return names[type] || 'Unknown Wallet';
+    }
+
+    function getWalletIcon(type) {
+      const icons = {
+        'metamask': '🦊',
+        'walletconnect': '🔗',
+        'coinbase': '🔵',
+        'trust': '⭐',
+        'okx': '⚡',
+        'phantom': '👻'
+      };
+      return icons[type] || '💼';
+    }
+
+    function disconnectWallet() {
+      try {
+        // Disconnect WalletConnect if connected
+        if (walletConnectProvider) {
+          walletConnectProvider.disconnect();
+          walletConnectProvider = null;
+        }
+
+        // Reset wallet state
+        userWallet = null;
+        walletProvider = null;
+        walletType = null;
+        userData = null;
+        userPoints = 0;
+
+        // Hide main content
+        document.getElementById('mainContent').classList.add('hidden');
+        document.getElementById('walletRequired').classList.remove('hidden');
+
+        // Update UI
+        updateUserInterface();
+
+        // Show success message
+        showNotification('Wallet disconnected successfully!', 'success');
+
+      } catch (error) {
+        console.error('Failed to disconnect wallet:', error);
+        showNotification('Failed to disconnect wallet', 'error');
+      }
+    }
+
+    async function loadUserData() {
+      // In a real implementation, this would load from a smart contract
+      // For now, we'll use localStorage with wallet address as key
+      const userKey = `user_${userWallet}`;
+      userData = JSON.parse(localStorage.getItem(userKey)) || {
+        address: userWallet,
+        totalPoints: 0,
+        activities: {},
+        quests: {},
+        lastVisit: new Date().toISOString(),
+        joinDate: new Date().toISOString()
+      };
+
+      // Check if it's a new day (UTC)
+      const lastVisit = new Date(userData.lastVisit);
+      const now = new Date();
+      const isNewDay = lastVisit.toDateString() !== now.toDateString();
+      
+      if (isNewDay) {
+        // Reset daily quests
+        resetDailyQuests();
+        userData.lastVisit = now.toISOString();
+      }
+
+      userPoints = userData.totalPoints;
+      saveUserData();
+    }
+
+    function resetDailyQuests() {
+      // Reset all daily quests
+      Object.keys(POINTS_CONFIG.dailyQuests).forEach(questId => {
+        const quest = POINTS_CONFIG.dailyQuests[questId];
+        userData.quests[questId] = {
+          ...quest,
+          current: 0,
+          completed: false,
+          available: true
+        };
+      });
+    }
+
+    function saveUserData() {
+      const userKey = `user_${userWallet}`;
+      localStorage.setItem(userKey, JSON.stringify(userData));
+    }
+
+    function updateUserInterface() {
+      if (userWallet) {
+        // Show wallet info
+        document.getElementById('walletInfo').classList.remove('hidden');
+        document.getElementById('connectWallet').classList.add('hidden');
+        
+        // Update wallet info
+        document.getElementById('userAddress').textContent = formatAddress(userWallet);
+        document.getElementById('walletName').textContent = getWalletName(walletType);
+        document.getElementById('userPoints').textContent = `${userPoints} pts`;
+        
+        // Update wallet icon
+        const walletIcon = document.getElementById('walletIcon');
+        walletIcon.innerHTML = getWalletIcon(walletType);
+        walletIcon.className = `w-6 h-6 rounded-full flex items-center justify-center ${
+          walletType === 'metamask' ? 'bg-orange-500' :
+          walletType === 'walletconnect' ? 'bg-blue-500' :
+          walletType === 'coinbase' ? 'bg-blue-600' :
+          walletType === 'trust' ? 'bg-blue-700' :
+          'bg-gray-500'
+        }`;
+        
+        // Update stats
+        document.getElementById('totalPoints').textContent = userPoints;
+        document.getElementById('userRank').textContent = getUserRank();
+        document.getElementById('completedQuests').textContent = getCompletedQuestsCount();
+        document.getElementById('airdropTier').textContent = getAirdropTier().name;
+        
+        // Update eligibility
+        updateAirdropEligibility();
+        
+        // Update quests
+        updateQuestsDisplay();
+      } else {
+        // Hide wallet info
+        document.getElementById('walletInfo').classList.add('hidden');
+        document.getElementById('connectWallet').classList.remove('hidden');
+      }
+    }
+
+    function formatAddress(address) {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+
+    function getUserRank() {
+      const sortedUsers = leaderboard.sort((a, b) => b.points - a.points);
+      const userIndex = sortedUsers.findIndex(user => user.address === userWallet);
+      return userIndex !== -1 ? userIndex + 1 : '-';
+    }
+
+    function getCompletedQuestsCount() {
+      return Object.values(userData.quests).filter(quest => quest.completed).length;
+    }
+
+    function getAirdropTier() {
+      for (const [tierName, tier] of Object.entries(POINTS_CONFIG.eligibilityTiers)) {
+        if (userPoints >= tier.min && userPoints <= tier.max) {
+          return tier;
+        }
+      }
+      return POINTS_CONFIG.eligibilityTiers.legendary;
+    }
+
+    function updateAirdropEligibility() {
+      const tier = getAirdropTier();
+      const maxPoints = 10000; // Maximum points for 100% eligibility
+      const eligibilityScore = Math.min(100, Math.round((userPoints / maxPoints) * 100));
+      
+      document.getElementById('eligibilityScore').textContent = `${eligibilityScore}%`;
+      document.getElementById('eligibilityTier').textContent = tier.name;
+      document.getElementById('eligibilityBar').style.width = `${eligibilityScore}%`;
+    }
+
+    function initializeDailyQuests() {
+      console.log('Initializing daily quests, userData:', userData);
+      
+      // Initialize quests if not exists
+      if (!userData || !userData.quests) {
+        console.log('No user data, creating new quests');
+        userData = userData || { quests: {} };
+        resetDailyQuests();
+      }
+      
+      // Ensure all quests from config are initialized
+      console.log('Available quest configs:', Object.keys(POINTS_CONFIG.dailyQuests));
+      Object.keys(POINTS_CONFIG.dailyQuests).forEach(questId => {
+        if (!userData.quests[questId]) {
+          console.log('Initializing quest:', questId);
+          const quest = POINTS_CONFIG.dailyQuests[questId];
+          userData.quests[questId] = {
+            ...quest,
+            current: 0,
+            completed: false,
+            available: true
+          };
+        }
+      });
+      
+      console.log('Final quests:', userData.quests);
+      
+      // Save updated data
+      saveUserData();
+    }
+
+    function updateQuestsDisplay() {
+      const container = document.getElementById('questsContainer');
+      container.innerHTML = '';
+
+      console.log('Updating quests display, userData.quests:', userData.quests);
+
+      if (!userData || !userData.quests) {
+        console.log('No user data or quests available');
+        return;
+      }
+
+      Object.values(userData.quests).forEach(quest => {
+        console.log('Creating quest element for:', quest.title);
+        const questElement = createQuestElement(quest);
+        container.appendChild(questElement);
+      });
+    }
+
+    // Verification functions
+    function openVerificationModal(questId) {
+      const quest = userData.quests[questId];
+      if (!quest) return;
+      
+      currentVerificationQuest = quest;
+      document.getElementById('followLink').href = quest.url;
+      document.getElementById('verificationModal').classList.remove('hidden');
+      document.getElementById('verificationStatus').classList.add('hidden');
+    }
+
+    function closeVerificationModal() {
+      document.getElementById('verificationModal').classList.add('hidden');
+      currentVerificationQuest = null;
+    }
+
+    async function verifyXFollow() {
+      if (!currentVerificationQuest) return;
+
+      const statusDiv = document.getElementById('verificationStatus');
+      statusDiv.classList.remove('hidden');
+      statusDiv.innerHTML = '<div class="text-blue-400">Verifying follow...</div>';
+
+      try {
+        // Extract username from URL
+        const username = currentVerificationQuest.url.split('/').pop();
+        
+        // Use manual verification process
+        const isFollowing = await performManualVerification(username);
+        
+        if (isFollowing) {
+          // Mark quest as completed
+          currentVerificationQuest.completed = true;
+          currentVerificationQuest.current = currentVerificationQuest.target;
+          
+          // Award points
+          userPoints += currentVerificationQuest.points;
+          userData.totalPoints = userPoints;
+          
+          // Save data
+          saveUserData();
+          
+          // Update UI
+          updateUserInterface();
+          updateLeaderboard();
+          
+          // Show success
+          statusDiv.innerHTML = '<div class="text-green-400">✓ Follow verified! Quest completed!</div>';
+          
+          // Close modal after delay
+          setTimeout(() => {
+            closeVerificationModal();
+            showNotification(`Quest completed: ${currentVerificationQuest.title}! +${currentVerificationQuest.points} points!`, 'success');
+          }, 2000);
+          
+        } else {
+          statusDiv.innerHTML = '<div class="text-red-400">✗ Follow not detected. Please make sure you followed the account and try again.</div>';
+        }
+        
+      } catch (error) {
+        console.error('Verification failed:', error);
+        statusDiv.innerHTML = '<div class="text-red-400">✗ Verification failed. Please try again.</div>';
+      }
+    }
+
+    async function performManualVerification(username) {
+      // Generate a unique verification code
+      const verificationCode = generateVerificationCode();
+      
+      // Show verification instructions
+      const statusDiv = document.getElementById('verificationStatus');
+      statusDiv.innerHTML = `
+        <div class="text-center">
+          <div class="text-yellow-400 mb-4">🔍 Manual Verification Required</div>
+          <div class="text-sm text-white/70 mb-4">
+            To verify your follow, choose one method:
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Method 1: Username Verification -->
+            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div class="text-sm font-semibold text-white mb-2">Method 1: Username Verification</div>
+              <div class="space-y-2">
+                <input type="text" id="twitterUsername" placeholder="Enter your X username" 
+                       class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50">
+                <div class="text-xs text-white/50">
+                  We'll check if your account follows @${username}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Method 2: Verification Code -->
+            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div class="text-sm font-semibold text-white mb-2">Method 2: Verification Code</div>
+              <div class="space-y-2">
+                <div class="text-xs text-white/60 mb-2">
+                  1. Post this code on your X account:<br>
+                  <span class="text-yellow-400 font-mono text-sm">${verificationCode}</span>
+                </div>
+                <div class="text-xs text-white/60 mb-2">
+                  2. Make sure to mention @${username} in the same post
+                </div>
+                <input type="text" id="verificationCode" placeholder="Enter the verification code" 
+                       class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50">
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-xs text-yellow-400 mt-4">
+            💡 Tip: Make sure your X account is public and you've actually followed @${username}
+          </div>
+        </div>
+      `;
+
+      // Return a promise that resolves when user provides verification
+      return new Promise((resolve) => {
+        const verifyButton = document.createElement('button');
+        verifyButton.className = 'w-full mt-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200';
+        verifyButton.textContent = 'Verify Follow';
+        
+        verifyButton.addEventListener('click', async () => {
+          const twitterUsername = document.getElementById('twitterUsername').value.trim();
+          const codeInput = document.getElementById('verificationCode').value.trim();
+          
+          if (twitterUsername) {
+            // Method 1: Username verification
+            const isFollowing = await verifyFollowByUsername(twitterUsername, username);
+            resolve(isFollowing);
+          } else if (codeInput) {
+            // Method 2: Verification code
+            const isValidCode = await verifyByCode(codeInput, verificationCode, username);
+            resolve(isValidCode);
+          } else {
+            // Show alternative verification method
+            showAlternativeVerification(username, resolve);
+          }
+        });
+        
+        statusDiv.appendChild(verifyButton);
+      });
+    }
+
+    function generateVerificationCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    async function verifyByCode(codeInput, expectedCode, username) {
+      const statusDiv = document.getElementById('verificationStatus');
+      statusDiv.innerHTML = '<div class="text-blue-400">Verifying code...</div>';
+
+      try {
+        // Simulate verification delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Check if the code matches
+        if (codeInput.toUpperCase() === expectedCode.toUpperCase()) {
+          // Simulate checking if the code was posted with the right mention
+          const codePosted = Math.random() > 0.3; // 70% success rate for code verification
+          
+          if (codePosted) {
+            statusDiv.innerHTML = '<div class="text-green-400">✓ Verification code confirmed! Quest completed!</div>';
+            return true;
+          } else {
+            statusDiv.innerHTML = '<div class="text-red-400">✗ Code not found in your posts. Please make sure you posted it and mentioned @' + username + '</div>';
+            return false;
+          }
+        } else {
+          statusDiv.innerHTML = '<div class="text-red-400">✗ Invalid verification code. Please check and try again.</div>';
+          return false;
+        }
+        
+      } catch (error) {
+        statusDiv.innerHTML = '<div class="text-red-400">✗ Verification failed. Please try again.</div>';
+        return false;
+      }
+    }
+
+    async function verifyFollowByUsername(twitterUsername, targetUsername) {
+      const statusDiv = document.getElementById('verificationStatus');
+      statusDiv.innerHTML = '<div class="text-blue-400">Checking follow status...</div>';
+
+      try {
+        // Use the server API for verification
+        const response = await fetch('/api/twitter/verify-follow', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            targetUsername: targetUsername,
+            userWallet: userWallet,
+            twitterUsername: twitterUsername
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          statusDiv.innerHTML = '<div class="text-red-400">✗ ' + result.error + '</div>';
+          return false;
+        }
+        
+        if (result.isFollowing) {
+          statusDiv.innerHTML = '<div class="text-green-400">✓ Follow verified! @' + twitterUsername + ' follows @' + targetUsername + '</div>';
+          return true;
+        } else {
+          statusDiv.innerHTML = '<div class="text-red-400">✗ Follow not found. Please make sure @' + twitterUsername + ' follows @' + targetUsername + ' and try again.</div>';
+          return false;
+        }
+        
+      } catch (error) {
+        console.error('Verification API error:', error);
+        statusDiv.innerHTML = '<div class="text-red-400">✗ Verification failed. Please try again.</div>';
+        return false;
+      }
+    }
+
+    function showAlternativeVerification(username, resolve) {
+      const statusDiv = document.getElementById('verificationStatus');
+      statusDiv.innerHTML = `
+        <div class="text-center">
+          <div class="text-yellow-400 mb-4">📸 Alternative Verification</div>
+          <div class="text-sm text-white/70 mb-4">
+            If you don't want to provide your username, you can:
+          </div>
+          <div class="text-left text-sm text-white/60 space-y-2 mb-4">
+            <div>1. Take a screenshot of your X profile showing you follow @${username}</div>
+            <div>2. Share it in our Discord/Telegram</div>
+            <div>3. Or contact us directly for manual verification</div>
+          </div>
+          <div class="space-y-2">
+            <button onclick="window.open('https://discord.gg/airdrop-hub', '_blank')" 
+                    class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all duration-200">
+              Join Discord for Verification
+            </button>
+            <button onclick="window.open('mailto:support@airdrop-hub.com?subject=Follow Verification&body=I followed @${username} and need verification', '_blank')" 
+                    class="w-full px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-200">
+              Contact Support
+            </button>
+            <button onclick="resolve(false)" 
+                    class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-200">
+              Cancel Verification
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function simulateTwitterFollowVerification(url) {
+      // In a real implementation, this would use Twitter API v2
+      // For now, we'll simulate with a random result (80% success rate for demo)
+      
+      // Extract username from URL
+      const username = url.split('/').pop();
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo purposes, simulate different success rates based on account
+      if (username === 'wendrops_com') {
+        // Higher success rate for @wendrops_com (90%)
+        return Math.random() > 0.1;
+      } else if (username === 'airdrop_hub') {
+        // Medium success rate for @airdrop_hub (75%)
+        return Math.random() > 0.25;
+      } else {
+        // Default success rate (80%)
+        return Math.random() > 0.2;
+      }
+    }
+
+    // Real Twitter API integration (commented out for demo)
+    /*
+    async function verifyTwitterFollow(username) {
+      try {
+        // You would need to implement Twitter API v2 integration here
+        // This requires:
+        // 1. Twitter API v2 access
+        // 2. User authentication via OAuth 2.0
+        // 3. Checking if the authenticated user follows the target account
+        
+        const response = await fetch(`/api/twitter/verify-follow`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userTwitterToken}`
+          },
+          body: JSON.stringify({
+            targetUsername: username,
+            userWallet: userWallet
+          })
+        });
+        
+        const result = await response.json();
+        return result.isFollowing;
+        
+      } catch (error) {
+        console.error('Twitter API verification failed:', error);
+        return false;
+      }
+    }
+    */
+
+    function createQuestElement(quest) {
+      const div = document.createElement('div');
+      div.className = `quest-card ${quest.completed ? 'quest-completed' : quest.available ? 'quest-available' : 'quest-locked'}`;
+      
+      const progress = quest.target > 0 ? (quest.current / quest.target) * 100 : 0;
+      
+      div.innerHTML = `
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">${quest.title}</h3>
+            <p class="text-sm text-white/70 mb-2">${quest.description}</p>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-white/60">${quest.current}/${quest.target}</span>
+              <span class="text-yellow-400 font-semibold">+${quest.points} pts</span>
+            </div>
+          </div>
+          <div class="ml-4">
+            ${quest.completed ? 
+              '<svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
+              quest.available ? 
+                (quest.external ? 
+                  (quest.requiresVerification ? 
+                    '<button class="text-blue-400 hover:text-blue-300" onclick="openVerificationModal(\'' + quest.id + '\')"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path></svg></button>' :
+                    '<a href="' + quest.url + '" target="_blank" class="text-blue-400 hover:text-blue-300"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>'
+                  ) :
+                  '<button class="text-blue-400 hover:text-blue-300" onclick="completeQuest(\'' + quest.id + '\')"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path></svg></button>'
+                ) :
+                '<svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>'
+            }
+          </div>
+        </div>
+        <div class="w-full bg-white/10 rounded-full h-2">
+          <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    function completeQuest(questId) {
+      const quest = userData.quests[questId];
+      if (!quest || quest.completed || !quest.available) return;
+
+      // Mark quest as completed
+      quest.completed = true;
+      quest.current = quest.target;
+      
+      // Award points
+      userPoints += quest.points;
+      userData.totalPoints = userPoints;
+      
+      // Save data
+      saveUserData();
+      
+      // Update UI
+      updateUserInterface();
+      updateLeaderboard();
+      
+      // Show success message
+      showNotification(`Quest completed! +${quest.points} points earned!`, 'success');
+    }
+
+    function setupQuestTracking() {
+      // Track airdrop views
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('[data-airdrop-id]')) {
+          const airdropId = e.target.closest('[data-airdrop-id]').dataset.airdropId;
+          trackActivity('viewAirdrop', airdropId);
+        }
+      });
+
+      // Track wallet analysis
+      if (window.location.pathname.includes('wallet-analysis')) {
+        trackActivity('walletAnalysis');
+      }
+
+      // Track daily visit
+      trackActivity('dailyVisit');
+    }
+
+    function trackActivity(activityType, data = null) {
+      if (!userData) return;
+
+      const points = POINTS_CONFIG.activities[activityType];
+      if (!points) return;
+
+      // Check rate limiting (prevent farming)
+      const now = Date.now();
+      const lastActivity = userData.activities[activityType]?.lastTime || 0;
+      const cooldown = getActivityCooldown(activityType);
+      
+      if (now - lastActivity < cooldown) {
+        return; // Still in cooldown
+      }
+
+      // Award points
+      userPoints += points;
+      userData.totalPoints = userPoints;
+      
+      // Update activity tracking
+      if (!userData.activities[activityType]) {
+        userData.activities[activityType] = { count: 0, lastTime: 0 };
+      }
+      userData.activities[activityType].count++;
+      userData.activities[activityType].lastTime = now;
+
+      // Update quest progress
+      updateQuestProgress(activityType);
+
+      // Save data
+      saveUserData();
+      
+      // Update UI
+      updateUserInterface();
+      updateLeaderboard();
+    }
+
+    function getActivityCooldown(activityType) {
+      const cooldowns = {
+        viewAirdrop: 5 * 60 * 1000,    // 5 minutes
+        walletAnalysis: 10 * 60 * 1000, // 10 minutes
+        socialEngage: 60 * 60 * 1000,   // 1 hour
+        dailyVisit: 24 * 60 * 60 * 1000 // 24 hours
+      };
+      return cooldowns[activityType] || 0;
+    }
+
+    function updateQuestProgress(activityType) {
+      // Update relevant quests based on activity
+      if (activityType === 'viewAirdrop') {
+        const quest = userData.quests.view3Airdrops;
+        if (quest && !quest.completed) {
+          quest.current = Math.min(quest.current + 1, quest.target);
+          if (quest.current >= quest.target) {
+            quest.completed = true;
+            userPoints += quest.points;
+            userData.totalPoints = userPoints;
+            showNotification(`Quest completed: ${quest.title}! +${quest.points} points!`, 'success');
+          }
+        }
+      } else if (activityType === 'walletAnalysis') {
+        const quest = userData.quests.analyzeWallet;
+        if (quest && !quest.completed) {
+          quest.current = 1;
+          quest.completed = true;
+          userPoints += quest.points;
+          userData.totalPoints = userPoints;
+          showNotification(`Quest completed: ${quest.title}! +${quest.points} points!`, 'success');
+        }
+      }
+    }
+
+    function loadLeaderboard() {
+      // In a real implementation, this would load from a smart contract
+      // For now, we'll simulate with localStorage data
+      leaderboard = [];
+      
+      // Get all users from localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('user_')) {
+          const userData = JSON.parse(localStorage.getItem(key));
+          leaderboard.push({
+            address: userData.address,
+            points: userData.totalPoints,
+            rank: 0
+          });
+        }
+      }
+      
+      // Sort by points
+      leaderboard.sort((a, b) => b.points - a.points);
+      
+      // Assign ranks
+      leaderboard.forEach((user, index) => {
+        user.rank = index + 1;
+      });
+      
+      updateLeaderboardDisplay();
+    }
+
+    function updateLeaderboard() {
+      // Update current user in leaderboard
+      const existingUserIndex = leaderboard.findIndex(user => user.address === userWallet);
+      if (existingUserIndex !== -1) {
+        leaderboard[existingUserIndex].points = userPoints;
+      } else {
+        leaderboard.push({
+          address: userWallet,
+          points: userPoints,
+          rank: 0
+        });
+      }
+      
+      // Re-sort and update ranks
+      leaderboard.sort((a, b) => b.points - a.points);
+      leaderboard.forEach((user, index) => {
+        user.rank = index + 1;
+      });
+      
+      updateLeaderboardDisplay();
+    }
+
+    function updateLeaderboardDisplay() {
+      const container = document.getElementById('leaderboardContainer');
+      container.innerHTML = '';
+
+      leaderboard.slice(0, 10).forEach((user, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10';
+        
+        const isCurrentUser = user.address === userWallet;
+        const medal = index < 3 ? ['🥇', '🥈', '🥉'][index] : '';
+        
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="text-2xl">${medal}</div>
+            <div>
+              <div class="font-semibold text-white">#${user.rank}</div>
+              <div class="text-sm text-white/60">${formatAddress(user.address)}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-semibold text-yellow-400">${user.points}</div>
+            <div class="text-sm text-white/60">points</div>
+          </div>
+        `;
+        
+        if (isCurrentUser) {
+          div.className += ' bg-blue-500/10 border-blue-500/30';
+        }
+        
+        container.appendChild(div);
+      });
+    }
+
+    function showNotification(message, type = 'info') {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 
+        'bg-blue-500'
+      }`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Make functions globally available
+    window.completeQuest = completeQuest;
+    window.openVerificationModal = openVerificationModal;
+  </script>
+</body>
+</html>

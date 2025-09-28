@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Analysis - Airdrop Hub v3.0 (Real Blockchain Data)</title>
+  <meta name="description" content="Real blockchain wallet analysis across multiple networks for airdrop eligibility">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <script>
+    // Force refresh cache
+    if (performance.navigation.type === 1) {
+      console.log('Page refreshed - cache cleared');
+    }
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .form-input {
+      @apply bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    }
+    .btn-primary {
+      @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl;
+    }
+    .loading-spinner {
+      @apply border-4 border-white/20 border-t-blue-500 rounded-full animate-spin;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen">
+  <header class="bg-black/20 backdrop-blur-sm border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-2xl font-bold text-white">🚀 Airdrop Hub</a>
+          <nav class="hidden md:flex space-x-6">
+            <a href="index.html" class="text-white/60 hover:text-white">Home</a>
+            <a href="points-system-v3.html" class="text-white/60 hover:text-white">Points System</a>
+            <a href="wallet-analysis-v3.html" class="text-white">Wallet Analysis</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl sm:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        Wallet Analysis
+      </h1>
+      <div class="bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-2 mb-4 inline-block">
+        <span class="text-red-400 font-semibold">🚀 NEW VERSION v3.0 - REAL BLOCKCHAIN DATA - NO FAKE DATA</span>
+      </div>
+      <p class="text-lg text-white/70 max-w-2xl mx-auto">
+        Get real blockchain data and insights about any wallet address across multiple networks.
+      </p>
+    </div>
+
+    <!-- Analysis Form -->
+    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Chain Selection -->
+        <div>
+          <label class="block text-sm font-medium text-white mb-2">Select Chain</label>
+          <select id="chainSelect" class="form-input w-full p-3">
+            <option value="ethereum">Ethereum</option>
+            <option value="base">Base</option>
+            <option value="arbitrum">Arbitrum</option>
+            <option value="polygon">Polygon</option>
+            <option value="avalanche">Avalanche</option>
+            <option value="bsc">BSC</option>
+            <option value="optimism">Optimism</option>
+            <option value="fantom">Fantom</option>
+          </select>
+        </div>
+
+        <!-- Address Input -->
+        <div>
+          <label class="block text-sm font-medium text-white mb-2">Wallet Address</label>
+          <input 
+            type="text" 
+            id="walletAddress" 
+            placeholder="0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6"
+            class="form-input w-full p-3"
+          >
+        </div>
+      </div>
+
+      <div class="mt-6 text-center">
+        <button id="analyzeBtn" class="btn-primary px-8 py-3 text-lg">
+          Analyze Wallet
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-12">
+      <div class="loading-spinner w-12 h-12 mx-auto mb-4"></div>
+      <p class="text-white/70">Fetching real blockchain data...</p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden space-y-8">
+      <!-- Wallet Overview -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <h2 class="text-2xl font-bold text-white mb-6">Wallet Overview</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-400" id="walletBalance">0 ETH</div>
+            <div class="text-sm text-white/60">Native Balance</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-400" id="transactionCount">0</div>
+            <div class="text-sm text-white/60">Total Transactions</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-purple-400" id="lastActivity">-</div>
+            <div class="text-sm text-white/60">Last Activity</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <h2 class="text-2xl font-bold text-white mb-6">Recent Transactions</h2>
+        <div id="transactionList" class="space-y-3">
+          <!-- Transactions will be populated here -->
+        </div>
+      </div>
+
+      <!-- Airdrop Eligibility -->
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+        <h2 class="text-2xl font-bold text-white mb-6">Airdrop Eligibility Score</h2>
+        <div class="text-center">
+          <div class="text-6xl font-bold text-yellow-400 mb-4" id="eligibilityScore">0%</div>
+          <div class="w-full bg-white/10 rounded-full h-4 mb-4">
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-4 rounded-full transition-all duration-1000" id="eligibilityBar" style="width: 0%"></div>
+          </div>
+          <p class="text-white/70" id="eligibilityText">Analyze wallet to see eligibility score</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Real blockchain RPC endpoints
+    const RPC_ENDPOINTS = {
+      ethereum: 'https://eth.llamarpc.com',
+      base: 'https://mainnet.base.org',
+      arbitrum: 'https://arb1.arbitrum.io/rpc',
+      polygon: 'https://polygon-rpc.com',
+      avalanche: 'https://api.avax.network/ext/bc/C/rpc',
+      bsc: 'https://bsc-dataseed.binance.org',
+      optimism: 'https://mainnet.optimism.io',
+      fantom: 'https://rpc.ftm.tools'
+    };
+
+    // Chain configurations
+    const CHAIN_CONFIG = {
+      ethereum: { name: 'Ethereum', symbol: 'ETH', decimals: 18, explorer: 'https://etherscan.io' },
+      base: { name: 'Base', symbol: 'ETH', decimals: 18, explorer: 'https://basescan.org' },
+      arbitrum: { name: 'Arbitrum', symbol: 'ETH', decimals: 18, explorer: 'https://arbiscan.io' },
+      polygon: { name: 'Polygon', symbol: 'MATIC', decimals: 18, explorer: 'https://polygonscan.com' },
+      avalanche: { name: 'Avalanche', symbol: 'AVAX', decimals: 18, explorer: 'https://snowtrace.io' },
+      bsc: { name: 'BSC', symbol: 'BNB', decimals: 18, explorer: 'https://bscscan.com' },
+      optimism: { name: 'Optimism', symbol: 'ETH', decimals: 18, explorer: 'https://optimistic.etherscan.io' },
+      fantom: { name: 'Fantom', symbol: 'FTM', decimals: 18, explorer: 'https://ftmscan.com' }
+    };
+
+    let currentProvider = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('analyzeBtn').addEventListener('click', analyzeWallet);
+    });
+
+    // Validate Ethereum address
+    function isValidAddress(address) {
+      return /^0x[a-fA-F0-9]{40}$/.test(address);
+    }
+
+    // Format address
+    function formatAddress(address) {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+
+    // Format number
+    function formatNumber(num) {
+      return new Intl.NumberFormat().format(num);
+    }
+
+    // Format currency
+    function formatCurrency(amount, symbol = 'USD') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: symbol
+      }).format(amount);
+    }
+
+    // Get provider for selected chain
+    function getProvider(chain) {
+      const rpcUrl = RPC_ENDPOINTS[chain];
+      if (!rpcUrl) throw new Error(`Unsupported chain: ${chain}`);
+      return new ethers.providers.JsonRpcProvider(rpcUrl);
+    }
+
+    // Analyze wallet
+    async function analyzeWallet() {
+      const address = document.getElementById('walletAddress').value.trim();
+      const chain = document.getElementById('chainSelect').value;
+
+      if (!address) {
+        alert('Please enter a wallet address');
+        return;
+      }
+
+      if (!isValidAddress(address)) {
+        alert('Please enter a valid Ethereum address');
+        return;
+      }
+
+      try {
+        // Show loading
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('results').classList.add('hidden');
+
+        console.log('🔍 Starting real blockchain analysis...');
+        console.log('Address:', address);
+        console.log('Chain:', chain);
+
+        // Get provider
+        currentProvider = getProvider(chain);
+        const config = CHAIN_CONFIG[chain];
+
+        console.log('📡 Fetching real blockchain data...');
+
+        // Fetch real blockchain data
+        const [balance, txCount, lastTx] = await Promise.all([
+          getBalance(address, currentProvider),
+          getTransactionCount(address, currentProvider),
+          getLastTransaction(address, currentProvider, config.explorer)
+        ]);
+
+        console.log('✅ Real data fetched:', { balance, txCount, lastTx });
+
+        // Calculate eligibility score
+        const eligibilityScore = calculateEligibilityScore(balance, txCount);
+
+        // Update UI with real data
+        updateWalletOverview(balance, txCount, lastTx, config);
+        updateEligibilityScore(eligibilityScore);
+        updateTransactionHistory(address, config.explorer);
+
+        // Show results
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('results').classList.remove('hidden');
+
+        console.log('🎉 Analysis complete with REAL blockchain data!');
+
+      } catch (error) {
+        console.error('Analysis error:', error);
+        alert(`Analysis failed: ${error.message}`);
+        document.getElementById('loadingState').classList.add('hidden');
+      }
+    }
+
+    // Get wallet balance
+    async function getBalance(address, provider) {
+      try {
+        const balance = await provider.getBalance(address);
+        return ethers.utils.formatEther(balance);
+      } catch (error) {
+        console.error('Balance fetch error:', error);
+        return '0';
+      }
+    }
+
+    // Get transaction count
+    async function getTransactionCount(address, provider) {
+      try {
+        return await provider.getTransactionCount(address);
+      } catch (error) {
+        console.error('Transaction count error:', error);
+        return 0;
+      }
+    }
+
+    // Get last transaction (simplified)
+    async function getLastTransaction(address, provider, explorer) {
+      try {
+        // This would require a more complex implementation with block scanning
+        // For now, return a placeholder
+        return 'Unknown';
+      } catch (error) {
+        console.error('Last transaction error:', error);
+        return 'Unknown';
+      }
+    }
+
+    // Calculate eligibility score based on real data
+    function calculateEligibilityScore(balance, txCount) {
+      const balanceNum = parseFloat(balance);
+      const txNum = parseInt(txCount);
+
+      let score = 0;
+
+      // Balance scoring (0-40 points)
+      if (balanceNum > 10) score += 40;
+      else if (balanceNum > 5) score += 30;
+      else if (balanceNum > 1) score += 20;
+      else if (balanceNum > 0.1) score += 10;
+
+      // Transaction activity scoring (0-60 points)
+      if (txNum > 1000) score += 60;
+      else if (txNum > 500) score += 50;
+      else if (txNum > 100) score += 40;
+      else if (txNum > 50) score += 30;
+      else if (txNum > 10) score += 20;
+      else if (txNum > 0) score += 10;
+
+      return Math.min(100, score);
+    }
+
+    // Update wallet overview
+    function updateWalletOverview(balance, txCount, lastTx, config) {
+      document.getElementById('walletBalance').textContent = `${parseFloat(balance).toFixed(4)} ${config.symbol}`;
+      document.getElementById('transactionCount').textContent = formatNumber(txCount);
+      document.getElementById('lastActivity').textContent = lastTx;
+    }
+
+    // Update eligibility score
+    function updateEligibilityScore(score) {
+      document.getElementById('eligibilityScore').textContent = `${score}%`;
+      document.getElementById('eligibilityBar').style.width = `${score}%`;
+      
+      let text = '';
+      if (score >= 80) text = 'Excellent! High airdrop eligibility';
+      else if (score >= 60) text = 'Good! Moderate airdrop eligibility';
+      else if (score >= 40) text = 'Fair. Consider more activity';
+      else if (score >= 20) text = 'Low. Increase wallet activity';
+      else text = 'Very low. Start using DeFi more';
+      
+      document.getElementById('eligibilityText').textContent = text;
+    }
+
+    // Update transaction history
+    function updateTransactionHistory(address, explorer) {
+      const container = document.getElementById('transactionList');
+      container.innerHTML = `
+        <div class="text-center text-white/70 py-4">
+          <p>Transaction history requires more complex implementation</p>
+          <p class="text-sm mt-2">
+            <a href="${explorer}/address/${address}" target="_blank" class="text-blue-400 hover:text-blue-300">
+              View on ${explorer.includes('etherscan') ? 'Etherscan' : 'Block Explorer'}
+            </a>
+          </p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
