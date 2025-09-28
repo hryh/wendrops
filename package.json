@@ -1,0 +1,26 @@
+{
+  "name": "airdrop-hub",
+  "version": "1.0.0",
+  "description": "Airdrop Hub - Points System with Twitter Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "airdrop",
+    "points",
+    "twitter",
+    "verification",
+    "web3"
+  ],
+  "author": "Airdrop Hub",
+  "license": "MIT"
+}
