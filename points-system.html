@@ -279,6 +279,38 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </button>
+
+          <!-- OKX Wallet -->
+          <button id="connectOKX" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">OKX Wallet</div>
+              <div class="text-sm text-white/60">Connect using OKX Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Phantom Wallet -->
+          <button id="connectPhantom" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Phantom Wallet</div>
+              <div class="text-sm text-white/60">Connect using Phantom (Solana)</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
         </div>
 
         <div class="mt-6 text-xs text-white/50">
@@ -451,6 +483,8 @@
       document.getElementById('connectWalletConnect').addEventListener('click', () => connectWallet('walletconnect'));
       document.getElementById('connectCoinbase').addEventListener('click', () => connectWallet('coinbase'));
       document.getElementById('connectTrust').addEventListener('click', () => connectWallet('trust'));
+      document.getElementById('connectOKX').addEventListener('click', () => connectWallet('okx'));
+      document.getElementById('connectPhantom').addEventListener('click', () => connectWallet('phantom'));
       
       // Verification modal event listeners
       document.getElementById('verifyFollow').addEventListener('click', verifyXFollow);
@@ -488,6 +522,12 @@
             break;
           case 'trust':
             provider = await connectTrust();
+            break;
+          case 'okx':
+            provider = await connectOKX();
+            break;
+          case 'phantom':
+            provider = await connectPhantom();
             break;
           default:
             throw new Error('Unsupported wallet type');
@@ -602,12 +642,57 @@
       }
     }
 
+    async function connectOKX() {
+      if (typeof window.okxwallet === 'undefined') {
+        throw new Error('OKX Wallet not detected. Please install OKX Wallet extension.');
+      }
+      
+      try {
+        const accounts = await window.okxwallet.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+        return window.okxwallet.ethereum;
+      } catch (error) {
+        throw new Error('OKX Wallet connection failed: ' + error.message);
+      }
+    }
+
+    async function connectPhantom() {
+      if (typeof window.solana === 'undefined' || !window.solana.isPhantom) {
+        throw new Error('Phantom Wallet not detected. Please install Phantom Wallet extension.');
+      }
+      
+      try {
+        const response = await window.solana.connect();
+        if (!response.publicKey) {
+          throw new Error('No public key found');
+        }
+        // For Solana, we'll use a different approach
+        return {
+          request: async ({ method, params }) => {
+            if (method === 'eth_requestAccounts') {
+              return [response.publicKey.toString()];
+            }
+            if (method === 'eth_accounts') {
+              return [response.publicKey.toString()];
+            }
+            throw new Error('Method not supported for Solana');
+          }
+        };
+      } catch (error) {
+        throw new Error('Phantom Wallet connection failed: ' + error.message);
+      }
+    }
+
     function getWalletName(type) {
       const names = {
         'metamask': 'MetaMask',
         'walletconnect': 'WalletConnect',
         'coinbase': 'Coinbase Wallet',
-        'trust': 'Trust Wallet'
+        'trust': 'Trust Wallet',
+        'okx': 'OKX Wallet',
+        'phantom': 'Phantom Wallet'
       };
       return names[type] || 'Unknown Wallet';
     }
@@ -617,7 +702,9 @@
         'metamask': '🦊',
         'walletconnect': '🔗',
         'coinbase': '🔵',
-        'trust': '⭐'
+        'trust': '⭐',
+        'okx': '⚡',
+        'phantom': '👻'
       };
       return icons[type] || '💼';
     }
