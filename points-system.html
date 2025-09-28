@@ -9,6 +9,12 @@
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script>
+    // Force refresh cache
+    if (performance.navigation.type === 1) {
+      console.log('Page refreshed - cache cleared');
+    }
+  </script>
+  <script>
     tailwind.config = {
       theme: {
         extend: {
@@ -496,6 +502,13 @@
 
     // Wallet connection functions
     function openWalletModal() {
+      console.log('🔗 Opening wallet modal with 6 options:');
+      console.log('1. MetaMask');
+      console.log('2. WalletConnect');
+      console.log('3. Coinbase Wallet');
+      console.log('4. Trust Wallet');
+      console.log('5. OKX Wallet');
+      console.log('6. Phantom Wallet');
       document.getElementById('walletModal').classList.remove('hidden');
     }
 

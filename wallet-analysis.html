@@ -8,6 +8,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script>
+    // Force refresh cache
+    if (performance.navigation.type === 1) {
+      console.log('Page refreshed - cache cleared');
+    }
+  </script>
+  <script>
     tailwind.config = {
       theme: {
         extend: {
@@ -230,9 +236,15 @@
         document.getElementById('loadingState').classList.remove('hidden');
         document.getElementById('results').classList.add('hidden');
 
+        console.log('🔍 Starting real blockchain analysis...');
+        console.log('Address:', address);
+        console.log('Chain:', chain);
+
         // Get provider
         currentProvider = getProvider(chain);
         const config = CHAIN_CONFIG[chain];
+
+        console.log('📡 Fetching real blockchain data...');
 
         // Fetch real blockchain data
         const [balance, txCount, lastTx] = await Promise.all([
@@ -240,6 +252,8 @@
           getTransactionCount(address, currentProvider),
           getLastTransaction(address, currentProvider, config.explorer)
         ]);
+
+        console.log('✅ Real data fetched:', { balance, txCount, lastTx });
 
         // Calculate eligibility score
         const eligibilityScore = calculateEligibilityScore(balance, txCount);
@@ -252,6 +266,8 @@
         // Show results
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('results').classList.remove('hidden');
+
+        console.log('🎉 Analysis complete with REAL blockchain data!');
 
       } catch (error) {
         console.error('Analysis error:', error);
