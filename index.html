@@ -142,6 +142,7 @@
       </div>
       <nav class="flex items-center gap-4 text-sm">
         <a href="wallet-analysis.html" class="text-white/60 hover:text-white">Wallet Analysis</a>
+        <a href="points-system.html" class="text-white/60 hover:text-white">Points System</a>
         <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
         <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline">Whitepaper</a>
         <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit <span class="text-xs text-yellow-400">(Whitelist)</span></a>
@@ -616,7 +617,7 @@
       const badge = isFeatured ? `<span class="chip text-cyan-300 border-cyan-400/40">Featured${x.featuredOrder ? ` #${x.featuredOrder}` : ''}</span>` : '';
       const endsChip = x.deadline ? urgencyBadge(x.deadline) : '';
       return `
-        <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow">
+        <article class="rounded-lg border border-white/10 bg-[${'#0f1422'}] p-4 hover:shadow-glow transition-shadow" data-airdrop-id="${escapeHtml(x.id)}">
           <div class="flex items-start justify-between gap-3">
             <div class="flex flex-col gap-1">
               <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
