@@ -6,7 +6,7 @@
   <title>Wallet Analysis - Airdrop Hub v3.0 (Real Blockchain Data)</title>
   <meta name="description" content="Real blockchain wallet analysis across multiple networks for airdrop eligibility">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
     // Force refresh cache
     if (performance.navigation.type === 1) {
@@ -17,6 +17,15 @@
     window.addEventListener('load', function() {
       const statusDiv = document.getElementById('libraryStatus');
       
+      // Set a timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (typeof ethers === 'undefined') {
+          console.error('Ethers library loading timeout');
+          statusDiv.textContent = 'Loading timeout. Please refresh the page.';
+          statusDiv.classList.remove('hidden');
+        }
+      }, 10000); // 10 second timeout
+      
       if (typeof ethers === 'undefined') {
         console.error('Ethers library failed to load, retrying...');
         statusDiv.classList.remove('hidden');
@@ -24,19 +33,36 @@
         
         // Retry loading ethers
         const script = document.createElement('script');
-        script.src = 'https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js';
+        script.src = 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
         script.onload = function() {
           console.log('Ethers library loaded successfully on retry');
+          clearTimeout(timeout);
           statusDiv.classList.add('hidden');
         };
         script.onerror = function() {
-          console.error('Failed to load ethers library even on retry');
-          statusDiv.textContent = 'Failed to load blockchain library. Please refresh the page.';
-          statusDiv.classList.remove('hidden');
+          console.error('Failed to load ethers library, trying alternative CDN...');
+          statusDiv.textContent = 'Trying alternative CDN...';
+          
+          // Try alternative CDN
+          const altScript = document.createElement('script');
+          altScript.src = 'https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js';
+          altScript.onload = function() {
+            console.log('Ethers library loaded successfully from alternative CDN');
+            clearTimeout(timeout);
+            statusDiv.classList.add('hidden');
+          };
+          altScript.onerror = function() {
+            console.error('All CDN attempts failed');
+            clearTimeout(timeout);
+            statusDiv.textContent = 'Failed to load blockchain library. Please refresh the page.';
+            statusDiv.classList.remove('hidden');
+          };
+          document.head.appendChild(altScript);
         };
         document.head.appendChild(script);
       } else {
         console.log('Ethers library loaded successfully');
+        clearTimeout(timeout);
         statusDiv.classList.add('hidden');
       }
     });
