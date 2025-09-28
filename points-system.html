@@ -7,6 +7,7 @@
   <meta name="description" content="Earn points and climb the leaderboard on Airdrop Hub. Complete daily quests and boost your airdrop eligibility.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -60,9 +61,25 @@
           </nav>
         </div>
         <div class="flex items-center space-x-4">
-          <div id="walletInfo" class="hidden">
-            <span id="userAddress" class="text-white/80 text-sm"></span>
-            <span id="userPoints" class="text-yellow-400 font-semibold ml-2"></span>
+          <div id="walletInfo" class="hidden flex items-center space-x-4">
+            <button id="walletInfoBtn" class="flex items-center space-x-2 hover:bg-white/5 rounded-lg p-2 transition-colors">
+              <div id="walletIcon" class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <div class="text-left">
+                <div id="userAddress" class="text-white/80 text-sm"></div>
+                <div id="walletName" class="text-xs text-white/50"></div>
+              </div>
+              <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <span id="userPoints" class="text-yellow-400 font-semibold"></span>
+            <button id="disconnectWallet" class="text-white/60 hover:text-white text-sm px-2 py-1 rounded hover:bg-white/10 transition-colors">
+              Disconnect
+            </button>
           </div>
           <button id="connectWallet" class="btn-primary px-4 py-2 text-sm">
             Connect Wallet
@@ -180,6 +197,96 @@
       </div>
     </div>
   </main>
+
+  <!-- Wallet Selection Modal -->
+  <div id="walletModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 max-w-md w-full">
+      <div class="text-center">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-2xl font-bold text-white">Connect Wallet</h2>
+          <button id="closeWalletModal" class="text-white/60 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="text-white/70 mb-6">Choose your preferred wallet to connect</p>
+        
+        <div class="space-y-3">
+          <!-- MetaMask -->
+          <button id="connectMetaMask" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">MetaMask</div>
+              <div class="text-sm text-white/60">Connect using MetaMask browser extension</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- WalletConnect -->
+          <button id="connectWalletConnect" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">WalletConnect</div>
+              <div class="text-sm text-white/60">Connect using mobile wallet app</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Coinbase Wallet -->
+          <button id="connectCoinbase" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Coinbase Wallet</div>
+              <div class="text-sm text-white/60">Connect using Coinbase Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <!-- Trust Wallet -->
+          <button id="connectTrust" class="w-full flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all duration-200 group">
+            <div class="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div class="text-left flex-1">
+              <div class="font-semibold text-white">Trust Wallet</div>
+              <div class="text-sm text-white/60">Connect using Trust Wallet</div>
+            </div>
+            <svg class="w-5 h-5 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-6 text-xs text-white/50">
+          By connecting a wallet, you agree to our Terms of Service and Privacy Policy
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Verification Modal -->
   <div id="verificationModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -310,6 +417,9 @@
     let userData = null;
     let leaderboard = [];
     let currentVerificationQuest = null;
+    let walletProvider = null;
+    let walletType = null;
+    let walletConnectProvider = null;
 
     // Initialize the points system
     document.addEventListener('DOMContentLoaded', () => {
@@ -330,8 +440,17 @@
       }
 
       // Set up event listeners
-      document.getElementById('connectWallet').addEventListener('click', connectWallet);
-      document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
+      document.getElementById('connectWallet').addEventListener('click', openWalletModal);
+      document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
+      document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+      document.getElementById('walletInfoBtn').addEventListener('click', openWalletModal);
+      document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+      
+      // Wallet selection event listeners
+      document.getElementById('connectMetaMask').addEventListener('click', () => connectWallet('metamask'));
+      document.getElementById('connectWalletConnect').addEventListener('click', () => connectWallet('walletconnect'));
+      document.getElementById('connectCoinbase').addEventListener('click', () => connectWallet('coinbase'));
+      document.getElementById('connectTrust').addEventListener('click', () => connectWallet('trust'));
       
       // Verification modal event listeners
       document.getElementById('verifyFollow').addEventListener('click', verifyXFollow);
@@ -341,18 +460,57 @@
       loadLeaderboard();
     }
 
-    async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        alert('Please install MetaMask or another Web3 wallet');
-        return;
-      }
+    // Wallet connection functions
+    function openWalletModal() {
+      document.getElementById('walletModal').classList.remove('hidden');
+    }
 
+    function closeWalletModal() {
+      document.getElementById('walletModal').classList.add('hidden');
+    }
+
+    async function connectWallet(walletType) {
       try {
-        const accounts = await window.ethereum.request({ 
-          method: 'eth_requestAccounts' 
-        });
+        closeWalletModal();
         
+        let provider = null;
+        let accounts = [];
+
+        switch (walletType) {
+          case 'metamask':
+            provider = await connectMetaMask();
+            break;
+          case 'walletconnect':
+            provider = await connectWalletConnect();
+            break;
+          case 'coinbase':
+            provider = await connectCoinbase();
+            break;
+          case 'trust':
+            provider = await connectTrust();
+            break;
+          default:
+            throw new Error('Unsupported wallet type');
+        }
+
+        if (!provider) {
+          throw new Error('Failed to connect to wallet');
+        }
+
+        // Get accounts
+        accounts = await provider.request({ method: 'eth_accounts' });
+        if (accounts.length === 0) {
+          accounts = await provider.request({ method: 'eth_requestAccounts' });
+        }
+
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+
+        // Store wallet info
         userWallet = accounts[0];
+        walletProvider = provider;
+        walletType = walletType;
         
         // Load user data
         await loadUserData();
@@ -370,9 +528,128 @@
         // Set up quest tracking
         setupQuestTracking();
         
+        // Show success message
+        showNotification(`Connected to ${getWalletName(walletType)}!`, 'success');
+        
       } catch (error) {
         console.error('Failed to connect wallet:', error);
-        alert('Failed to connect wallet');
+        showNotification(`Failed to connect wallet: ${error.message}`, 'error');
+      }
+    }
+
+    async function connectMetaMask() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask not installed. Please install MetaMask extension.');
+      }
+      return window.ethereum;
+    }
+
+    async function connectWalletConnect() {
+      try {
+        // Check if WalletConnect is available
+        if (typeof WalletConnectProvider === 'undefined') {
+          throw new Error('WalletConnect not available. Please refresh the page and try again.');
+        }
+
+        // Initialize WalletConnect provider
+        walletConnectProvider = new WalletConnectProvider.default({
+          rpc: {
+            1: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID',
+            137: 'https://polygon-rpc.com',
+            56: 'https://bsc-dataseed.binance.org',
+            42161: 'https://arb1.arbitrum.io/rpc',
+            10: 'https://mainnet.optimism.io',
+            8453: 'https://mainnet.base.org'
+          },
+          chainId: 1,
+          bridge: 'https://bridge.walletconnect.org',
+          qrcode: true,
+          pollingInterval: 12000
+        });
+
+        // Enable session (triggers QR Code modal)
+        await walletConnectProvider.enable();
+        return walletConnectProvider;
+      } catch (error) {
+        console.error('WalletConnect error:', error);
+        throw new Error('WalletConnect connection failed. Please make sure you have a mobile wallet app installed.');
+      }
+    }
+
+    async function connectCoinbase() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Coinbase Wallet not detected. Please install Coinbase Wallet.');
+      }
+      
+      // Check if it's Coinbase Wallet
+      if (window.ethereum.isCoinbaseWallet) {
+        return window.ethereum;
+      } else {
+        throw new Error('Coinbase Wallet not detected. Please make sure you have Coinbase Wallet installed.');
+      }
+    }
+
+    async function connectTrust() {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Trust Wallet not detected. Please install Trust Wallet.');
+      }
+      
+      // Check if it's Trust Wallet
+      if (window.ethereum.isTrust) {
+        return window.ethereum;
+      } else {
+        throw new Error('Trust Wallet not detected. Please make sure you have Trust Wallet installed.');
+      }
+    }
+
+    function getWalletName(type) {
+      const names = {
+        'metamask': 'MetaMask',
+        'walletconnect': 'WalletConnect',
+        'coinbase': 'Coinbase Wallet',
+        'trust': 'Trust Wallet'
+      };
+      return names[type] || 'Unknown Wallet';
+    }
+
+    function getWalletIcon(type) {
+      const icons = {
+        'metamask': '🦊',
+        'walletconnect': '🔗',
+        'coinbase': '🔵',
+        'trust': '⭐'
+      };
+      return icons[type] || '💼';
+    }
+
+    function disconnectWallet() {
+      try {
+        // Disconnect WalletConnect if connected
+        if (walletConnectProvider) {
+          walletConnectProvider.disconnect();
+          walletConnectProvider = null;
+        }
+
+        // Reset wallet state
+        userWallet = null;
+        walletProvider = null;
+        walletType = null;
+        userData = null;
+        userPoints = 0;
+
+        // Hide main content
+        document.getElementById('mainContent').classList.add('hidden');
+        document.getElementById('walletRequired').classList.remove('hidden');
+
+        // Update UI
+        updateUserInterface();
+
+        // Show success message
+        showNotification('Wallet disconnected successfully!', 'success');
+
+      } catch (error) {
+        console.error('Failed to disconnect wallet:', error);
+        showNotification('Failed to disconnect wallet', 'error');
       }
     }
 
@@ -423,21 +700,43 @@
     }
 
     function updateUserInterface() {
-      // Update wallet info
-      document.getElementById('userAddress').textContent = formatAddress(userWallet);
-      document.getElementById('userPoints').textContent = `${userPoints} pts`;
-      
-      // Update stats
-      document.getElementById('totalPoints').textContent = userPoints;
-      document.getElementById('userRank').textContent = getUserRank();
-      document.getElementById('completedQuests').textContent = getCompletedQuestsCount();
-      document.getElementById('airdropTier').textContent = getAirdropTier().name;
-      
-      // Update eligibility
-      updateAirdropEligibility();
-      
-      // Update quests
-      updateQuestsDisplay();
+      if (userWallet) {
+        // Show wallet info
+        document.getElementById('walletInfo').classList.remove('hidden');
+        document.getElementById('connectWallet').classList.add('hidden');
+        
+        // Update wallet info
+        document.getElementById('userAddress').textContent = formatAddress(userWallet);
+        document.getElementById('walletName').textContent = getWalletName(walletType);
+        document.getElementById('userPoints').textContent = `${userPoints} pts`;
+        
+        // Update wallet icon
+        const walletIcon = document.getElementById('walletIcon');
+        walletIcon.innerHTML = getWalletIcon(walletType);
+        walletIcon.className = `w-6 h-6 rounded-full flex items-center justify-center ${
+          walletType === 'metamask' ? 'bg-orange-500' :
+          walletType === 'walletconnect' ? 'bg-blue-500' :
+          walletType === 'coinbase' ? 'bg-blue-600' :
+          walletType === 'trust' ? 'bg-blue-700' :
+          'bg-gray-500'
+        }`;
+        
+        // Update stats
+        document.getElementById('totalPoints').textContent = userPoints;
+        document.getElementById('userRank').textContent = getUserRank();
+        document.getElementById('completedQuests').textContent = getCompletedQuestsCount();
+        document.getElementById('airdropTier').textContent = getAirdropTier().name;
+        
+        // Update eligibility
+        updateAirdropEligibility();
+        
+        // Update quests
+        updateQuestsDisplay();
+      } else {
+        // Hide wallet info
+        document.getElementById('walletInfo').classList.add('hidden');
+        document.getElementById('connectWallet').classList.remove('hidden');
+      }
     }
 
     function formatAddress(address) {

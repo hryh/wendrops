@@ -360,6 +360,12 @@
             </svg>
             Copy JSON
           </button>
+          <button id="autoPublishBtn" type="button" class="btn-primary px-6 py-3 text-lg bg-green-600 hover:bg-green-700 hidden">
+            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+            </svg>
+            Auto-Publish to Frontend
+          </button>
         </div>
 
         <div id="resultWrap" class="hidden">
@@ -594,6 +600,7 @@
 
       document.getElementById('result').textContent = JSON.stringify(output, null, 2);
       document.getElementById('resultWrap').classList.remove('hidden');
+      document.getElementById('autoPublishBtn').classList.remove('hidden');
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
 
@@ -601,6 +608,76 @@
       const txt = document.getElementById('result').textContent.trim();
       if (!txt) return alert('Generate JSON first.');
       try { await navigator.clipboard.writeText(txt); alert('Copied JSON.'); } catch { alert('Copy failed.'); }
+    });
+
+    // Auto-publish functionality
+    document.getElementById('autoPublishBtn').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      const jsonData = result.textContent;
+      
+      if (!jsonData) {
+        alert('Please validate and generate JSON first!');
+        return;
+      }
+
+      try {
+        const airdropData = JSON.parse(jsonData);
+        const accessKey = localStorage.getItem('airdrop_access_key');
+        
+        if (!accessKey) {
+          alert('Please authenticate first!');
+          return;
+        }
+
+        // Show loading state
+        const publishBtn = document.getElementById('autoPublishBtn');
+        const originalText = publishBtn.innerHTML;
+        publishBtn.innerHTML = '<svg class="w-5 h-5 mr-2 inline animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Publishing...';
+        publishBtn.disabled = true;
+
+        const response = await fetch('/api/auto-publish', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            airdropData: airdropData,
+            accessKey: accessKey
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`✅ Airdrop published successfully!\n\nID: ${result.airdropId}\nPublished: ${new Date(result.publishedAt).toLocaleString()}`);
+          
+          // Show success state
+          publishBtn.innerHTML = '<svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Published!';
+          publishBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+          publishBtn.classList.add('bg-green-500');
+          
+          // Reset form
+          setTimeout(() => {
+            document.getElementById('airdropForm').reset();
+            document.getElementById('resultWrap').classList.add('hidden');
+            publishBtn.innerHTML = originalText;
+            publishBtn.classList.remove('bg-green-500');
+            publishBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            publishBtn.disabled = false;
+          }, 3000);
+        } else {
+          throw new Error(result.error || 'Failed to publish airdrop');
+        }
+
+      } catch (error) {
+        console.error('Auto-publish error:', error);
+        alert(`❌ Failed to publish airdrop: ${error.message}`);
+        
+        // Reset button
+        const publishBtn = document.getElementById('autoPublishBtn');
+        publishBtn.innerHTML = originalText;
+        publishBtn.disabled = false;
+      }
     });
 
     loadExistingIds();

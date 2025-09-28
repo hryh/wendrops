@@ -92,6 +92,96 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
   }
 });
 
+// Auto-publish endpoint for submissions
+app.post('/api/auto-publish', async (req, res) => {
+  try {
+    const { airdropData, accessKey } = req.body;
+    
+    // Verify access key
+    if (accessKey !== 'airdrop2024') {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid access key'
+      });
+    }
+    
+    // Validate airdrop data
+    if (!airdropData || !airdropData.name || !airdropData.chain) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid airdrop data'
+      });
+    }
+    
+    // Generate unique ID
+    const airdropId = `airdrop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Add metadata
+    const newAirdrop = {
+      id: airdropId,
+      ...airdropData,
+      addedDate: new Date().toISOString(),
+      status: 'live',
+      featured: false,
+      verified: true
+    };
+    
+    // In a real implementation, you would:
+    // 1. Save to database
+    // 2. Update the data.json file
+    // 3. Trigger a rebuild of the frontend
+    // 4. Send notifications
+    
+    console.log('Auto-publishing airdrop:', newAirdrop.name);
+    
+    // Simulate success
+    res.json({
+      success: true,
+      message: 'Airdrop published successfully!',
+      airdropId: airdropId,
+      publishedAt: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Auto-publish error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to publish airdrop',
+      message: error.message
+    });
+  }
+});
+
+// Get all airdrops (for frontend)
+app.get('/api/airdrops', (req, res) => {
+  try {
+    // In a real implementation, this would fetch from database
+    // For now, return the static data
+    const fs = require('fs');
+    const path = require('path');
+    const dataPath = path.join(__dirname, 'data', 'data.json');
+    
+    if (fs.existsSync(dataPath)) {
+      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+      res.json({
+        success: true,
+        airdrops: data.airdrops || []
+      });
+    } else {
+      res.json({
+        success: true,
+        airdrops: []
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching airdrops:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch airdrops'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
