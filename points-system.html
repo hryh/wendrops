@@ -573,7 +573,20 @@
         
       } catch (error) {
         console.error('Failed to connect wallet:', error);
-        showNotification(`Failed to connect wallet: ${error.message}`, 'error');
+        
+        // More user-friendly error messages
+        let errorMessage = error.message;
+        if (error.message.includes('User rejected')) {
+          errorMessage = 'Connection cancelled by user';
+        } else if (error.message.includes('not detected') || error.message.includes('not found')) {
+          errorMessage = 'Wallet not found. Please install the wallet extension and try again.';
+        } else if (error.message.includes('WalletConnect')) {
+          errorMessage = 'WalletConnect not available. Please try another wallet or refresh the page.';
+        } else if (error.message.includes('not available')) {
+          errorMessage = 'Wallet not available. Please install the wallet extension.';
+        }
+        
+        showNotification(`Failed to connect wallet: ${errorMessage}`, 'error');
       }
     }
 
@@ -594,7 +607,7 @@
         // Initialize WalletConnect provider
         walletConnectProvider = new WalletConnectProvider.default({
           rpc: {
-            1: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID',
+            1: 'https://eth.llamarpc.com',
             137: 'https://polygon-rpc.com',
             56: 'https://bsc-dataseed.binance.org',
             42161: 'https://arb1.arbitrum.io/rpc',
@@ -612,7 +625,13 @@
         return walletConnectProvider;
       } catch (error) {
         console.error('WalletConnect error:', error);
-        throw new Error('WalletConnect connection failed. Please make sure you have a mobile wallet app installed.');
+        if (error.message.includes('User rejected')) {
+          throw new Error('Connection cancelled by user');
+        } else if (error.message.includes('not available')) {
+          throw new Error('WalletConnect not available. Please refresh the page and try again.');
+        } else {
+          throw new Error('WalletConnect connection failed. Please make sure you have a mobile wallet app installed.');
+        }
       }
     }
 
