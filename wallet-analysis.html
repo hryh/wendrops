@@ -12,6 +12,34 @@
     if (performance.navigation.type === 1) {
       console.log('Page refreshed - cache cleared');
     }
+    
+    // Ensure ethers is loaded
+    window.addEventListener('load', function() {
+      const statusDiv = document.getElementById('libraryStatus');
+      
+      if (typeof ethers === 'undefined') {
+        console.error('Ethers library failed to load, retrying...');
+        statusDiv.classList.remove('hidden');
+        statusDiv.textContent = 'Retrying blockchain library...';
+        
+        // Retry loading ethers
+        const script = document.createElement('script');
+        script.src = 'https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js';
+        script.onload = function() {
+          console.log('Ethers library loaded successfully on retry');
+          statusDiv.classList.add('hidden');
+        };
+        script.onerror = function() {
+          console.error('Failed to load ethers library even on retry');
+          statusDiv.textContent = 'Failed to load blockchain library. Please refresh the page.';
+          statusDiv.classList.remove('hidden');
+        };
+        document.head.appendChild(script);
+      } else {
+        console.log('Ethers library loaded successfully');
+        statusDiv.classList.add('hidden');
+      }
+    });
   </script>
   <script>
     tailwind.config = {
@@ -105,6 +133,9 @@
         <button id="analyzeBtn" class="btn-primary px-8 py-3 text-lg">
           Analyze Wallet
         </button>
+        <div id="libraryStatus" class="mt-2 text-sm text-white/60 hidden">
+          Loading blockchain library...
+        </div>
       </div>
     </div>
 
@@ -234,6 +265,12 @@
         return;
       }
 
+      // Check if ethers is loaded
+      if (typeof ethers === 'undefined') {
+        alert('Blockchain library is still loading. Please wait a moment and try again.');
+        return;
+      }
+
       try {
         // Show loading
         document.getElementById('loadingState').classList.remove('hidden');
@@ -242,6 +279,7 @@
         console.log('🔍 Starting real blockchain analysis...');
         console.log('Address:', address);
         console.log('Chain:', chain);
+        console.log('Ethers available:', typeof ethers !== 'undefined');
 
         // Get provider
         currentProvider = getProvider(chain);
