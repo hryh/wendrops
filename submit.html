@@ -114,14 +114,55 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="text-center mb-12">
+    <!-- Authentication Section -->
+    <div id="authSection" class="text-center mb-12">
       <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
         Submit Your Airdrop
       </h2>
-      <p class="text-lg text-white/70 max-w-2xl mx-auto">
-        Share your crypto airdrop with the community. Fill out the form below to get your project listed on Airdrop Hub.
+      <p class="text-lg text-white/70 max-w-2xl mx-auto mb-8">
+        Submit airdrops are currently restricted to whitelisted users only.
       </p>
+      
+      <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 max-w-md mx-auto">
+        <div class="mb-6">
+          <svg class="w-16 h-16 text-yellow-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          <h3 class="text-2xl font-bold text-white mb-2">Whitelist Required</h3>
+          <p class="text-white/70 mb-6">Enter your access key to submit airdrops</p>
+        </div>
+        
+        <div class="space-y-4">
+          <input 
+            type="password" 
+            id="accessKey" 
+            placeholder="Enter access key..." 
+            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button 
+            id="authBtn" 
+            class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Verify Access
+          </button>
+        </div>
+        
+        <div id="authError" class="mt-4 text-red-400 text-sm hidden">
+          Invalid access key. Please try again.
+        </div>
+      </div>
     </div>
+
+    <!-- Submit Form (Hidden by default) -->
+    <div id="submitForm" class="hidden">
+      <div class="text-center mb-12">
+        <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          Submit Your Airdrop
+        </h2>
+        <p class="text-lg text-white/70 max-w-2xl mx-auto">
+          Share your crypto airdrop with the community. Fill out the form below to get your project listed on Airdrop Hub.
+        </p>
+      </div>
 
     <div class="gridish">
       <!-- Form -->
@@ -346,9 +387,58 @@
         </div>
       </aside>
     </div>
+    </div> <!-- Close submitForm div -->
   </main>
 
   <script>
+    // Authentication system
+    const ACCESS_KEY = 'airdrop2024'; // Change this to your desired access key
+    
+    function checkAuth() {
+      const authSection = document.getElementById('authSection');
+      const submitForm = document.getElementById('submitForm');
+      const storedKey = localStorage.getItem('airdrop_access_key');
+      
+      if (storedKey === ACCESS_KEY) {
+        authSection.classList.add('hidden');
+        submitForm.classList.remove('hidden');
+        return true;
+      }
+      return false;
+    }
+    
+    function authenticate() {
+      const accessKey = document.getElementById('accessKey').value;
+      const authError = document.getElementById('authError');
+      
+      if (accessKey === ACCESS_KEY) {
+        localStorage.setItem('airdrop_access_key', accessKey);
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('submitForm').classList.remove('hidden');
+        authError.classList.add('hidden');
+      } else {
+        authError.classList.remove('hidden');
+        document.getElementById('accessKey').value = '';
+      }
+    }
+    
+    // Initialize authentication check
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) {
+        // Show auth form
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('submitForm').classList.add('hidden');
+      }
+      
+      // Add event listeners
+      document.getElementById('authBtn').addEventListener('click', authenticate);
+      document.getElementById('accessKey').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          authenticate();
+        }
+      });
+    });
+
     function isValidISODate(value) {
       if (typeof value !== 'string') return false;
       const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
