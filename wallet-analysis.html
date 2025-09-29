@@ -111,10 +111,11 @@
             <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">🪂</span>
             <span>Airdrop Hub</span>
           </a>
-          <nav class="hidden md:flex space-x-2">
+          <nav class="hidden md:flex space-x-2 items-center">
             <a href="index.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Home</a>
             <a href="points-system.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Points System</a>
             <a href="wallet-analysis.html" class="px-3 py-1.5 rounded-lg border border-white/20 bg-white/10">Wallet Analysis</a>
+            <button id="toggleTheme" class="ml-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition">Toggle Theme</button>
           </nav>
         </div>
       </div>
@@ -122,14 +123,20 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Floating Points Widget -->
+    <div id="pointsWidget" class="hidden fixed right-4 bottom-4 z-40">
+      <div class="rounded-xl border border-white/10 bg-black/50 backdrop-blur px-4 py-3 shadow-glow">
+        <div class="text-xs text-white/60">Your Points</div>
+        <div id="pointsWidgetValue" class="text-2xl font-bold">0</div>
+        <div id="pointsWidgetAddr" class="text-[11px] text-white/50 mt-1">-</div>
+      </div>
+    </div>
     <!-- Hero Section -->
     <div class="text-center mb-12">
       <h1 class="text-4xl sm:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
         Wallet Analysis
       </h1>
-      <div class="bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-2 mb-4 inline-block">
-        <span class="text-red-400 font-semibold">🚀 NEW VERSION v3.0 - REAL BLOCKCHAIN DATA - NO FAKE DATA</span>
-      </div>
+      
       <p class="text-lg text-white/70 max-w-2xl mx-auto">
         Get real blockchain data and insights about any wallet address across multiple networks.
       </p>
@@ -225,6 +232,37 @@
   </main>
 
   <script>
+    // Light mode inversion hack
+    (function(){
+      const style = document.createElement('style');
+      style.textContent = `html.light { filter: invert(1) hue-rotate(180deg); } html.light img, html.light video, html.light iframe { filter: invert(1) hue-rotate(180deg); }`;
+      document.head.appendChild(style);
+      try { const saved = localStorage.getItem('theme'); if (saved === 'light') document.documentElement.classList.add('light'); } catch {}
+      const btn = document.getElementById('toggleTheme');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const isLight = document.documentElement.classList.toggle('light');
+          try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch {}
+        });
+      }
+    })();
+
+    // Floating points widget updater
+    function updatePointsWidget() {
+      try {
+        const addr = localStorage.getItem('current_user_wallet');
+        const w = document.getElementById('pointsWidget');
+        if (!addr || !w) return;
+        const user = JSON.parse(localStorage.getItem('user_' + addr) || '{}');
+        const points = user.totalPoints ?? 0;
+        const val = document.getElementById('pointsWidgetValue');
+        const ad = document.getElementById('pointsWidgetAddr');
+        if (val && ad) { val.textContent = String(points); ad.textContent = addr.slice(0,6)+'…'+addr.slice(-4); }
+        w.classList.remove('hidden');
+      } catch {}
+    }
+    window.addEventListener('storage', (e) => { if (!e.key) return; if (e.key.startsWith('user_') || e.key === 'current_user_wallet') updatePointsWidget(); });
+    updatePointsWidget();
     // Real blockchain RPC endpoints
     const RPC_ENDPOINTS = {
       ethereum: 'https://eth.llamarpc.com',

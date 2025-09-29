@@ -165,10 +165,12 @@
   <!-- Notification System -->
   <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-  <!-- Version Indicator -->
-  <div class="max-w-6xl mx-auto px-4 py-2">
-    <div class="bg-green-500/20 border border-green-500/30 rounded-lg px-4 py-2 text-center">
-      <span class="text-green-400 font-semibold">✅ Updated to v3.0 - Real Blockchain Data & 6 Wallet Options</span>
+  <!-- Floating Points Widget -->
+  <div id="pointsWidget" class="hidden fixed right-4 bottom-4 z-40">
+    <div class="rounded-xl border border-white/10 bg-black/50 backdrop-blur px-4 py-3 shadow-glow">
+      <div class="text-xs text-white/60">Your Points</div>
+      <div id="pointsWidgetValue" class="text-2xl font-bold">0</div>
+      <div id="pointsWidgetAddr" class="text-[11px] text-white/50 mt-1">-</div>
     </div>
   </div>
 
@@ -347,12 +349,56 @@
   </div>
 
   <script>
+    // Light mode inversion hack (quick white theme)
+    const style = document.createElement('style');
+    style.textContent = `
+      html.light { filter: invert(1) hue-rotate(180deg); }
+      html.light img, html.light video, html.light iframe { filter: invert(1) hue-rotate(180deg); }
+    `;
+    document.head.appendChild(style);
+
     (function showSubmitIfOwner() {
       try {
         const isOwner = localStorage.getItem('owner_access') === 'true';
         if (isOwner) document.getElementById('submitLink').classList.remove('hidden');
       } catch {}
     })();
+
+    // Global theme toggle (persisted)
+    (function initTheme() {
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light') document.documentElement.classList.add('light');
+      } catch {}
+      const btn = document.getElementById('toggleTheme');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const isLight = document.documentElement.classList.toggle('light');
+          try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch {}
+        });
+      }
+    })();
+
+    // Floating points widget updater
+    function updatePointsWidget() {
+      try {
+        const addr = localStorage.getItem('current_user_wallet');
+        if (!addr) { document.getElementById('pointsWidget').classList.add('hidden'); return; }
+        const user = JSON.parse(localStorage.getItem('user_' + addr) || '{}');
+        const points = user.totalPoints ?? 0;
+        const val = document.getElementById('pointsWidgetValue');
+        const ad = document.getElementById('pointsWidgetAddr');
+        if (val && ad) {
+          val.textContent = String(points);
+          ad.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+        }
+        document.getElementById('pointsWidget').classList.remove('hidden');
+      } catch {}
+    }
+    window.addEventListener('storage', (e) => {
+      if (e.key && (e.key.startsWith('user_') || e.key === 'current_user_wallet')) updatePointsWidget();
+    });
+    updatePointsWidget();
 
     function saveState() { try { localStorage.setItem('filters', JSON.stringify(state)); } catch {} }
     function restoreState() {
