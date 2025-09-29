@@ -132,22 +132,31 @@
     })();
   </script>
 </head>
-<body class="min-h-screen text-white">
-  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur border-b border-white/10">
+<body class="min-h-screen text-white relative overflow-x-hidden">
+  <!-- Background Orbs / Grid -->
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+    <div class="absolute -top-24 -right-16 w-[38rem] h-[38rem] rounded-full blur-3xl opacity-20" style="background: radial-gradient(circle at 30% 30%, rgba(59,130,246,0.6), transparent 60%);"></div>
+    <div class="absolute -bottom-24 -left-16 w-[34rem] h-[34rem] rounded-full blur-3xl opacity-20" style="background: radial-gradient(circle at 70% 70%, rgba(16,185,129,0.5), transparent 60%);"></div>
+    <div class="absolute inset-0 opacity-[0.06]" style="background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 24px 24px;"></div>
+  </div>
+
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-cyan-300 font-semibold">AD</span>
-          <h1 class="text-lg sm:text-xl font-semibold">Airdrop Hub</h1>
-          <span class="ml-2 text-xs text-white/50">Neon Dark</span>
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-glow">
+            <span class="text-black font-extrabold">🪂</span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Airdrop Hub</h1>
+          <span class="ml-2 text-xs text-white/50">Pro</span>
         </div>
         <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline text-sm">Whitepaper</a>
       </div>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="wallet-analysis.html" class="text-white/60 hover:text-white">Wallet Analysis</a>
-        <a href="points-system.html" class="text-white/60 hover:text-white">Points System</a>
-        <a href="terms.html" class="text-white/60 hover:text-white">Terms</a>
-        <a id="submitLink" href="submit.html" class="text-white/80 hover:text-white hidden">Submit <span class="text-xs text-yellow-400">(Whitelist)</span></a>
+      <nav class="flex items-center gap-2 text-sm">
+        <a href="wallet-analysis.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Wallet Analysis</a>
+        <a href="points-system.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Points System</a>
+        <a href="terms.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Terms</a>
+        <a id="submitLink" href="submit.html" class="px-3 py-1.5 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300 hover:bg-yellow-500/20 transition hidden">Submit <span class="text-xs">(Whitelist)</span></a>
         <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
       </nav>
     </div>
@@ -164,6 +173,43 @@
   </div>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Hero -->
+    <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 mb-6">
+      <div class="absolute right-0 top-0 h-full w-1/2 opacity-20 blur-2xl" style="background: radial-gradient( circle at 30% 50%, rgba(59,130,246,0.5), transparent 50% );"></div>
+      <div class="relative z-10 grid md:grid-cols-2 gap-6 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-xs">Crypto‑Native Discovery • Multi‑Chain</div>
+          <h2 class="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight">Discover, qualify and track airdrops like a pro.</h2>
+          <p class="mt-3 text-white/70">Premium dark UI, on‑chain analytics, quests and a public leaderboard. Built for explorers who want signal over noise.</p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <a href="wallet-analysis.html" class="btn-primary px-5 py-2.5 text-sm font-semibold rounded-xl">Analyze Wallet</a>
+            <a href="points-system.html" class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">Earn Points</a>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="rounded-xl border border-white/10 bg-black/30 p-4 shadow-glow">
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-lg bg-white/5 p-3">
+                <div class="text-white/60">Chains</div>
+                <div class="text-xl font-semibold">7+</div>
+              </div>
+              <div class="rounded-lg bg-white/5 p-3">
+                <div class="text-white/60">Airdrops</div>
+                <div class="text-xl font-semibold">1000+</div>
+              </div>
+              <div class="rounded-lg bg-white/5 p-3">
+                <div class="text-white/60">Quests</div>
+                <div class="text-xl font-semibold">Daily</div>
+              </div>
+              <div class="rounded-lg bg-white/5 p-3">
+                <div class="text-white/60">Leaderboard</div>
+                <div class="text-xl font-semibold">Live</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
     <!-- Daily Picks -->
     <section id="dailyPicksSection" class="mb-6 hidden">
       <div class="flex items-center justify-between">
@@ -257,11 +303,17 @@
       </ul>
     </section>
 
-    <footer class="mt-16 pt-8 border-t border-white/10 text-center">
-      <p class="text-white/60 text-sm">
-        Built for learning. Data is sample only. Always DYOR. • 
-        <a class="text-blue-400 hover:text-blue-300 transition-colors" href="terms.html">Terms</a>
-      </p>
+    <footer class="mt-16 pt-8 border-t border-white/10">
+      <div class="max-w-6xl mx-auto px-2 sm:px-0">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-white/60">
+          <p>© ${new Date().getFullYear?.() || ''} Airdrop Hub. All rights reserved.</p>
+          <div class="flex items-center gap-4">
+            <a class="hover:text-white" href="terms.html">Terms</a>
+            <a class="hover:text-white" href="points-system.html">Leaderboard</a>
+            <a class="hover:text-white" href="wallet-analysis.html">Wallet Analysis</a>
+          </div>
+        </div>
+      </div>
     </footer>
   </main>
 
