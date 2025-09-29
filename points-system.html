@@ -1021,13 +1021,27 @@
       statusDiv.innerHTML = '<div class="text-blue-400">Verifying follow...</div>';
 
       try {
+        // Check if connected to X
+        const xStatus = await fetch('/api/x/status', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ connected: false }));
+        
+        if (!xStatus.connected) {
+          statusDiv.innerHTML = '<div class="text-red-400">✗ Please connect to X first. <a href="/api/x/login" class="text-blue-400 underline">Connect X</a></div>';
+          return;
+        }
+
         // Extract username from URL
         const username = currentVerificationQuest.url.split('/').pop();
         
-        // Use manual verification process
-        const isFollowing = await performManualVerification(username);
+        // Use real verification
+        const response = await fetch('/api/twitter/verify-follow-real', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUsername: username })
+        });
         
-        if (isFollowing) {
+        const result = await response.json();
+        
+        if (result.success && result.isFollowing) {
           // Mark quest as completed
           currentVerificationQuest.completed = true;
           currentVerificationQuest.current = currentVerificationQuest.target;
@@ -1053,7 +1067,7 @@
           }, 2000);
           
         } else {
-          statusDiv.innerHTML = '<div class="text-red-400">✗ Follow not detected. Please make sure you followed the account and try again.</div>';
+          statusDiv.innerHTML = '<div class="text-red-400">✗ Follow not detected. Please follow @' + username + ' and try again.</div>';
         }
         
       } catch (error) {
@@ -1062,199 +1076,15 @@
       }
     }
 
-    async function performManualVerification(username) {
-      // Generate a unique verification code
-      const verificationCode = generateVerificationCode();
-      
-      // Show verification instructions
-      const statusDiv = document.getElementById('verificationStatus');
-      statusDiv.innerHTML = `
-        <div class="text-center">
-          <div class="text-yellow-400 mb-4">🔍 Manual Verification Required</div>
-          <div class="text-sm text-white/70 mb-4">
-            To verify your follow, choose one method:
-          </div>
-          
-          <div class="space-y-4">
-            <!-- Method 1: Username Verification -->
-            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-              <div class="text-sm font-semibold text-white mb-2">Method 1: Username Verification</div>
-              <div class="space-y-2">
-                <input type="text" id="twitterUsername" placeholder="Enter your X username" 
-                       class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50">
-                <div class="text-xs text-white/50">
-                  We'll check if your account follows @${username}
-                </div>
-              </div>
-            </div>
-            
-            <!-- Method 2: Verification Code -->
-            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-              <div class="text-sm font-semibold text-white mb-2">Method 2: Verification Code</div>
-              <div class="space-y-2">
-                <div class="text-xs text-white/60 mb-2">
-                  1. Post this code on your X account:<br>
-                  <span class="text-yellow-400 font-mono text-sm">${verificationCode}</span>
-                </div>
-                <div class="text-xs text-white/60 mb-2">
-                  2. Make sure to mention @${username} in the same post
-                </div>
-                <input type="text" id="verificationCode" placeholder="Enter the verification code" 
-                       class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50">
-              </div>
-            </div>
-          </div>
-          
-          <div class="text-xs text-yellow-400 mt-4">
-            💡 Tip: Make sure your X account is public and you've actually followed @${username}
-          </div>
-        </div>
-      `;
+    // Removed manual verification - now uses only OAuth flow
 
-      // Return a promise that resolves when user provides verification
-      return new Promise((resolve) => {
-        const verifyButton = document.createElement('button');
-        verifyButton.className = 'w-full mt-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200';
-        verifyButton.textContent = 'Verify Follow';
-        
-        verifyButton.addEventListener('click', async () => {
-          const twitterUsername = document.getElementById('twitterUsername').value.trim();
-          const codeInput = document.getElementById('verificationCode').value.trim();
-          
-          if (twitterUsername) {
-            // Method 1: Username verification
-            const isFollowing = await verifyFollowByUsername(twitterUsername, username);
-            resolve(isFollowing);
-          } else if (codeInput) {
-            // Method 2: Verification code
-            const isValidCode = await verifyByCode(codeInput, verificationCode, username);
-            resolve(isValidCode);
-          } else {
-            // Show alternative verification method
-            showAlternativeVerification(username, resolve);
-          }
-        });
-        
-        statusDiv.appendChild(verifyButton);
-      });
-    }
+    // Removed verification code generation
 
-    function generateVerificationCode() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = '';
-      for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    }
+    // Removed code verification
 
-    async function verifyByCode(codeInput, expectedCode, username) {
-      const statusDiv = document.getElementById('verificationStatus');
-      statusDiv.innerHTML = '<div class="text-blue-400">Verifying code...</div>';
+    // Removed username verification
 
-      try {
-        // Simulate verification delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Check if the code matches
-        if (codeInput.toUpperCase() === expectedCode.toUpperCase()) {
-          // Simulate checking if the code was posted with the right mention
-          const codePosted = Math.random() > 0.3; // 70% success rate for code verification
-          
-          if (codePosted) {
-            statusDiv.innerHTML = '<div class="text-green-400">✓ Verification code confirmed! Quest completed!</div>';
-            return true;
-          } else {
-            statusDiv.innerHTML = '<div class="text-red-400">✗ Code not found in your posts. Please make sure you posted it and mentioned @' + username + '</div>';
-            return false;
-          }
-        } else {
-          statusDiv.innerHTML = '<div class="text-red-400">✗ Invalid verification code. Please check and try again.</div>';
-          return false;
-        }
-        
-      } catch (error) {
-        statusDiv.innerHTML = '<div class="text-red-400">✗ Verification failed. Please try again.</div>';
-        return false;
-      }
-    }
-
-    async function verifyFollowByUsername(twitterUsername, targetUsername) {
-      const statusDiv = document.getElementById('verificationStatus');
-      statusDiv.innerHTML = '<div class="text-blue-400">Checking follow status...</div>';
-
-      try {
-        // Prefer real verification when X is connected; fall back to simulator
-        const real = await fetch('/api/x/status', { cache: 'no-store' }).then(r=>r.json()).catch(()=>({connected:false}));
-        const endpoint = real.connected ? '/api/twitter/verify-follow-real' : '/api/twitter/verify-follow';
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            targetUsername: targetUsername,
-            userWallet: userWallet,
-            twitterUsername: twitterUsername
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error('API request failed');
-        }
-        
-        const result = await response.json();
-        
-        if (result.error) {
-          statusDiv.innerHTML = '<div class="text-red-400">✗ ' + result.error + '</div>';
-          return false;
-        }
-        
-        if (result.isFollowing) {
-          statusDiv.innerHTML = '<div class="text-green-400">✓ Follow verified! @' + twitterUsername + ' follows @' + targetUsername + '</div>';
-          return true;
-        } else {
-          statusDiv.innerHTML = '<div class="text-red-400">✗ Follow not found. Please make sure @' + twitterUsername + ' follows @' + targetUsername + ' and try again.</div>';
-          return false;
-        }
-        
-      } catch (error) {
-        console.error('Verification API error:', error);
-        statusDiv.innerHTML = '<div class="text-red-400">✗ Verification failed. Please try again.</div>';
-        return false;
-      }
-    }
-
-    function showAlternativeVerification(username, resolve) {
-      const statusDiv = document.getElementById('verificationStatus');
-      statusDiv.innerHTML = `
-        <div class="text-center">
-          <div class="text-yellow-400 mb-4">📸 Alternative Verification</div>
-          <div class="text-sm text-white/70 mb-4">
-            If you don't want to provide your username, you can:
-          </div>
-          <div class="text-left text-sm text-white/60 space-y-2 mb-4">
-            <div>1. Take a screenshot of your X profile showing you follow @${username}</div>
-            <div>2. Share it in our Discord/Telegram</div>
-            <div>3. Or contact us directly for manual verification</div>
-          </div>
-          <div class="space-y-2">
-            <button onclick="window.open('https://discord.gg/airdrop-hub', '_blank')" 
-                    class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all duration-200">
-              Join Discord for Verification
-            </button>
-            <button onclick="window.open('mailto:support@airdrop-hub.com?subject=Follow Verification&body=I followed @${username} and need verification', '_blank')" 
-                    class="w-full px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-200">
-              Contact Support
-            </button>
-            <button onclick="resolve(false)" 
-                    class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-200">
-              Cancel Verification
-            </button>
-          </div>
-        </div>
-      `;
-    }
+    // Removed alternative verification
 
     async function simulateTwitterFollowVerification(url) {
       // In a real implementation, this would use Twitter API v2
