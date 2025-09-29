@@ -239,6 +239,18 @@
       fantom: { name: 'Fantom', symbol: 'FTM', decimals: 18, explorer: 'https://ftmscan.com' }
     };
 
+    // Etherscan-compatible API endpoints for recent transactions (supports CORS)
+    const EXPLORER_API = {
+      ethereum: 'https://api.etherscan.io/api',
+      base: 'https://api.basescan.org/api',
+      arbitrum: 'https://api.arbiscan.io/api',
+      polygon: 'https://api.polygonscan.com/api',
+      avalanche: 'https://api.snowtrace.io/api',
+      bsc: 'https://api.bscscan.com/api',
+      optimism: 'https://api-optimistic.etherscan.io/api',
+      fantom: 'https://api.ftmscan.com/api'
+    };
+
     let currentProvider = null;
 
     // Initialize
@@ -328,7 +340,7 @@
         // Update UI with real data
         updateWalletOverview(balance, txCount, lastTx, config);
         updateEligibilityScore(eligibilityScore);
-        updateTransactionHistory(address, config.explorer);
+        await updateTransactionHistory(address, chain, config.explorer);
 
         // Show results
         document.getElementById('loadingState').classList.add('hidden');
@@ -422,19 +434,87 @@
       document.getElementById('eligibilityText').textContent = text;
     }
 
-    // Update transaction history
-    function updateTransactionHistory(address, explorer) {
+    // Fetch recent transactions via Etherscan-compatible APIs
+    async function fetchRecentTransactions(address, chain) {
+      try {
+        const apiBase = EXPLORER_API[chain];
+        if (!apiBase) throw new Error('Unsupported chain for explorer API');
+
+        // Optional: Allow API key via localStorage (per-chain) or global
+        const chainKey = (localStorage.getItem(`apiKey_${chain}`) || '').trim();
+        const globalKey = (localStorage.getItem('ETHERSCAN_API_KEY') || '').trim();
+        const apiKey = chainKey || globalKey; // safe to be empty
+
+        const params = new URLSearchParams({
+          module: 'account',
+          action: 'txlist',
+          address: address,
+          startblock: '0',
+          endblock: '99999999',
+          page: '1',
+          offset: '10',
+          sort: 'desc'
+        });
+        if (apiKey) params.append('apikey', apiKey);
+
+        const url = `${apiBase}?${params.toString()}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Explorer API request failed');
+        const data = await res.json();
+        if (data.status !== '1' || !Array.isArray(data.result)) {
+          throw new Error(data.message || 'No transactions found');
+        }
+        return data.result;
+      } catch (err) {
+        console.warn('fetchRecentTransactions failed:', err.message);
+        return [];
+      }
+    }
+
+    // Update transaction history UI (with graceful fallback)
+    async function updateTransactionHistory(address, chain, explorer) {
       const container = document.getElementById('transactionList');
-      container.innerHTML = `
-        <div class="text-center text-white/70 py-4">
-          <p>Transaction history requires more complex implementation</p>
-          <p class="text-sm mt-2">
-            <a href="${explorer}/address/${address}" target="_blank" class="text-blue-400 hover:text-blue-300">
-              View on ${explorer.includes('etherscan') ? 'Etherscan' : 'Block Explorer'}
-            </a>
-          </p>
-        </div>
-      `;
+      container.innerHTML = '<div class="text-white/60">Loading recent transactions...</div>';
+
+      const txs = await fetchRecentTransactions(address, chain);
+      if (!txs || txs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-white/70 py-4">
+            <p>No recent transactions available from API.</p>
+            <p class="text-sm mt-2">
+              <a href="${explorer}/address/${address}" target="_blank" class="text-blue-400 hover:text-blue-300">
+                View full history on explorer
+              </a>
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render list
+      container.innerHTML = '';
+      txs.forEach(tx => {
+        const isOutgoing = tx.from?.toLowerCase() === address.toLowerCase();
+        const valueEth = Number(ethers.utils.formatEther(tx.value || '0'));
+        const time = tx.timeStamp ? new Date(Number(tx.timeStamp) * 1000) : null;
+        const item = document.createElement('a');
+        item.href = `${explorer}/tx/${tx.hash}`;
+        item.target = '_blank';
+        item.className = 'block p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors';
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="min-w-0">
+              <div class="text-white font-semibold truncate">${tx.hash}</div>
+              <div class="text-xs text-white/50 mt-1 truncate">${isOutgoing ? 'Sent' : 'Received'} • From ${formatAddress(tx.from)} to ${formatAddress(tx.to || '0x')}</div>
+            </div>
+            <div class="text-right ml-4">
+              <div class="${isOutgoing ? 'text-red-400' : 'text-green-400'} font-semibold">${isOutgoing ? '-' : '+'}${valueEth.toFixed(6)}</div>
+              <div class="text-xs text-white/50">${time ? time.toLocaleString() : ''}</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
     }
   </script>
 </body>
