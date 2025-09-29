@@ -101,6 +101,9 @@
           <button id="connectWallet" class="btn-primary px-4 py-2 text-sm">
             Connect Wallet
           </button>
+          <button id="connectX" class="px-4 py-2 text-sm rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">
+            Connect X
+          </button>
         </div>
       </div>
     </div>
@@ -116,7 +119,7 @@
       </div>
     </div>
     <!-- Hero Section -->
-    <div class="text-center mb-12">
+      <div class="text-center mb-12">
       <h1 class="text-4xl sm:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
         Points System
       </h1>
@@ -136,6 +139,9 @@
         <p class="text-white/70 mb-6">Connect your wallet to start earning points and tracking your progress.</p>
         <button id="connectWalletBtn" class="btn-primary px-8 py-3">
           Connect Wallet
+        </button>
+        <button id="connectXBtn" class="mt-3 w-full px-8 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">
+          Connect X
         </button>
       </div>
     </div>
@@ -516,6 +522,10 @@
       // Set up event listeners
       document.getElementById('connectWallet').addEventListener('click', openWalletModal);
       document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
+      const connectX = document.getElementById('connectX');
+      const connectXBtn = document.getElementById('connectXBtn');
+      if (connectX) connectX.addEventListener('click', () => window.location.href = '/api/x/login');
+      if (connectXBtn) connectXBtn.addEventListener('click', () => window.location.href = '/api/x/login');
       document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
       document.getElementById('walletInfoBtn').addEventListener('click', openWalletModal);
       document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
@@ -534,6 +544,15 @@
 
       // Load leaderboard
       loadLeaderboard();
+
+      // Check X connection status (optional UI tweaks)
+      try {
+        const st = await fetch('/api/x/status', { cache: 'no-store' }).then(r=>r.json());
+        if (st.connected) {
+          console.log('X connected as', st.user);
+          showNotification('Connected to X', 'success');
+        }
+      } catch {}
     }
 
     // Wallet connection functions
@@ -1165,8 +1184,10 @@
       statusDiv.innerHTML = '<div class="text-blue-400">Checking follow status...</div>';
 
       try {
-        // Use the server API for verification
-        const response = await fetch('/api/twitter/verify-follow', {
+        // Prefer real verification when X is connected; fall back to simulator
+        const real = await fetch('/api/x/status', { cache: 'no-store' }).then(r=>r.json()).catch(()=>({connected:false}));
+        const endpoint = real.connected ? '/api/twitter/verify-follow-real' : '/api/twitter/verify-follow';
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
