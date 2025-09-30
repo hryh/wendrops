@@ -192,16 +192,36 @@ app.get('/api/x/callback', async (req, res) => {
     params.set('redirect_uri', getRedirectUri(req));
     params.set('code_verifier', verifier);
     params.set('client_id', X_CLIENT_ID);
+    
+    // Add client secret for server-side token exchange
+    if (X_CLIENT_SECRET) {
+      params.set('client_secret', X_CLIENT_SECRET);
+    }
 
     const tokenRes = await fetch(X_TOKEN_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       body: params.toString()
     });
+    
+    console.log('Token request details:', {
+      url: X_TOKEN_URL,
+      clientId: X_CLIENT_ID,
+      redirectUri: getRedirectUri(req),
+      hasCode: !!code,
+      hasVerifier: !!verifier,
+      status: tokenRes.status
+    });
+    
     if (!tokenRes.ok) {
       const txt = await tokenRes.text();
-      console.error('Token exchange failed', tokenRes.status, txt);
-      return res.status(500).send('Token exchange failed');
+      console.error('Token exchange failed', {
+        status: tokenRes.status,
+        statusText: tokenRes.statusText,
+        response: txt,
+        requestBody: params.toString()
+      });
+      return res.status(500).send(`Token exchange failed: ${tokenRes.status} - ${txt}`);
     }
     const tokenJson = await tokenRes.json();
     const accessToken = tokenJson.access_token;
