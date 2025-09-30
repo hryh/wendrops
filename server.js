@@ -104,8 +104,25 @@ app.get('/api/x/callback', async (req, res) => {
   try {
     const { code, state } = req.query;
     const cookies = getCookies(req);
-    if (!code || !state || !cookies.x_cv || !cookies.x_state || state !== cookies.x_state) {
-      return res.status(400).send('Invalid auth response');
+    
+    console.log('Callback received:', { 
+      hasCode: !!code, 
+      hasState: !!state, 
+      hasCv: !!cookies.x_cv, 
+      hasStateCookie: !!cookies.x_state,
+      stateMatch: state === cookies.x_state
+    });
+    
+    if (!code || !state) {
+      return res.status(400).send('Missing code or state parameter');
+    }
+    
+    if (!cookies.x_cv || !cookies.x_state) {
+      return res.status(400).send('Missing PKCE cookies - please try again');
+    }
+    
+    if (state !== cookies.x_state) {
+      return res.status(400).send('State mismatch - possible CSRF attack');
     }
 
     const params = new URLSearchParams();
