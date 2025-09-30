@@ -66,7 +66,7 @@ const X_CLIENT_ID = process.env.X_CLIENT_ID || '';
 const X_CLIENT_SECRET = process.env.X_CLIENT_SECRET || '';
 const X_SCOPE = ['tweet.read','users.read','follows.read','offline.access'].join(' ');
 const X_AUTH_URL = 'https://twitter.com/i/oauth2/authorize';
-const X_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
+const X_TOKEN_URL = 'https://api.x.com/oauth2/token';
 const X_API = 'https://api.twitter.com/2';
 
 // --- X OAuth 2.0 (PKCE) ---
@@ -150,8 +150,10 @@ app.get('/api/x/callback', async (req, res) => {
     let stateValid = false;
     
     // Try to parse verifier from state parameter (format: "state:verifier")
-    if (state.includes(':')) {
-      const [statePart, verifierPart] = state.split(':', 2);
+    // Note: state might be URL encoded, so we need to decode it first
+    const decodedState = decodeURIComponent(state);
+    if (decodedState.includes(':')) {
+      const [statePart, verifierPart] = decodedState.split(':', 2);
       if (verifierPart) {
         verifier = verifierPart;
         stateValid = true;
@@ -217,7 +219,8 @@ app.get('/api/x/callback', async (req, res) => {
       redirectUri: getRedirectUri(req),
       hasCode: !!code,
       hasVerifier: !!verifier,
-      status: tokenRes.status
+      status: tokenRes.status,
+      authHeader: `Basic ${credentials.substring(0, 10)}...` // Show first 10 chars of credentials
     });
     
     if (!tokenRes.ok) {
