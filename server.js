@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Simple in-memory store for PKCE data (in production, use Redis)
+const pkceStore = new Map();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -77,8 +80,26 @@ app.get('/api/x/login', (req, res) => {
     }
     const { verifier, challenge } = generatePKCE();
     const state = base64url(crypto.randomBytes(16));
-    setCookie(res, 'x_cv', verifier, { maxAge: 600 });
-    setCookie(res, 'x_state', state, { maxAge: 600 });
+    
+    // Store in both cookies and memory (fallback)
+    setCookie(res, 'x_cv', verifier, { 
+      maxAge: 600, 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'lax',
+      path: '/'
+    });
+    setCookie(res, 'x_state', state, { 
+      maxAge: 600, 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'lax',
+      path: '/'
+    });
+    
+    // Also store in memory as fallback
+    pkceStore.set(state, { verifier, challenge });
+    setTimeout(() => pkceStore.delete(state), 600000); // Clean up after 10 minutes
 
     const redirectUri = getRedirectUri(req);
     console.log('Using redirect URI:', redirectUri);
@@ -117,11 +138,21 @@ app.get('/api/x/callback', async (req, res) => {
       return res.status(400).send('Missing code or state parameter');
     }
     
-    if (!cookies.x_cv || !cookies.x_state) {
-      return res.status(400).send('Missing PKCE cookies - please try again');
+    // Try to get PKCE data from cookies first, then memory store
+    let verifier = cookies.x_cv;
+    let storedState = cookies.x_state;
+    
+    if (!verifier || !storedState) {
+      // Fallback to memory store
+      const pkceData = pkceStore.get(state);
+      if (!pkceData) {
+        return res.status(400).send('Missing PKCE data - please try again');
+      }
+      verifier = pkceData.verifier;
+      storedState = state; // If we found it in memory, state matches
     }
     
-    if (state !== cookies.x_state) {
+    if (state !== storedState) {
       return res.status(400).send('State mismatch - possible CSRF attack');
     }
 
@@ -129,7 +160,7 @@ app.get('/api/x/callback', async (req, res) => {
     params.set('grant_type', 'authorization_code');
     params.set('code', String(code));
     params.set('redirect_uri', getRedirectUri(req));
-    params.set('code_verifier', cookies.x_cv);
+    params.set('code_verifier', verifier);
     params.set('client_id', X_CLIENT_ID);
 
     const tokenRes = await fetch(X_TOKEN_URL, {
@@ -157,9 +188,22 @@ app.get('/api/x/callback', async (req, res) => {
     setCookie(res, 'x_token', accessToken, { maxAge: 60 * 60 });
     if (userId) setCookie(res, 'x_uid', userId, { maxAge: 60 * 60 });
     if (userName) setCookie(res, 'x_uname', userName, { maxAge: 60 * 60 });
-    // Clear PKCE cookies
-    setCookie(res, 'x_cv', '', { maxAge: 0 });
-    setCookie(res, 'x_state', '', { maxAge: 0 });
+    // Clear PKCE cookies and memory store
+    setCookie(res, 'x_cv', '', { 
+      maxAge: 0, 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'lax',
+      path: '/'
+    });
+    setCookie(res, 'x_state', '', { 
+      maxAge: 0, 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'lax',
+      path: '/'
+    });
+    pkceStore.delete(state); // Clean up memory store
 
     res.redirect('/points-system.html?x=connected');
   } catch (e) {
