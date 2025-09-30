@@ -69,6 +69,9 @@ const X_API = 'https://api.twitter.com/2';
 // --- X OAuth 2.0 (PKCE) ---
 app.get('/api/x/login', (req, res) => {
   try {
+    console.log('X_CLIENT_ID:', X_CLIENT_ID ? 'Set' : 'Not set');
+    console.log('X_REDIRECT_URI:', process.env.X_REDIRECT_URI);
+    
     if (!X_CLIENT_ID) {
       return res.status(500).send('X client is not configured');
     }
@@ -77,18 +80,23 @@ app.get('/api/x/login', (req, res) => {
     setCookie(res, 'x_cv', verifier, { maxAge: 600 });
     setCookie(res, 'x_state', state, { maxAge: 600 });
 
+    const redirectUri = getRedirectUri(req);
+    console.log('Using redirect URI:', redirectUri);
+
     const url = new URL(X_AUTH_URL);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('client_id', X_CLIENT_ID);
-    url.searchParams.set('redirect_uri', getRedirectUri(req));
+    url.searchParams.set('redirect_uri', redirectUri);
     url.searchParams.set('scope', X_SCOPE);
     url.searchParams.set('state', state);
     url.searchParams.set('code_challenge', challenge);
     url.searchParams.set('code_challenge_method', 'S256');
+    
+    console.log('Redirecting to:', url.toString());
     res.redirect(url.toString());
   } catch (e) {
     console.error('x/login error', e);
-    res.status(500).send('Auth init failed');
+    res.status(500).send('Auth init failed: ' + e.message);
   }
 });
 
