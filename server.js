@@ -59,7 +59,10 @@ function generatePKCE() {
 }
 
 function getRedirectUri(req) {
-  return process.env.X_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/x/callback`;
+  const envUri = process.env.X_REDIRECT_URI;
+  const constructedUri = `${req.protocol}://${req.get('host')}/api/x/callback`;
+  console.log('Redirect URI options:', { envUri, constructedUri, using: envUri || constructedUri });
+  return envUri || constructedUri;
 }
 
 const X_CLIENT_ID = process.env.X_CLIENT_ID || '';
@@ -194,6 +197,13 @@ app.get('/api/x/callback', async (req, res) => {
     params.set('redirect_uri', getRedirectUri(req));
     params.set('code_verifier', verifier);
     // Note: client_id and client_secret are now in the Authorization header
+    
+    console.log('Authorization code details:', {
+      code: String(code),
+      codeLength: String(code).length,
+      codeType: typeof code,
+      isString: typeof code === 'string'
+    });
 
     // Validate credentials
     if (!X_CLIENT_ID || !X_CLIENT_SECRET) {
@@ -218,9 +228,12 @@ app.get('/api/x/callback', async (req, res) => {
       clientId: X_CLIENT_ID,
       redirectUri: getRedirectUri(req),
       hasCode: !!code,
+      codeLength: code ? code.length : 0,
       hasVerifier: !!verifier,
+      verifierLength: verifier ? verifier.length : 0,
       status: tokenRes.status,
-      authHeader: `Basic ${credentials.substring(0, 10)}...` // Show first 10 chars of credentials
+      authHeader: `Basic ${credentials.substring(0, 10)}...`, // Show first 10 chars of credentials
+      requestBody: params.toString()
     });
     
     if (!tokenRes.ok) {
