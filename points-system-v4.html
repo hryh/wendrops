@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Points System - Airdrop Hub v4.0 (NO CSP)</title>
+  <meta name="description" content="Earn points and climb the leaderboard on Airdrop Hub. Complete daily quests and boost your airdrop eligibility.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Reuse hardened ethers loader here too
+    window.__ethersReady = (function() {
+      if (window.__ethersReady) return window.__ethersReady;
+      let resolveFn, rejectFn;
+      const p = new Promise((res, rej) => { resolveFn = res; rejectFn = rej; });
+      function load(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.crossOrigin = 'anonymous';
+          s.onload = () => resolve(true);
+          s.onerror = () => reject(new Error('Failed: ' + src));
+          document.head.appendChild(s);
+        });
+      }
+      (async () => {
+        if (window.ethers) { resolveFn(true); return; }
+        const cdns = [
+          'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js',
+          'https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js',
+          'https://cdn.skypack.dev/ethers@5.7.2?min'
+        ];
+        const deadline = Date.now() + 15000;
+        for (const url of cdns) {
+          try {
+            await load(url);
+            if (window.ethers) { console.log('ethers loaded from', url); resolveFn(true); return; }
+          } catch (e) { console.warn('ethers load failed', url); }
+          if (Date.now() > deadline) break;
+        }
+        rejectFn(new Error('ethers failed to load'));
+      })();
+      return p;
+    })();
+  </script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <script>
+    // Force refresh cache
+    if (performance.navigation.type === 1) {
+      console.log('Page refreshed - cache cleared');
+    }
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'crypto-gold': '#FFD700',
+            'crypto-blue': '#00D4FF',
+            'crypto-purple': '#8B5CF6',
+            'dark-bg': '#0A0A0A',
+            'dark-card': '#1A1A1A',
+            'dark-border': '#2A2A2A'
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite',
+            'spin-slow': 'spin 3s linear infinite'
+          }
+        }
+      },
+      darkMode: 'class'
+    }
+  </script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%);
+      min-height: 100vh;
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .gradient-orb {
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(0, 212, 255, 0.1) 50%, transparent 70%);
+    }
+  </style>
+</head>
+<body class="dark bg-dark-bg text-white">
+  <!-- Floating Points Widget -->
+  <div id="floatingPointsWidget" class="fixed top-4 right-4 z-50 bg-crypto-purple text-white px-4 py-2 rounded-lg shadow-lg font-bold text-lg hidden">
+    <span id="userPointsDisplay">0</span> Points
+  </div>
+
+  <!-- Header -->
+  <header class="bg-dark-card/80 backdrop-blur-md border-b border-dark-border sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-2xl font-bold bg-gradient-to-r from-crypto-gold to-crypto-blue bg-clip-text text-transparent">
+            Airdrop Hub
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="index.html" class="hover:text-crypto-blue transition-colors">Home</a>
+            <a href="wallet-analysis-v4.html" class="hover:text-crypto-blue transition-colors">Wallet Analysis</a>
+            <a href="submit.html" class="hover:text-crypto-blue transition-colors">Submit Airdrop</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="themeToggle" class="p-2 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path id="themeIcon" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+            </svg>
+          </button>
+          <div id="walletInfo" class="hidden items-center space-x-2 bg-dark-border px-3 py-2 rounded-lg">
+            <span id="walletIcon" class="text-lg">🔗</span>
+            <span id="walletName" class="font-medium">Connected</span>
+            <button id="disconnectWallet" class="text-red-400 hover:text-red-300">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-crypto-gold via-crypto-blue to-crypto-purple bg-clip-text text-transparent">
+        Points System v4.0
+      </h1>
+      <p class="text-xl text-gray-300 mb-8">Earn points, complete quests, and boost your airdrop eligibility</p>
+      <div class="inline-block bg-gradient-to-r from-crypto-purple to-crypto-blue text-white px-6 py-3 rounded-full font-bold text-lg">
+        🚀 NO CSP VERSION - ALL SCRIPTS WORK
+      </div>
+    </div>
+
+    <!-- Points Overview -->
+    <div class="grid md:grid-cols-3 gap-6 mb-12">
+      <div class="glassmorphism rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-crypto-gold mb-2" id="totalPoints">0</div>
+        <div class="text-gray-300">Total Points</div>
+      </div>
+      <div class="glassmorphism rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-crypto-blue mb-2" id="dailyPoints">0</div>
+        <div class="text-gray-300">Daily Points</div>
+      </div>
+      <div class="glassmorphism rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-crypto-purple mb-2" id="rank">#1</div>
+        <div class="text-gray-300">Your Rank</div>
+      </div>
+    </div>
+
+    <!-- Wallet Connection -->
+    <div class="glassmorphism rounded-xl p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-center">Connect Your Wallet</h2>
+      <div class="text-center">
+        <button id="connectWalletBtn" class="bg-gradient-to-r from-crypto-purple to-crypto-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all transform hover:scale-105">
+          Connect Wallet
+        </button>
+        <p class="text-gray-400 mt-4">Connect to start earning points and completing quests</p>
+      </div>
+    </div>
+
+    <!-- Daily Quests -->
+    <div class="glassmorphism rounded-xl p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-center">Daily Quests</h2>
+      <div id="dailyQuests" class="space-y-4">
+        <!-- Quests will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- X Integration -->
+    <div class="glassmorphism rounded-xl p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-center">X (Twitter) Integration</h2>
+      <div class="text-center">
+        <div class="flex items-center justify-center gap-3">
+          <button id="connectXBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all transform hover:scale-105">
+          Connect X Account
+          </button>
+          <button id="disconnectXBtn" class="px-4 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold hidden">
+            Disconnect
+          </button>
+        </div>
+        <p class="text-gray-400 mt-4">Connect your X account to complete social quests</p>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="glassmorphism rounded-xl p-8">
+      <h2 class="text-2xl font-bold mb-6 text-center">Leaderboard</h2>
+      <div id="leaderboard" class="space-y-4">
+        <!-- Leaderboard will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark-card/80 backdrop-blur-md border-t border-dark-border mt-16">
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center text-gray-400">
+        <p>&copy; 2024 Airdrop Hub. All rights reserved.</p>
+        <p class="mt-2">Discover, track, and participate in the best crypto airdrops.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Wallet Selection Modal -->
+  <div id="walletModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="glassmorphism rounded-xl p-8 max-w-md w-full mx-4">
+      <h3 class="text-2xl font-bold mb-6 text-center">Select Wallet</h3>
+      <div class="space-y-4">
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="metamask">
+          <span class="text-2xl">🦊</span>
+          <span class="font-medium">MetaMask</span>
+        </button>
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="walletconnect">
+          <span class="text-2xl">🔗</span>
+          <span class="font-medium">WalletConnect</span>
+        </button>
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="coinbase">
+          <span class="text-2xl">🔵</span>
+          <span class="font-medium">Coinbase Wallet</span>
+        </button>
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="trust">
+          <span class="text-2xl">🛡️</span>
+          <span class="font-medium">Trust Wallet</span>
+        </button>
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="okx">
+          <span class="text-2xl">⚡</span>
+          <span class="font-medium">OKX Wallet</span>
+        </button>
+        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="phantom">
+          <span class="text-2xl">👻</span>
+          <span class="font-medium">Phantom</span>
+        </button>
+      </div>
+      <button id="closeWalletModal" class="w-full mt-6 py-3 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let userData = {
+      points: 0,
+      dailyPoints: 0,
+      rank: 1,
+      walletConnected: false,
+      walletType: null,
+      walletAddress: null,
+      xConnected: false
+    };
+
+    let walletProvider = null;
+    let walletConnectProvider = null;
+
+    // Points configuration
+    const POINTS_CONFIG = {
+      dailyQuests: [
+        { id: 'visit', title: 'Visit Daily', description: 'Visit the platform', points: 10, completed: false },
+        { id: 'wallet', title: 'Connect Wallet', description: 'Connect your wallet', points: 25, completed: false },
+        { id: 'x_follow', title: 'Follow on X', description: 'Follow @AirdropHub on X', points: 50, completed: false },
+        { id: 'share', title: 'Share Airdrop', description: 'Share an airdrop on social media', points: 30, completed: false }
+      ],
+      multipliers: {
+        wallet: 1.2,
+        x: 1.5,
+        premium: 2.0
+      }
+    };
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserData();
+      updateUserInterface();
+      initializeDailyQuests();
+      initializeEventListeners();
+      initializeTheme();
+      refreshXStatus();
+    });
+
+    // Load user data from localStorage
+    function loadUserData() {
+      const saved = localStorage.getItem('airdropHubUserData');
+      if (saved) {
+        userData = { ...userData, ...JSON.parse(saved) };
+      }
+    }
+
+    // Save user data to localStorage
+    function saveUserData() {
+      localStorage.setItem('airdropHubUserData', JSON.stringify(userData));
+    }
+
+    // Update the user interface
+    function updateUserInterface() {
+      document.getElementById('totalPoints').textContent = userData.points;
+      document.getElementById('dailyPoints').textContent = userData.dailyPoints;
+      document.getElementById('rank').textContent = `#${userData.rank}`;
+      document.getElementById('userPointsDisplay').textContent = userData.points;
+
+      // Show/hide floating points widget
+      const floatingWidget = document.getElementById('floatingPointsWidget');
+      if (userData.points > 0) {
+        floatingWidget.classList.remove('hidden');
+      } else {
+        floatingWidget.classList.add('hidden');
+      }
+
+      // Update wallet info
+      const walletInfo = document.getElementById('walletInfo');
+      const connectBtn = document.getElementById('connectWalletBtn');
+      
+      if (userData.walletConnected) {
+        walletInfo.classList.remove('hidden');
+        walletInfo.classList.add('flex');
+        connectBtn.textContent = 'Wallet Connected';
+        connectBtn.disabled = true;
+        connectBtn.classList.add('bg-green-600', 'cursor-not-allowed');
+        connectBtn.classList.remove('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+      } else {
+        walletInfo.classList.add('hidden');
+        walletInfo.classList.remove('flex');
+        connectBtn.textContent = 'Connect Wallet';
+        connectBtn.disabled = false;
+        connectBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+        connectBtn.classList.add('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+      }
+
+      // Update X connection
+      const xBtn = document.getElementById('connectXBtn');
+      if (userData.xConnected) {
+        xBtn.textContent = 'X Connected';
+        xBtn.disabled = true;
+        xBtn.classList.add('bg-green-600', 'cursor-not-allowed');
+        xBtn.classList.remove('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+      } else {
+        xBtn.textContent = 'Connect X Account';
+        xBtn.disabled = false;
+        xBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+        xBtn.classList.add('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+      }
+    }
+
+    // Initialize daily quests
+    function initializeDailyQuests() {
+      const questsContainer = document.getElementById('dailyQuests');
+      questsContainer.innerHTML = '';
+
+      POINTS_CONFIG.dailyQuests.forEach(quest => {
+        const questElement = document.createElement('div');
+        questElement.className = `glassmorphism rounded-lg p-4 ${quest.completed ? 'opacity-50' : ''}`;
+        questElement.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg">${quest.title}</h3>
+              <p class="text-gray-400">${quest.description}</p>
+            </div>
+        <div class="text-right">
+          <div class="text-crypto-gold font-bold">+${quest.points} pts</div>
+          ${quest.id === 'x_follow' && !quest.completed ? '<button id="btnFollowX" class="mt-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm">Verify Follow</button>' : ''}
+          ${quest.completed ? '<div class="text-green-400 text-sm">✓ Completed</div>' : ''}
+        </div>
+          </div>
+        `;
+        questsContainer.appendChild(questElement);
+      });
+
+      // Wire follow verification button if present
+      const btn = document.getElementById('btnFollowX');
+      if (btn) {
+        btn.addEventListener('click', verifyFollowQuest);
+      }
+    }
+
+    // Initialize event listeners
+    function initializeEventListeners() {
+      // Wallet connection
+      document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
+      document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+      document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+
+      // Wallet options
+      document.querySelectorAll('.wallet-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const walletType = e.currentTarget.dataset.wallet;
+          connectWallet(walletType);
+        });
+      });
+
+      // X connection
+      document.getElementById('connectXBtn').addEventListener('click', connectX);
+      document.getElementById('disconnectXBtn').addEventListener('click', disconnectX);
+    }
+
+    // Initialize theme
+    function initializeTheme() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    }
+
+    // Wallet modal functions
+    function openWalletModal() {
+      document.getElementById('walletModal').classList.remove('hidden');
+    }
+
+    function closeWalletModal() {
+      document.getElementById('walletModal').classList.add('hidden');
+    }
+
+    // Connect wallet
+    async function connectWallet(walletType) {
+      try {
+        closeWalletModal();
+        
+        switch(walletType) {
+          case 'metamask':
+            await connectMetaMask();
+            break;
+          case 'walletconnect':
+            await connectWalletConnect();
+            break;
+          case 'coinbase':
+            await connectCoinbase();
+            break;
+          case 'trust':
+            await connectTrust();
+            break;
+          case 'okx':
+            await connectOKX();
+            break;
+          case 'phantom':
+            await connectPhantom();
+            break;
+        }
+      } catch (error) {
+        console.error('Wallet connection failed:', error);
+        alert('Wallet connection failed. Please try again.');
+      }
+    }
+
+    // MetaMask connection
+    async function connectMetaMask() {
+      if (typeof window.ethereum !== 'undefined') {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        userData.walletConnected = true;
+        userData.walletType = 'MetaMask';
+        userData.walletAddress = accounts[0];
+        walletProvider = window.ethereum;
+        
+        // Complete wallet quest
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('MetaMask not installed');
+      }
+    }
+
+    // WalletConnect connection
+    async function connectWalletConnect() {
+      if (typeof WalletConnectProvider !== 'undefined') {
+        walletConnectProvider = new WalletConnectProvider({
+          rpc: {
+            1: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID',
+            137: 'https://polygon-rpc.com',
+            56: 'https://bsc-dataseed.binance.org'
+          }
+        });
+        
+        await walletConnectProvider.enable();
+        const accounts = walletConnectProvider.accounts;
+        
+        userData.walletConnected = true;
+        userData.walletType = 'WalletConnect';
+        userData.walletAddress = accounts[0];
+        walletProvider = walletConnectProvider;
+        
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('WalletConnect not available');
+      }
+    }
+
+    // Coinbase connection
+    async function connectCoinbase() {
+      if (typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        userData.walletConnected = true;
+        userData.walletType = 'Coinbase';
+        userData.walletAddress = accounts[0];
+        walletProvider = window.ethereum;
+        
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('Coinbase Wallet not available');
+      }
+    }
+
+    // Trust Wallet connection
+    async function connectTrust() {
+      if (typeof window.ethereum !== 'undefined' && window.ethereum.isTrust) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        userData.walletConnected = true;
+        userData.walletType = 'Trust';
+        userData.walletAddress = accounts[0];
+        walletProvider = window.ethereum;
+        
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('Trust Wallet not available');
+      }
+    }
+
+    // OKX Wallet connection
+    async function connectOKX() {
+      if (typeof window.okxwallet !== 'undefined') {
+        const accounts = await window.okxwallet.ethereum.request({ method: 'eth_requestAccounts' });
+        userData.walletConnected = true;
+        userData.walletType = 'OKX';
+        userData.walletAddress = accounts[0];
+        walletProvider = window.okxwallet.ethereum;
+        
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('OKX Wallet not installed');
+      }
+    }
+
+    // Phantom connection
+    async function connectPhantom() {
+      if (typeof window.phantom !== 'undefined' && window.phantom.solana) {
+        const response = await window.phantom.solana.connect();
+        userData.walletConnected = true;
+        userData.walletType = 'Phantom';
+        userData.walletAddress = response.publicKey.toString();
+        walletProvider = window.phantom.solana;
+        
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+      } else {
+        throw new Error('Phantom not installed');
+      }
+    }
+
+    // Disconnect wallet
+    function disconnectWallet() {
+      userData.walletConnected = false;
+      userData.walletType = null;
+      userData.walletAddress = null;
+      walletProvider = null;
+      walletConnectProvider = null;
+      
+      updateUserInterface();
+      saveUserData();
+    }
+
+    // Connect X
+    async function connectX() {
+      try {
+        // Redirect to X OAuth
+        window.location.href = '/api/x/login';
+      } catch (error) {
+        console.error('X connection failed:', error);
+        alert('X connection failed. Please try again.');
+      }
+    }
+
+    // Verify follow quest using real API (requires X connection)
+    async function verifyFollowQuest() {
+      try {
+        const res = await fetch('/api/x/status', { credentials: 'include' });
+        const { connected } = await res.json();
+        if (!connected) {
+          showNotification('Please connect X first', 'error');
+          return;
+        }
+        const targetUsername = 'wendrops_com';
+        const v = await fetch('/api/twitter/verify-follow-real', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ targetUsername })
+        });
+        const data = await v.json();
+        if (!v.ok) {
+          showNotification(data?.error || 'Verification failed', 'error');
+          return;
+        }
+        if (data.isFollowing) {
+          completeQuest('x_follow');
+          showNotification('Follow verified', 'success');
+        } else {
+          showNotification('You are not following yet', 'info');
+        }
+      } catch (e) {
+        showNotification('Verification failed', 'error');
+      }
+    }
+
+    // Refresh X connection status from server
+    async function refreshXStatus() {
+      try {
+        const res = await fetch('/api/x/status', { credentials: 'include' });
+        const data = await res.json();
+        const xBtn = document.getElementById('connectXBtn');
+        const dxBtn = document.getElementById('disconnectXBtn');
+        if (data.connected) {
+          xBtn.textContent = data.user?.username ? `X Connected (@${data.user.username})` : 'X Connected';
+          xBtn.disabled = true;
+          xBtn.classList.add('bg-green-600', 'cursor-not-allowed');
+          xBtn.classList.remove('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+          dxBtn.classList.remove('hidden');
+        } else {
+          xBtn.textContent = 'Connect X Account';
+          xBtn.disabled = false;
+          xBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+          xBtn.classList.add('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+          dxBtn.classList.add('hidden');
+        }
+      } catch (e) {
+        console.warn('Status check failed');
+      }
+    }
+
+    // Disconnect X and refresh UI
+    async function disconnectX() {
+      try {
+        await fetch('/api/x/logout', { method: 'POST', credentials: 'include' });
+        await refreshXStatus();
+        showNotification('Disconnected from X', 'info');
+      } catch (e) {
+        showNotification('Failed to disconnect', 'error');
+      }
+    }
+
+    // Complete quest
+    function completeQuest(questId) {
+      const quest = POINTS_CONFIG.dailyQuests.find(q => q.id === questId);
+      if (quest && !quest.completed) {
+        quest.completed = true;
+        userData.points += quest.points;
+        userData.dailyPoints += quest.points;
+        
+        updateUserInterface();
+        initializeDailyQuests();
+        saveUserData();
+        
+        // Show notification
+        showNotification(`Quest completed! +${quest.points} points`, 'success');
+      }
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 left-4 z-50 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-600' : 
+        type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+      } text-white font-medium`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Initialize leaderboard
+    function initializeLeaderboard() {
+      const leaderboard = document.getElementById('leaderboard');
+      const mockData = [
+        { rank: 1, name: 'CryptoWhale', points: 2500 },
+        { rank: 2, name: 'AirdropHunter', points: 2200 },
+        { rank: 3, name: 'DeFiMaster', points: 1900 },
+        { rank: 4, name: 'BlockchainPro', points: 1600 },
+        { rank: 5, name: 'TokenCollector', points: 1300 }
+      ];
+
+      leaderboard.innerHTML = '';
+      mockData.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.className = 'flex items-center justify-between p-4 rounded-lg bg-dark-border';
+        userElement.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <div class="text-2xl font-bold text-crypto-gold">#${user.rank}</div>
+            <div class="font-medium">${user.name}</div>
+          </div>
+          <div class="text-crypto-blue font-bold">${user.points} pts</div>
+        `;
+        leaderboard.appendChild(userElement);
+      });
+    }
+
+    // Initialize leaderboard on load
+    initializeLeaderboard();
+  </script>
+</body>
+</html>
+
+

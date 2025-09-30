@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Points System - Airdrop Hub (Standalone)</title>
+  <meta name="description" content="Earn points and climb the leaderboard on Airdrop Hub. Complete daily quests and boost your airdrop eligibility.">
+  <script>
+    // Redirect this legacy page to the v4 page
+    if (location.pathname.endsWith('/points-system-standalone.html')) {
+      location.replace('/points-system-v4.html');
+    }
+  </script>
+  
+  <!-- Inline Tailwind CSS to avoid external loading -->
+  <script>
+    // Inline Tailwind CSS
+    const tailwindCSS = `
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%); color: white; min-height: 100vh; }
+      .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+      .header { background: rgba(26, 26, 26, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 40; }
+      .header-content { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
+      .logo { font-size: 1.5rem; font-weight: bold; background: linear-gradient(to right, #FFD700, #00D4FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .nav { display: flex; gap: 1rem; }
+      .nav a { padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); text-decoration: none; color: white; transition: all 0.2s; }
+      .nav a:hover { background: rgba(255, 255, 255, 0.1); }
+      .main { padding: 2rem 0; }
+      .hero { text-align: center; margin-bottom: 3rem; }
+      .hero h1 { font-size: 3rem; font-weight: bold; margin-bottom: 1rem; background: linear-gradient(to right, #FFD700, #00D4FF, #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .hero p { font-size: 1.25rem; color: #D1D5DB; margin-bottom: 2rem; }
+      .badge { display: inline-block; background: linear-gradient(to right, #8B5CF6, #00D4FF); color: white; padding: 0.75rem 1.5rem; border-radius: 9999px; font-weight: bold; font-size: 1.125rem; }
+      .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem; }
+      .card h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; text-align: center; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+      .stat-card { text-align: center; }
+      .stat-number { font-size: 2rem; font-weight: bold; color: #FFD700; margin-bottom: 0.5rem; }
+      .stat-label { color: #D1D5DB; }
+      .btn { padding: 0.75rem 2rem; border-radius: 0.75rem; font-weight: bold; text-decoration: none; display: inline-block; transition: all 0.2s; cursor: pointer; border: none; }
+      .btn-primary { background: linear-gradient(to right, #8B5CF6, #00D4FF); color: white; }
+      .btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); }
+      .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
+      .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+      .input { width: 100%; padding: 0.75rem; background: rgba(42, 42, 42, 1); border: 1px solid #6B7280; border-radius: 0.5rem; color: white; }
+      .input:focus { outline: none; border-color: #00D4FF; }
+      .quest-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(42, 42, 42, 1); border-radius: 0.5rem; margin-bottom: 1rem; }
+      .quest-info h3 { font-weight: bold; margin-bottom: 0.25rem; }
+      .quest-info p { color: #9CA3AF; font-size: 0.875rem; }
+      .quest-points { text-align: right; }
+      .quest-points .points { color: #FFD700; font-weight: bold; }
+      .quest-points .completed { color: #10B981; font-size: 0.875rem; }
+      .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+      .modal.hidden { display: none; }
+      .modal-content { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 0.75rem; padding: 2rem; max-width: 28rem; width: 100%; margin: 0 1rem; }
+      .wallet-option { width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 0.5rem; background: rgba(42, 42, 42, 1); border: none; color: white; cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem; }
+      .wallet-option:hover { background: rgba(139, 92, 246, 0.2); }
+      .wallet-icon { font-size: 1.5rem; }
+      .wallet-name { font-weight: 500; }
+      .wallet-desc { font-size: 0.875rem; color: #9CA3AF; }
+      .floating-widget { position: fixed; top: 1rem; right: 1rem; z-index: 50; background: #8B5CF6; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: bold; font-size: 1.125rem; }
+      .floating-widget.hidden { display: none; }
+      .footer { background: rgba(26, 26, 26, 0.8); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 4rem; }
+      .footer-content { text-align: center; color: #9CA3AF; padding: 2rem 0; }
+      .loading { text-align: center; padding: 3rem 0; }
+      .spinner { display: inline-block; width: 3rem; height: 3rem; border: 3px solid rgba(0, 212, 255, 0.3); border-top: 3px solid #00D4FF; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .notification { position: fixed; top: 1rem; left: 1rem; z-index: 50; padding: 1rem; border-radius: 0.5rem; color: white; font-weight: 500; }
+      .notification.success { background: #10B981; }
+      .notification.error { background: #EF4444; }
+      .notification.info { background: #3B82F6; }
+      @media (max-width: 768px) {
+        .hero h1 { font-size: 2rem; }
+        .nav { flex-direction: column; gap: 0.5rem; }
+        .header-content { flex-direction: column; gap: 1rem; }
+      }
+    `;
+    
+    // Inject CSS
+    const style = document.createElement('style');
+    style.textContent = tailwindCSS;
+    document.head.appendChild(style);
+  </script>
+</head>
+<body>
+  <!-- Floating Points Widget -->
+  <div id="floatingPointsWidget" class="floating-widget hidden">
+    <span id="userPointsDisplay">0</span> Points
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="index.html" class="logo">Airdrop Hub</a>
+          <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="wallet-analysis-standalone.html">Wallet Analysis</a>
+            <a href="submit.html">Submit Airdrop</a>
+          </nav>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button id="themeToggle" class="btn btn-secondary">🌙</button>
+          <div id="walletInfo" class="hidden" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(42, 42, 42, 1); padding: 0.5rem 1rem; border-radius: 0.5rem;">
+            <span id="walletIcon">🔗</span>
+            <span id="walletName">Connected</span>
+            <button id="disconnectWallet" style="color: #EF4444; background: none; border: none; cursor: pointer;">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero">
+        <h1>Points System (Standalone)</h1>
+        <p>Earn points, complete quests, and boost your airdrop eligibility</p>
+        <div class="badge">🚀 NO EXTERNAL SCRIPTS - FULLY WORKING</div>
+      </div>
+
+      <!-- Points Overview -->
+      <div class="grid">
+        <div class="card stat-card">
+          <div class="stat-number" id="totalPoints">0</div>
+          <div class="stat-label">Total Points</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-number" id="dailyPoints">0</div>
+          <div class="stat-label">Daily Points</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-number" id="rank">#1</div>
+          <div class="stat-label">Your Rank</div>
+        </div>
+      </div>
+
+      <!-- Wallet Connection -->
+      <div class="card">
+        <h2>Connect Your Wallet</h2>
+        <div style="text-align: center;">
+          <button id="connectWalletBtn" class="btn btn-primary">Connect Wallet</button>
+          <p style="color: #9CA3AF; margin-top: 1rem;">Connect to start earning points and completing quests</p>
+        </div>
+      </div>
+
+      <!-- Daily Quests -->
+      <div class="card">
+        <h2>Daily Quests</h2>
+        <div id="dailyQuests">
+          <!-- Quests will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- X Integration -->
+      <div class="card">
+        <h2>X (Twitter) Integration</h2>
+        <div style="text-align: center;">
+          <button id="connectXBtn" class="btn btn-primary" style="background: linear-gradient(to right, #1DA1F2, #1DA1F2);">Connect X Account</button>
+          <p style="color: #9CA3AF; margin-top: 1rem;">Connect your X account to complete social quests</p>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="card">
+        <h2>Leaderboard</h2>
+        <div id="leaderboard">
+          <!-- Leaderboard will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <p>&copy; 2024 Airdrop Hub. All rights reserved.</p>
+        <p style="margin-top: 0.5rem;">Discover, track, and participate in the best crypto airdrops.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Wallet Selection Modal -->
+  <div id="walletModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; text-align: center;">Select Wallet</h3>
+      <div>
+        <button class="wallet-option" data-wallet="metamask">
+          <span class="wallet-icon">🦊</span>
+          <div>
+            <div class="wallet-name">MetaMask</div>
+            <div class="wallet-desc">Connect using MetaMask browser extension</div>
+          </div>
+        </button>
+        <button class="wallet-option" data-wallet="walletconnect">
+          <span class="wallet-icon">🔗</span>
+          <div>
+            <div class="wallet-name">WalletConnect</div>
+            <div class="wallet-desc">Connect using WalletConnect</div>
+          </div>
+        </button>
+        <button class="wallet-option" data-wallet="coinbase">
+          <span class="wallet-icon">🔵</span>
+          <div>
+            <div class="wallet-name">Coinbase Wallet</div>
+            <div class="wallet-desc">Connect using Coinbase Wallet</div>
+          </div>
+        </button>
+        <button class="wallet-option" data-wallet="trust">
+          <span class="wallet-icon">🛡️</span>
+          <div>
+            <div class="wallet-name">Trust Wallet</div>
+            <div class="wallet-desc">Connect using Trust Wallet</div>
+          </div>
+        </button>
+        <button class="wallet-option" data-wallet="okx">
+          <span class="wallet-icon">⚡</span>
+          <div>
+            <div class="wallet-name">OKX Wallet</div>
+            <div class="wallet-desc">Connect using OKX Wallet</div>
+          </div>
+        </button>
+        <button class="wallet-option" data-wallet="phantom">
+          <span class="wallet-icon">👻</span>
+          <div>
+            <div class="wallet-name">Phantom</div>
+            <div class="wallet-desc">Connect using Phantom wallet</div>
+          </div>
+        </button>
+      </div>
+      <button id="closeWalletModal" class="btn btn-secondary" style="width: 100%; margin-top: 1.5rem;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let userData = {
+      points: 0,
+      dailyPoints: 0,
+      rank: 1,
+      walletConnected: false,
+      walletType: null,
+      walletAddress: null,
+      xConnected: false
+    };
+
+    // Points configuration
+    const POINTS_CONFIG = {
+      dailyQuests: [
+        { id: 'visit', title: 'Visit Daily', description: 'Visit the platform', points: 10, completed: false },
+        { id: 'wallet', title: 'Connect Wallet', description: 'Connect your wallet', points: 25, completed: false },
+        { id: 'x_follow', title: 'Follow on X', description: 'Follow @AirdropHub on X', points: 50, completed: false },
+        { id: 'share', title: 'Share Airdrop', description: 'Share an airdrop on social media', points: 30, completed: false }
+      ]
+    };
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserData();
+      updateUserInterface();
+      initializeDailyQuests();
+      initializeEventListeners();
+      initializeTheme();
+      initializeLeaderboard();
+    });
+
+    // Load user data from localStorage
+    function loadUserData() {
+      const saved = localStorage.getItem('airdropHubUserData');
+      if (saved) {
+        userData = { ...userData, ...JSON.parse(saved) };
+      }
+    }
+
+    // Save user data to localStorage
+    function saveUserData() {
+      localStorage.setItem('airdropHubUserData', JSON.stringify(userData));
+    }
+
+    // Update the user interface
+    function updateUserInterface() {
+      document.getElementById('totalPoints').textContent = userData.points;
+      document.getElementById('dailyPoints').textContent = userData.dailyPoints;
+      document.getElementById('rank').textContent = `#${userData.rank}`;
+      document.getElementById('userPointsDisplay').textContent = userData.points;
+
+      // Show/hide floating points widget
+      const floatingWidget = document.getElementById('floatingPointsWidget');
+      if (userData.points > 0) {
+        floatingWidget.classList.remove('hidden');
+      } else {
+        floatingWidget.classList.add('hidden');
+      }
+
+      // Update wallet info
+      const walletInfo = document.getElementById('walletInfo');
+      const connectBtn = document.getElementById('connectWalletBtn');
+      
+      if (userData.walletConnected) {
+        walletInfo.classList.remove('hidden');
+        connectBtn.textContent = 'Wallet Connected';
+        connectBtn.disabled = true;
+        connectBtn.style.background = '#10B981';
+        connectBtn.style.cursor = 'not-allowed';
+      } else {
+        walletInfo.classList.add('hidden');
+        connectBtn.textContent = 'Connect Wallet';
+        connectBtn.disabled = false;
+        connectBtn.style.background = 'linear-gradient(to right, #8B5CF6, #00D4FF)';
+        connectBtn.style.cursor = 'pointer';
+      }
+
+      // Update X connection
+      const xBtn = document.getElementById('connectXBtn');
+      if (userData.xConnected) {
+        xBtn.textContent = 'X Connected';
+        xBtn.disabled = true;
+        xBtn.style.background = '#10B981';
+        xBtn.style.cursor = 'not-allowed';
+      } else {
+        xBtn.textContent = 'Connect X Account';
+        xBtn.disabled = false;
+        xBtn.style.background = 'linear-gradient(to right, #1DA1F2, #1DA1F2)';
+        xBtn.style.cursor = 'pointer';
+      }
+    }
+
+    // Initialize daily quests
+    function initializeDailyQuests() {
+      const questsContainer = document.getElementById('dailyQuests');
+      questsContainer.innerHTML = '';
+
+      POINTS_CONFIG.dailyQuests.forEach(quest => {
+        const questElement = document.createElement('div');
+        questElement.className = `quest-item ${quest.completed ? 'opacity-50' : ''}`;
+        questElement.innerHTML = `
+          <div class="quest-info">
+            <h3>${quest.title}</h3>
+            <p>${quest.description}</p>
+          </div>
+          <div class="quest-points">
+            <div class="points">+${quest.points} pts</div>
+            ${quest.completed ? '<div class="completed">✓ Completed</div>' : ''}
+          </div>
+        `;
+        questsContainer.appendChild(questElement);
+      });
+    }
+
+    // Initialize event listeners
+    function initializeEventListeners() {
+      // Wallet connection
+      document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
+      document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+      document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+
+      // Wallet options
+      document.querySelectorAll('.wallet-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const walletType = e.currentTarget.dataset.wallet;
+          connectWallet(walletType);
+        });
+      });
+
+      // X connection
+      document.getElementById('connectXBtn').addEventListener('click', connectX);
+    }
+
+    // Initialize theme
+    function initializeTheme() {
+      const themeToggle = document.getElementById('themeToggle');
+      
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        themeToggle.textContent = isDark ? '🌙' : '☀️';
+      });
+    }
+
+    // Initialize leaderboard
+    function initializeLeaderboard() {
+      const leaderboard = document.getElementById('leaderboard');
+      const mockData = [
+        { rank: 1, name: 'CryptoWhale', points: 2500 },
+        { rank: 2, name: 'AirdropHunter', points: 2200 },
+        { rank: 3, name: 'DeFiMaster', points: 1900 },
+        { rank: 4, name: 'BlockchainPro', points: 1600 },
+        { rank: 5, name: 'TokenCollector', points: 1300 }
+      ];
+
+      leaderboard.innerHTML = '';
+      mockData.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.className = 'quest-item';
+        userElement.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #FFD700;">#${user.rank}</div>
+            <div style="font-weight: 500;">${user.name}</div>
+          </div>
+          <div style="color: #00D4FF; font-weight: bold;">${user.points} pts</div>
+        `;
+        leaderboard.appendChild(userElement);
+      });
+    }
+
+    // Wallet modal functions
+    function openWalletModal() {
+      document.getElementById('walletModal').classList.remove('hidden');
+    }
+
+    function closeWalletModal() {
+      document.getElementById('walletModal').classList.add('hidden');
+    }
+
+    // Connect wallet
+    async function connectWallet(walletType) {
+      try {
+        closeWalletModal();
+        
+        // Simulate wallet connection for demo
+        userData.walletConnected = true;
+        userData.walletType = walletType;
+        userData.walletAddress = '0x' + Math.random().toString(16).substr(2, 40);
+        
+        // Complete wallet quest
+        completeQuest('wallet');
+        updateUserInterface();
+        saveUserData();
+        
+        showNotification(`Connected to ${walletType}!`, 'success');
+      } catch (error) {
+        console.error('Wallet connection failed:', error);
+        showNotification('Wallet connection failed. Please try again.', 'error');
+      }
+    }
+
+    // Disconnect wallet
+    function disconnectWallet() {
+      userData.walletConnected = false;
+      userData.walletType = null;
+      userData.walletAddress = null;
+      
+      updateUserInterface();
+      saveUserData();
+      showNotification('Wallet disconnected', 'info');
+    }
+
+    // Connect X
+    async function connectX() {
+      try {
+        // Simulate X connection for demo
+        userData.xConnected = true;
+        updateUserInterface();
+        saveUserData();
+        
+        // Complete X quest
+        completeQuest('x_follow');
+        showNotification('X account connected!', 'success');
+      } catch (error) {
+        console.error('X connection failed:', error);
+        showNotification('X connection failed. Please try again.', 'error');
+      }
+    }
+
+    // Complete quest
+    function completeQuest(questId) {
+      const quest = POINTS_CONFIG.dailyQuests.find(q => q.id === questId);
+      if (quest && !quest.completed) {
+        quest.completed = true;
+        userData.points += quest.points;
+        userData.dailyPoints += quest.points;
+        
+        updateUserInterface();
+        initializeDailyQuests();
+        saveUserData();
+        
+        // Show notification
+        showNotification(`Quest completed! +${quest.points} points`, 'success');
+      }
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

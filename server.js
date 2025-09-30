@@ -4,13 +4,20 @@ const path = require('path');
 const crypto = require('crypto');
 
 const app = express();
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 3001;
 
 // Simple in-memory store for PKCE data (in production, use Redis)
 const pkceStore = new Map();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+// No security headers to avoid CSP conflicts
+
 app.use(express.json());
 app.use(express.static('.'));
 
@@ -59,18 +66,18 @@ function generatePKCE() {
 }
 
 function getRedirectUri(req) {
-  const envUri = process.env.X_REDIRECT_URI;
+  const envUri = process.env.X_REDIRECT_URI ? process.env.X_REDIRECT_URI.trim() : null;
   const constructedUri = `${req.protocol}://${req.get('host')}/api/x/callback`;
   console.log('Redirect URI options:', { envUri, constructedUri, using: envUri || constructedUri });
   return envUri || constructedUri;
 }
 
-const X_CLIENT_ID = process.env.X_CLIENT_ID || '';
-const X_CLIENT_SECRET = process.env.X_CLIENT_SECRET || '';
+const X_CLIENT_ID = (process.env.X_CLIENT_ID || '').trim();
+const X_CLIENT_SECRET = (process.env.X_CLIENT_SECRET || '').trim();
 const X_SCOPE = ['tweet.read','users.read','follows.read','offline.access'].join(' ');
 const X_AUTH_URL = 'https://twitter.com/i/oauth2/authorize';
-const X_TOKEN_URL = 'https://api.x.com/oauth2/token';
-const X_API = 'https://api.twitter.com/2';
+const X_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
+const X_API = 'https://api.x.com/2';
 
 // --- X OAuth 2.0 (PKCE) ---
 app.get('/api/x/login', (req, res) => {
@@ -103,8 +110,8 @@ app.get('/api/x/login', (req, res) => {
       path: '/'
     });
     
-    // Also store in memory as fallback
-    pkceStore.set(state, { verifier, challenge });
+    // Also store in memory as fallback (keyed by the exact state we send)
+    pkceStore.set(stateWithVerifier, { verifier, challenge });
     setTimeout(() => pkceStore.delete(state), 600000); // Clean up after 10 minutes
 
     const redirectUri = getRedirectUri(req);
@@ -196,6 +203,8 @@ app.get('/api/x/callback', async (req, res) => {
     params.set('code', String(code));
     params.set('redirect_uri', getRedirectUri(req));
     params.set('code_verifier', verifier);
+    // Include client_id for compatibility with X OAuth token endpoint
+    params.set('client_id', X_CLIENT_ID);
     // Note: client_id and client_secret are now in the Authorization header
     
     console.log('Authorization code details:', {
@@ -214,11 +223,11 @@ app.get('/api/x/callback', async (req, res) => {
     // Create Basic Auth header with client credentials
     const credentials = Buffer.from(`${X_CLIENT_ID}:${X_CLIENT_SECRET}`).toString('base64');
     
-    const tokenRes = await fetch(X_TOKEN_URL, {
+    // First attempt: PKCE-style body only (no Authorization header)
+    let tokenRes = await fetch(X_TOKEN_URL, {
       method: 'POST',
       headers: { 
-        'content-type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`
+        'content-type': 'application/x-www-form-urlencoded'
       },
       body: params.toString()
     });
@@ -232,19 +241,37 @@ app.get('/api/x/callback', async (req, res) => {
       hasVerifier: !!verifier,
       verifierLength: verifier ? verifier.length : 0,
       status: tokenRes.status,
-      authHeader: `Basic ${credentials.substring(0, 10)}...`, // Show first 10 chars of credentials
       requestBody: params.toString()
     });
     
     if (!tokenRes.ok) {
-      const txt = await tokenRes.text();
-      console.error('Token exchange failed', {
+      const firstTxt = await tokenRes.text();
+      console.error('Token exchange failed (first attempt)', {
         status: tokenRes.status,
         statusText: tokenRes.statusText,
-        response: txt,
-        requestBody: params.toString()
+        response: firstTxt
       });
-      return res.status(500).send(`Token exchange failed: ${tokenRes.status} - ${txt}`);
+      // Retry with Basic auth (some configurations require confidential exchange)
+      if (X_CLIENT_ID && X_CLIENT_SECRET) {
+        const credentials = Buffer.from(`${X_CLIENT_ID}:${X_CLIENT_SECRET}`).toString('base64');
+        tokenRes = await fetch(X_TOKEN_URL, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${credentials}`
+          },
+          body: params.toString()
+        });
+      }
+      if (!tokenRes.ok) {
+        const secondTxt = await tokenRes.text();
+        console.error('Token exchange failed (second attempt)', {
+          status: tokenRes.status,
+          statusText: tokenRes.statusText,
+          response: secondTxt
+        });
+        return res.status(500).send(`Token exchange failed: ${tokenRes.status} - ${secondTxt}`);
+      }
     }
     const tokenJson = await tokenRes.json();
     const accessToken = tokenJson.access_token;
@@ -278,7 +305,7 @@ app.get('/api/x/callback', async (req, res) => {
     });
     pkceStore.delete(state); // Clean up memory store
 
-    res.redirect('/points-system.html?x=connected');
+    res.redirect('/points-system-v4.html?x=connected');
   } catch (e) {
     console.error('x/callback error', e);
     res.status(500).send('Auth callback failed');
@@ -292,6 +319,82 @@ app.get('/api/x/status', (req, res) => {
     res.json({ connected, user: connected ? { id: cookies.x_uid || null, username: cookies.x_uname || null } : null });
   } catch (e) {
     res.json({ connected: false });
+  }
+});
+
+// Debug endpoint to verify current OAuth settings (do not expose sensitive data)
+app.get('/api/x/debug-config', (req, res) => {
+  try {
+    res.json({
+      authUrl: X_AUTH_URL,
+      tokenUrl: X_TOKEN_URL,
+      apiBase: X_API,
+      redirectUri: getRedirectUri(req),
+      hasClientId: Boolean(X_CLIENT_ID),
+      hasClientSecret: Boolean(X_CLIENT_SECRET)
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'debug-failed' });
+  }
+});
+
+// X logout: clear session cookies
+app.post('/api/x/logout', (req, res) => {
+  try {
+    setCookie(res, 'x_token', '', {
+      maxAge: 0,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    });
+    setCookie(res, 'x_uid', '', {
+      maxAge: 0,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    });
+    setCookie(res, 'x_uname', '', {
+      maxAge: 0,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    });
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: 'Logout failed' });
+  }
+});
+
+// Optional: refresh access token using refresh_token (if provided by X)
+app.post('/api/x/refresh', async (req, res) => {
+  try {
+    const cookies = getCookies(req);
+    const refreshToken = cookies.x_refresh;
+    if (!refreshToken) return res.status(400).json({ success: false, error: 'No refresh token' });
+
+    const params = new URLSearchParams();
+    params.set('grant_type', 'refresh_token');
+    params.set('refresh_token', refreshToken);
+    params.set('client_id', X_CLIENT_ID);
+
+    const tokenRes = await fetch(X_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    });
+    const json = await tokenRes.json();
+    if (!tokenRes.ok) return res.status(500).json(json);
+
+    const accessToken = json.access_token;
+    const newRefresh = json.refresh_token;
+    if (accessToken) setCookie(res, 'x_token', accessToken, { maxAge: 60 * 60 });
+    if (newRefresh) setCookie(res, 'x_refresh', newRefresh, { maxAge: 7 * 24 * 60 * 60 });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'refresh_failed' });
   }
 });
 

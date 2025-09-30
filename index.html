@@ -13,7 +13,7 @@
   <meta name="twitter:title" content="Airdrop Hub — Discover & Track Crypto Airdrops" />
   <meta name="twitter:description" content="Discover the latest crypto airdrops across multiple blockchains. Track live, upcoming, and ended airdrops with detailed information and tutorials." />
   
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle'%3E🪂%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -143,9 +143,9 @@
   <header class="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-glow">
-            <span class="text-black font-extrabold">🪂</span>
+            <span class="text-black font-extrabold">??</span>
           </div>
           <h1 class="text-lg sm:text-xl font-semibold tracking-tight">Airdrop Hub</h1>
           <span class="ml-2 text-xs text-white/50">Pro</span>
@@ -153,8 +153,8 @@
         <a href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener" class="text-cyan-300 hover:text-white underline text-sm">Whitepaper</a>
       </div>
       <nav class="flex items-center gap-2 text-sm">
-        <a href="wallet-analysis.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Wallet Analysis</a>
-        <a href="points-system.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Points System</a>
+        <a href="wallet-analysis-v4.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Wallet Analysis</a>
+        <a href="points-system-v4.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Points System</a>
         <a href="terms.html" class="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition">Terms</a>
         <a id="submitLink" href="submit.html" class="px-3 py-1.5 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300 hover:bg-yellow-500/20 transition hidden">Submit <span class="text-xs">(Whitelist)</span></a>
         <button id="toggleTheme" class="btn ml-1 text-white/80">Toggle Theme</button>
@@ -180,12 +180,12 @@
       <div class="absolute right-0 top-0 h-full w-1/2 opacity-20 blur-2xl" style="background: radial-gradient( circle at 30% 50%, rgba(59,130,246,0.5), transparent 50% );"></div>
       <div class="relative z-10 grid md:grid-cols-2 gap-6 items-center">
         <div>
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-xs">Crypto‑Native Discovery • Multi‑Chain</div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300 text-xs">Crypto-Native Discovery · Multi-Chain</div>
           <h2 class="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight">Discover, qualify and track airdrops like a pro.</h2>
-          <p class="mt-3 text-white/70">Premium dark UI, on‑chain analytics, quests and a public leaderboard. Built for explorers who want signal over noise.</p>
+          <p class="mt-3 text-white/70">Premium dark UI, on-chain analytics, quests, and a public leaderboard. Built for explorers who want signal over noise.</p>
           <div class="mt-5 flex flex-wrap gap-3">
-            <a href="wallet-analysis.html" class="btn-primary px-5 py-2.5 text-sm font-semibold rounded-xl">Analyze Wallet</a>
-            <a href="points-system.html" class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">Earn Points</a>
+            <a href="wallet-analysis-v4.html" class="btn-primary px-5 py-2.5 text-sm font-semibold rounded-xl">Analyze Wallet</a>
+            <a href="points-system-v4.html" class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">Earn Points</a>
           </div>
         </div>
         <div class="hidden md:block">
@@ -283,7 +283,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 class="text-white/90 font-semibold">Read the Whitepaper</h2>
-          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti‑Sybil scoring, and token buyback policy.</p>
+          <p class="text-white/70 text-sm mt-1">Executive summary, product overview, anti-Sybil scoring, and token buyback policy.</p>
         </div>
         <a class="btn-primary px-6 py-3 text-lg font-semibold" href="https://spangle-cheshire-e55.notion.site/Airdrop-Hub-Whitepaper-f939112946de41009c58280d42d870dc" target="_blank" rel="noopener">
           Read Whitepaper
@@ -311,8 +311,8 @@
           <p>© ${new Date().getFullYear?.() || ''} Airdrop Hub. All rights reserved.</p>
           <div class="flex items-center gap-4">
             <a class="hover:text-white" href="terms.html">Terms</a>
-            <a class="hover:text-white" href="points-system.html">Leaderboard</a>
-            <a class="hover:text-white" href="wallet-analysis.html">Wallet Analysis</a>
+            <a class="hover:text-white" href="points-system-v4.html">Leaderboard</a>
+            <a class="hover:text-white" href="wallet-analysis-v4.html">Wallet Analysis</a>
           </div>
         </div>
       </div>
@@ -390,7 +390,7 @@
         const ad = document.getElementById('pointsWidgetAddr');
         if (val && ad) {
           val.textContent = String(points);
-          ad.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+          ad.textContent = addr.slice(0,6) + '...' + addr.slice(-4);
         }
         document.getElementById('pointsWidget').classList.remove('hidden');
       } catch {}
@@ -478,16 +478,16 @@
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         wallet.address = accounts[0];
-        walletInfo.textContent = `Connected: ${short(wallet.address)} • Reading recent activity…`;
+        walletInfo.textContent = `Connected: ${short(wallet.address)} ??Reading recent activity?�`;
         await readWalletStats();
-        walletInfo.textContent = `Connected: ${short(wallet.address)} • Readiness: ${(wallet.readiness*100).toFixed(0)}%`;
+        walletInfo.textContent = `Connected: ${short(wallet.address)} ??Readiness: ${(wallet.readiness*100).toFixed(0)}%`;
         renderFeatured(); render();
       } catch (e) {
         alert('Wallet connection failed: ' + (e.message || e));
       }
     }
 
-    function short(addr){ return addr ? addr.slice(0,6)+'…'+addr.slice(-4) : ''; }
+    function short(addr){ return addr ? addr.slice(0,6)+'...'+addr.slice(-4) : ''; }
 
     async function readWalletStats() {
       const clicks = JSON.parse(localStorage.getItem('x_clicks') || '{}'); // just to show how we might mix signals later
@@ -731,7 +731,7 @@
           <div class="flex items-start justify-between gap-3">
             <div class="flex flex-col gap-1">
               <h3 class="text-base font-semibold">${escapeHtml(x.name)}</h3>
-              <div class="text-xs text-white/60">${escapeHtml(x.chain)} • ${escapeHtml(x.status)}</div>
+              <div class="text-xs text-white/60">${escapeHtml(x.chain)} · ${escapeHtml(x.status)}</div>
               <div class="flex gap-2 mt-1">${badge}${endsChip ? `<span>${endsChip}</span>` : ''}</div>
             </div>
             <button data-fav="${escapeHtml(x.id)}" class="p-2 rounded-lg transition-all ${fav ? 'text-yellow-400 bg-yellow-400/10' : 'text-white/40 hover:text-yellow-400 hover:bg-yellow-400/10'}" title="Toggle favorite">
@@ -756,7 +756,7 @@
             <h4 class="text-sm font-semibold text-white/80 mb-2">Tasks</h4>
             <ul class="text-sm text-white/70 space-y-1">
               ${(x.tasks ?? []).slice(0,3).map(t=>`<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>${escapeHtml(t)}</li>`).join('')}
-            </ul>
+          </ul>
           </div>
 
           <div class="flex flex-wrap gap-2 mb-4">
@@ -807,7 +807,7 @@
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
+      state = { status: 'all', chain: 'all', sortBy: 'deadlineAsc', search: '', page: 1, pageSize: 9, favoritesOnly: false };
         if (chainFilter) chainFilter.value = 'all';
         if (sortBy) sortBy.value = 'deadlineAsc';
         const searchInput = document.getElementById('searchInput');
@@ -818,8 +818,8 @@
         document.querySelectorAll('.statusBtn').forEach(b => b.classList.remove('btn-primary'));
         const allStatusBtn = document.querySelector('[data-status="all"]');
         if (allStatusBtn) allStatusBtn.classList.add('btn-primary');
-        render();
-      });
+      render();
+    });
     }
     const favoritesOnly = document.getElementById('favoritesOnly');
     if (favoritesOnly) {
@@ -843,7 +843,7 @@
     }
     
     if (modal) {
-      modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeTutorialModal(); });
     }
     function openTutorialModal(url, title) { notionNotice.classList.add('hidden'); titleEl.textContent = title || 'Tutorial'; frame.src = url; openNew.href = url; modal.classList.remove('hidden'); modal.classList.add('flex'); }
     function closeTutorialModal() { frame.src = 'about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
@@ -863,7 +863,7 @@
       coachModal.addEventListener('click', (e) => { if (e.target === coachModal) closeCoach(); });
     }
     function openCoach(item) {
-      coachTitle.textContent = `${item.name} — Activity Coach`;
+      coachTitle.textContent = `${item.name} · Activity Coach`;
       const baseSteps = Array.isArray(item.coachSteps) ? item.coachSteps : [];
       const dynamic = [];
       // General hints
