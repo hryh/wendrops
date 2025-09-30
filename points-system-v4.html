@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Points System - WENDROPS v4.0 (NO CSP)</title>
+  <title>Points System — WENDROPS</title>
   <meta name="description" content="Earn points and climb the leaderboard on WENDROPS. Complete daily quests and boost your airdrop eligibility.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -130,12 +130,9 @@
     <!-- Hero Section -->
     <div class="text-center mb-12">
       <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-crypto-gold via-crypto-blue to-crypto-purple bg-clip-text text-transparent">
-        Points System v4.0
+        Points System
       </h1>
       <p class="text-xl text-gray-300 mb-8">Earn points, complete quests, and boost your airdrop eligibility</p>
-      <div class="inline-block bg-gradient-to-r from-crypto-purple to-crypto-blue text-white px-6 py-3 rounded-full font-bold text-lg">
-        🚀 NO CSP VERSION - ALL SCRIPTS WORK
-      </div>
     </div>
 
     <!-- Points Overview -->
@@ -158,6 +155,9 @@
     <div class="glassmorphism rounded-xl p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6 text-center">Connect Your Wallet</h2>
       <div class="text-center">
+        <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors mb-6">
+          ← Back
+        </a>
         <button id="connectWalletBtn" class="bg-gradient-to-r from-crypto-purple to-crypto-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all transform hover:scale-105">
           Connect Wallet
         </button>
@@ -202,7 +202,7 @@
   <footer class="bg-dark-card/80 backdrop-blur-md border-t border-dark-border mt-16">
     <div class="container mx-auto px-4 py-8">
       <div class="text-center text-gray-400">
-        <p>&copy; 2024 WENDROPS. All rights reserved.</p>
+        <p>&copy; 2025 WENDROPS. All rights reserved.</p>
         <p class="mt-2">Discover, track, and participate in the best crypto airdrops.</p>
       </div>
     </div>
@@ -690,29 +690,41 @@
     }
 
     // Initialize leaderboard
-    function initializeLeaderboard() {
-      const leaderboard = document.getElementById('leaderboard');
-      const mockData = [
-        { rank: 1, name: 'CryptoWhale', points: 2500 },
-        { rank: 2, name: 'AirdropHunter', points: 2200 },
-        { rank: 3, name: 'DeFiMaster', points: 1900 },
-        { rank: 4, name: 'BlockchainPro', points: 1600 },
-        { rank: 5, name: 'TokenCollector', points: 1300 }
-      ];
+    async function initializeLeaderboard() {
+      const el = document.getElementById('leaderboard');
+      el.innerHTML = '<div class="text-center text-gray-400">Loading...</div>';
+      try {
+        const res = await fetch('/api/leaderboard', { cache: 'no-store' });
+        const data = await res.json();
+        const items = (data && data.data) ? data.data : [];
+        el.innerHTML = '';
+        if (items.length === 0) { el.innerHTML = '<div class="text-center text-gray-400">No entries yet</div>'; return; }
+        items.forEach((user, idx) => {
+          const userElement = document.createElement('div');
+          userElement.className = 'flex items-center justify-between p-4 rounded-lg bg-dark-border';
+          const name = user.username || (user.wallet ? user.wallet.slice(0,6)+'...'+user.wallet.slice(-4) : 'User');
+          userElement.innerHTML = `
+            <div class="flex items-center space-x-4">
+              <div class="text-2xl font-bold text-crypto-gold">#${idx+1}</div>
+              <div class="font-medium">${name}</div>
+            </div>
+            <div class="text-crypto-blue font-bold">${user.points} pts</div>
+          `;
+          el.appendChild(userElement);
+        });
+      } catch { el.innerHTML = '<div class="text-center text-red-400">Failed to load leaderboard</div>'; }
+    }
 
-      leaderboard.innerHTML = '';
-      mockData.forEach(user => {
-        const userElement = document.createElement('div');
-        userElement.className = 'flex items-center justify-between p-4 rounded-lg bg-dark-border';
-        userElement.innerHTML = `
-          <div class="flex items-center space-x-4">
-            <div class="text-2xl font-bold text-crypto-gold">#${user.rank}</div>
-            <div class="font-medium">${user.name}</div>
-          </div>
-          <div class="text-crypto-blue font-bold">${user.points} pts</div>
-        `;
-        leaderboard.appendChild(userElement);
-      });
+    // Submit score when points change
+    const _saveUserData = saveUserData;
+    function saveUserData() {
+      _saveUserData();
+      try {
+        fetch('/api/leaderboard/submit', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ wallet: userData.walletAddress, points: userData.points, username: userData.walletType })
+        }).then(()=>initializeLeaderboard());
+      } catch {}
     }
 
     // Initialize leaderboard on load

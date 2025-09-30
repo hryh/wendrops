@@ -75,8 +75,8 @@ function getRedirectUri(req) {
 const X_CLIENT_ID = (process.env.X_CLIENT_ID || '').trim();
 const X_CLIENT_SECRET = (process.env.X_CLIENT_SECRET || '').trim();
 const X_SCOPE = ['tweet.read','users.read','follows.read','offline.access'].join(' ');
-const X_AUTH_URL = 'https://twitter.com/i/oauth2/authorize';
-const X_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
+const X_AUTH_URL = 'https://x.com/i/oauth2/authorize';
+const X_TOKEN_URL = 'https://api.x.com/oauth2/token';
 const X_API = 'https://api.x.com/2';
 
 // --- X OAuth 2.0 (PKCE) ---
@@ -470,8 +470,10 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing targetUsername' });
     }
 
-    // Get target user id
-    const tRes = await fetch(`${X_API}/users/by/username/${encodeURIComponent(targetUsername)}`);
+    // Get target user id (requires app bearer OR user token; use user token for consistency)
+    const tRes = await fetch(`${X_API}/users/by/username/${encodeURIComponent(targetUsername)}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     if (!tRes.ok) return res.status(400).json({ success: false, error: 'Target user lookup failed' });
     const tJson = await tRes.json();
     const targetId = tJson?.data?.id;
@@ -590,6 +592,23 @@ app.get('/api/airdrops', (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Simple in-memory leaderboard (replace with DB in production)
+const leaderboard = [];
+app.post('/api/leaderboard/submit', (req, res) => {
+  try {
+    const { wallet, points, username } = req.body || {};
+    if (!wallet || typeof points !== 'number') return res.status(400).json({ success: false, error: 'Invalid payload' });
+    const existing = leaderboard.find(x => x.wallet === wallet);
+    if (existing) { existing.points = points; existing.username = username || existing.username; existing.updatedAt = Date.now(); }
+    else { leaderboard.push({ wallet, points, username: username || null, updatedAt: Date.now() }); }
+    leaderboard.sort((a,b)=>b.points-a.points);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false }); }
+});
+app.get('/api/leaderboard', (req, res) => {
+  res.json({ success: true, data: leaderboard.slice(0, 100) });
 });
 
 // Serve the main page
