@@ -594,21 +594,70 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Simple in-memory leaderboard (replace with DB in production)
-const leaderboard = [];
-app.post('/api/leaderboard/submit', (req, res) => {
+// Leaderboard storage: Upstash Redis (if configured) with in-memory fallback
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_TOKEN;
+const useRedis = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
+const localLeaderboard = [];
+
+async function redisCmd(bodyArray) {
+  const res = await fetch(`${UPSTASH_URL}/pipeline`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyArray)
+  });
+  if (!res.ok) throw new Error('KV request failed ' + res.status);
+  return res.json();
+}
+
+app.post('/api/leaderboard/submit', async (req, res) => {
   try {
     const { wallet, points, username } = req.body || {};
     if (!wallet || typeof points !== 'number') return res.status(400).json({ success: false, error: 'Invalid payload' });
-    const existing = leaderboard.find(x => x.wallet === wallet);
-    if (existing) { existing.points = points; existing.username = username || existing.username; existing.updatedAt = Date.now(); }
-    else { leaderboard.push({ wallet, points, username: username || null, updatedAt: Date.now() }); }
-    leaderboard.sort((a,b)=>b.points-a.points);
+
+    if (useRedis) {
+      const cmds = [
+        ["ZADD", "leaderboard", points, wallet]
+      ];
+      if (username) cmds.push(["SET", `uname:${wallet}`, username]);
+      await redisCmd(cmds);
+    } else {
+      const existing = localLeaderboard.find(x => x.wallet === wallet);
+      if (existing) { existing.points = points; existing.username = username || existing.username; existing.updatedAt = Date.now(); }
+      else { localLeaderboard.push({ wallet, points, username: username || null, updatedAt: Date.now() }); }
+      localLeaderboard.sort((a,b)=>b.points-a.points);
+    }
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ success: false }); }
+  } catch (e) {
+    console.error('leaderboard submit error', e);
+    res.status(500).json({ success: false });
+  }
 });
-app.get('/api/leaderboard', (req, res) => {
-  res.json({ success: true, data: leaderboard.slice(0, 100) });
+
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    if (useRedis) {
+      // Get top 100 with scores
+      const range = await redisCmd([["ZREVRANGE", "leaderboard", 0, 99, "WITHSCORES"]]);
+      const arr = Array.isArray(range?.[0]?.result) ? range[0].result : [];
+      const out = [];
+      for (let i = 0; i < arr.length; i += 2) {
+        const wallet = arr[i];
+        const points = Number(arr[i+1] || 0);
+        out.push({ wallet, points });
+      }
+      if (out.length > 0) {
+        const unameCmds = out.map(x => ["GET", `uname:${x.wallet}`]);
+        const names = await redisCmd(unameCmds);
+        out.forEach((x, idx) => { x.username = names[idx]?.result || null; });
+      }
+      return res.json({ success: true, data: out });
+    }
+    return res.json({ success: true, data: localLeaderboard.slice(0, 100) });
+  } catch (e) {
+    console.error('leaderboard fetch error', e);
+    res.status(500).json({ success: false, data: [] });
+  }
 });
 
 // Serve the main page
