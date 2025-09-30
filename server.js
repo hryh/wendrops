@@ -79,7 +79,14 @@ app.get('/api/x/login', (req, res) => {
       return res.status(500).send('X client is not configured');
     }
     const { verifier, challenge } = generatePKCE();
-    const state = base64url(crypto.randomBytes(16));
+    const randomState = base64url(crypto.randomBytes(16));
+    
+    // Encode PKCE data into the state parameter itself
+    const stateData = {
+      random: randomState,
+      verifier: verifier
+    };
+    const state = base64url(Buffer.from(JSON.stringify(stateData)));
     
     // Store in both cookies and memory (fallback)
     setCookie(res, 'x_cv', verifier, { 
@@ -131,29 +138,58 @@ app.get('/api/x/callback', async (req, res) => {
       hasState: !!state, 
       hasCv: !!cookies.x_cv, 
       hasStateCookie: !!cookies.x_state,
-      stateMatch: state === cookies.x_state
+      stateMatch: state === cookies.x_state,
+      stateValue: state,
+      cookieStateValue: cookies.x_state,
+      memoryStoreKeys: Array.from(pkceStore.keys()),
+      memoryStoreHasState: pkceStore.has(state)
     });
     
     if (!code || !state) {
       return res.status(400).send('Missing code or state parameter');
     }
     
-    // Try to get PKCE data from cookies first, then memory store
-    let verifier = cookies.x_cv;
-    let storedState = cookies.x_state;
+    // Try to get PKCE data from state parameter first, then cookies, then memory store
+    let verifier = null;
+    let stateValid = false;
     
-    if (!verifier || !storedState) {
-      // Fallback to memory store
-      const pkceData = pkceStore.get(state);
-      if (!pkceData) {
-        return res.status(400).send('Missing PKCE data - please try again');
+    try {
+      // Try to decode state parameter (new method)
+      const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
+      if (stateData.verifier) {
+        verifier = stateData.verifier;
+        stateValid = true;
+        console.log('Got verifier from state parameter');
       }
-      verifier = pkceData.verifier;
-      storedState = state; // If we found it in memory, state matches
+    } catch (e) {
+      console.log('Could not decode state parameter, trying other methods');
     }
     
-    if (state !== storedState) {
-      return res.status(400).send('State mismatch - possible CSRF attack');
+    if (!verifier) {
+      // Fallback to cookies
+      verifier = cookies.x_cv;
+      if (verifier) {
+        stateValid = (state === cookies.x_state);
+        console.log('Got verifier from cookies');
+      }
+    }
+    
+    if (!verifier) {
+      // Fallback to memory store
+      const pkceData = pkceStore.get(state);
+      if (pkceData) {
+        verifier = pkceData.verifier;
+        stateValid = true;
+        console.log('Got verifier from memory store');
+      }
+    }
+    
+    if (!verifier) {
+      return res.status(400).send('Missing PKCE data - please try again');
+    }
+    
+    if (!stateValid) {
+      return res.status(400).send('State validation failed - please try again');
     }
 
     const params = new URLSearchParams();
