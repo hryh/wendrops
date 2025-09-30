@@ -79,14 +79,10 @@ app.get('/api/x/login', (req, res) => {
       return res.status(500).send('X client is not configured');
     }
     const { verifier, challenge } = generatePKCE();
-    const randomState = base64url(crypto.randomBytes(16));
+    const state = base64url(crypto.randomBytes(16));
     
-    // Encode PKCE data into the state parameter itself
-    const stateData = {
-      random: randomState,
-      verifier: verifier
-    };
-    const state = base64url(Buffer.from(JSON.stringify(stateData)));
+    // Store verifier in the state parameter directly (simpler approach)
+    const stateWithVerifier = `${state}:${verifier}`;
     
     // Store in both cookies and memory (fallback)
     setCookie(res, 'x_cv', verifier, { 
@@ -96,7 +92,7 @@ app.get('/api/x/login', (req, res) => {
       sameSite: 'lax',
       path: '/'
     });
-    setCookie(res, 'x_state', state, { 
+    setCookie(res, 'x_state', stateWithVerifier, { 
       maxAge: 600, 
       httpOnly: true, 
       secure: true, 
@@ -116,7 +112,7 @@ app.get('/api/x/login', (req, res) => {
     url.searchParams.set('client_id', X_CLIENT_ID);
     url.searchParams.set('redirect_uri', redirectUri);
     url.searchParams.set('scope', X_SCOPE);
-    url.searchParams.set('state', state);
+    url.searchParams.set('state', stateWithVerifier);
     url.searchParams.set('code_challenge', challenge);
     url.searchParams.set('code_challenge_method', 'S256');
     
@@ -153,16 +149,14 @@ app.get('/api/x/callback', async (req, res) => {
     let verifier = null;
     let stateValid = false;
     
-    try {
-      // Try to decode state parameter (new method)
-      const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
-      if (stateData.verifier) {
-        verifier = stateData.verifier;
+    // Try to parse verifier from state parameter (format: "state:verifier")
+    if (state.includes(':')) {
+      const [statePart, verifierPart] = state.split(':', 2);
+      if (verifierPart) {
+        verifier = verifierPart;
         stateValid = true;
         console.log('Got verifier from state parameter');
       }
-    } catch (e) {
-      console.log('Could not decode state parameter, trying other methods');
     }
     
     if (!verifier) {
