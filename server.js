@@ -191,16 +191,23 @@ app.get('/api/x/callback', async (req, res) => {
     params.set('code', String(code));
     params.set('redirect_uri', getRedirectUri(req));
     params.set('code_verifier', verifier);
-    params.set('client_id', X_CLIENT_ID);
-    
-    // Add client secret for server-side token exchange
-    if (X_CLIENT_SECRET) {
-      params.set('client_secret', X_CLIENT_SECRET);
-    }
+    // Note: client_id and client_secret are now in the Authorization header
 
+    // Validate credentials
+    if (!X_CLIENT_ID || !X_CLIENT_SECRET) {
+      console.error('Missing X credentials:', { hasClientId: !!X_CLIENT_ID, hasClientSecret: !!X_CLIENT_SECRET });
+      return res.status(500).send('X client credentials not configured');
+    }
+    
+    // Create Basic Auth header with client credentials
+    const credentials = Buffer.from(`${X_CLIENT_ID}:${X_CLIENT_SECRET}`).toString('base64');
+    
     const tokenRes = await fetch(X_TOKEN_URL, {
       method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      headers: { 
+        'content-type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${credentials}`
+      },
       body: params.toString()
     });
     
