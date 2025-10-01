@@ -302,23 +302,20 @@
       }
 
       // Update wallet info
-      const walletInfo = document.getElementById('walletInfo');
       const connectBtn = document.getElementById('connectWalletBtn');
       
-      if (userData.walletConnected) {
-        walletInfo.classList.remove('hidden');
-        walletInfo.classList.add('flex');
-        connectBtn.textContent = 'Wallet Connected';
-        connectBtn.disabled = true;
-        connectBtn.classList.add('bg-green-600', 'cursor-not-allowed');
-        connectBtn.classList.remove('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
-      } else {
-        walletInfo.classList.add('hidden');
-        walletInfo.classList.remove('flex');
-        connectBtn.textContent = 'Connect Wallet';
-        connectBtn.disabled = false;
-        connectBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
-        connectBtn.classList.add('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+      if (connectBtn) {
+        if (userData.walletConnected) {
+          connectBtn.textContent = 'Wallet Connected';
+          connectBtn.disabled = true;
+          connectBtn.classList.add('bg-green-600', 'cursor-not-allowed');
+          connectBtn.classList.remove('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+        } else {
+          connectBtn.textContent = 'Connect Wallet';
+          connectBtn.disabled = false;
+          connectBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+          connectBtn.classList.add('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+        }
       }
 
       // Update X connection
