@@ -367,9 +367,20 @@
     // Initialize event listeners
     function initializeEventListeners() {
       // Wallet connection
-      document.getElementById('connectWalletBtn').addEventListener('click', openWalletModal);
-      document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
-      document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+      const connectWalletBtn = document.getElementById('connectWalletBtn');
+      if (connectWalletBtn) {
+        connectWalletBtn.addEventListener('click', openWalletModal);
+      }
+      
+      const closeWalletModalBtn = document.getElementById('closeWalletModal');
+      if (closeWalletModalBtn) {
+        closeWalletModalBtn.addEventListener('click', closeWalletModal);
+      }
+      
+      const disconnectWalletBtn = document.getElementById('disconnectWallet');
+      if (disconnectWalletBtn) {
+        disconnectWalletBtn.addEventListener('click', disconnectWallet);
+      }
 
       // Wallet options
       document.querySelectorAll('.wallet-option').forEach(btn => {
@@ -380,8 +391,15 @@
       });
 
       // X connection
-      document.getElementById('connectXBtn').addEventListener('click', connectX);
-      document.getElementById('disconnectXBtn').addEventListener('click', disconnectX);
+      const connectXBtn = document.getElementById('connectXBtn');
+      if (connectXBtn) {
+        connectXBtn.addEventListener('click', connectX);
+      }
+      
+      const disconnectXBtn = document.getElementById('disconnectXBtn');
+      if (disconnectXBtn) {
+        disconnectXBtn.addEventListener('click', disconnectX);
+      }
     }
 
     // Initialize theme
