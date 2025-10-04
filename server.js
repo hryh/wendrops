@@ -348,11 +348,18 @@ app.get('/api/x/debug-config', (req, res) => {
       apiBase: X_API,
       redirectUri: getRedirectUri(req),
       hasClientId: Boolean(X_CLIENT_ID),
-      hasClientSecret: Boolean(X_CLIENT_SECRET)
+      hasClientSecret: Boolean(X_CLIENT_SECRET),
+      clientIdLength: X_CLIENT_ID ? X_CLIENT_ID.length : 0,
+      clientSecretLength: X_CLIENT_SECRET ? X_CLIENT_SECRET.length : 0
     });
   } catch (e) {
-    res.status(500).json({ error: 'debug-failed' });
+    res.status(500).json({ error: 'debug-failed', details: e.message });
   }
+});
+
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // X logout: clear session cookies
