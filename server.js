@@ -216,7 +216,12 @@ app.get('/api/x/callback', async (req, res) => {
 
     // Validate credentials
     if (!X_CLIENT_ID || !X_CLIENT_SECRET) {
-      console.error('Missing X credentials:', { hasClientId: !!X_CLIENT_ID, hasClientSecret: !!X_CLIENT_SECRET });
+      console.error('Missing X credentials:', { 
+        hasClientId: !!X_CLIENT_ID, 
+        hasClientSecret: !!X_CLIENT_SECRET,
+        clientIdLength: X_CLIENT_ID ? X_CLIENT_ID.length : 0,
+        clientSecretLength: X_CLIENT_SECRET ? X_CLIENT_SECRET.length : 0
+      });
       return res.status(500).send('X client credentials not configured');
     }
     
@@ -273,7 +278,19 @@ app.get('/api/x/callback', async (req, res) => {
         return res.status(500).send(`Token exchange failed: ${tokenRes.status} - ${secondTxt}`);
       }
     }
-    const tokenJson = await tokenRes.json();
+    let tokenJson;
+    try {
+      tokenJson = await tokenRes.json();
+    } catch (parseError) {
+      console.error('Failed to parse token response:', parseError);
+      return res.status(500).send('Invalid token response from X');
+    }
+    
+    if (!tokenJson.access_token) {
+      console.error('No access token in response:', tokenJson);
+      return res.status(500).send('No access token received from X');
+    }
+    
     const accessToken = tokenJson.access_token;
 
     // Fetch user
