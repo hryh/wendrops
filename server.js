@@ -530,10 +530,12 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
     }
 
     // Get target user id using app bearer to avoid user-token scope limitations
-    const appBearer = process.env.X_BEARER_TOKEN ? process.env.X_BEARER_TOKEN.trim() : '';
+    const rawBearer = process.env.X_BEARER_TOKEN ? process.env.X_BEARER_TOKEN.trim() : '';
+    const appBearer = rawBearer ? decodeURIComponent(rawBearer) : '';
     console.log('Environment check:', {
       hasBearerToken: !!process.env.X_BEARER_TOKEN,
-      bearerLength: appBearer.length,
+      rawLength: rawBearer.length,
+      decodedLength: appBearer.length,
       bearerPreview: appBearer ? appBearer.substring(0, 20) + '...' : 'none',
       usingBearer: !!appBearer
     });
