@@ -531,7 +531,8 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
 
     // Get target user id using app bearer to avoid user-token scope limitations
     const appBearer = process.env.X_BEARER_TOKEN ? process.env.X_BEARER_TOKEN.trim() : '';
-    console.log('Using bearer:', appBearer ? 'app bearer' : 'user token');
+    console.log('Using bearer:', appBearer ? 'app bearer (length: ' + appBearer.length + ')' : 'user token');
+    console.log('Bearer token preview:', appBearer ? appBearer.substring(0, 20) + '...' : 'none');
     
     const tRes = await fetch(`${X_API}/users/by/username/${encodeURIComponent(targetUsername)}`, {
       headers: { Authorization: `Bearer ${appBearer || token}` }
@@ -559,8 +560,8 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
     const sourceId = me?.data?.id;
     if (!sourceId) return res.status(401).json({ success: false, error: 'Invalid user' });
 
-    // Check following list (single page, up to 1000)
-    const fRes = await fetch(`${X_API}/users/${sourceId}/following?max_results=1000`, { headers: { Authorization: `Bearer ${token}` } });
+    // Check following list (single page, up to 1000) - use bearer token for this too
+    const fRes = await fetch(`${X_API}/users/${sourceId}/following?max_results=1000`, { headers: { Authorization: `Bearer ${appBearer || token}` } });
     if (!fRes.ok) {
       const errorText = await fRes.text();
       console.error('Following fetch failed:', fRes.status, errorText);
