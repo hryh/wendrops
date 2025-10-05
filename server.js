@@ -75,9 +75,9 @@ function getRedirectUri(req) {
 const X_CLIENT_ID = (process.env.X_CLIENT_ID || '').trim();
 const X_CLIENT_SECRET = (process.env.X_CLIENT_SECRET || '').trim();
 const X_SCOPE = ['tweet.read','users.read','follows.read','offline.access'].join(' ');
-const X_AUTH_URL = 'https://x.com/i/oauth2/authorize';
-const X_TOKEN_URL = 'https://api.x.com/oauth2/token';
-const X_API = 'https://api.x.com/2';
+const X_AUTH_URL = 'https://twitter.com/i/oauth2/authorize';
+const X_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
+const X_API = 'https://api.twitter.com/2';
 
 // --- X OAuth 2.0 (PKCE) ---
 app.get('/api/x/login', (req, res) => {
