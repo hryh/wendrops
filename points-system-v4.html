@@ -155,12 +155,15 @@
     <!-- Wallet Connection -->
     <div class="glassmorphism rounded-xl p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6 text-center">Connect Your Wallet</h2>
-      <div class="text-center">
+      <div class="text-center flex items-center justify-center gap-3">
         <button id="connectWalletBtn" class="bg-gradient-to-r from-crypto-purple to-crypto-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all transform hover:scale-105">
           Connect Wallet
         </button>
-        <p class="text-gray-400 mt-4">Connect to start earning points and completing quests</p>
+        <button id="disconnectWalletBtn" class="px-4 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold hidden">
+          Disconnect
+        </button>
       </div>
+      <p class="text-gray-400 mt-4 text-center">Connect to start earning points and completing quests</p>
     </div>
 
     <!-- Daily Quests -->
@@ -300,6 +303,7 @@
 
       // Update wallet info
       const connectBtn = document.getElementById('connectWalletBtn');
+      const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
       
       if (connectBtn) {
         if (userData.walletConnected) {
@@ -307,11 +311,13 @@
           connectBtn.disabled = true;
           connectBtn.classList.add('bg-green-600', 'cursor-not-allowed');
           connectBtn.classList.remove('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+          if (disconnectWalletBtn) disconnectWalletBtn.classList.remove('hidden');
         } else {
           connectBtn.textContent = 'Connect Wallet';
           connectBtn.disabled = false;
           connectBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
           connectBtn.classList.add('from-crypto-purple', 'to-crypto-blue', 'hover:shadow-lg', 'hover:scale-105');
+          if (disconnectWalletBtn) disconnectWalletBtn.classList.add('hidden');
         }
       }
 
@@ -380,9 +386,12 @@
         closeWalletModalBtn.addEventListener('click', closeWalletModal);
       }
       
-      const disconnectWalletBtn = document.getElementById('disconnectWallet');
+      const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
       if (disconnectWalletBtn) {
-        disconnectWalletBtn.addEventListener('click', disconnectWallet);
+        disconnectWalletBtn.addEventListener('click', () => {
+          disconnectWallet();
+          updateUserInterface();
+        });
       }
 
       // Wallet options
