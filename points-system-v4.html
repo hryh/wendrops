@@ -322,6 +322,10 @@
     function saveUserDataCore() {
       localStorage.setItem('airdropHubUserData', JSON.stringify(userData));
     }
+    // Backward-compatible wrapper used by older handlers
+    function saveUserData() {
+      saveUserDataCore();
+    }
 
     // Update the user interface
     function updateUserInterface() {
