@@ -8,6 +8,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="dns-prefetch" href="https://api.twitter.com">
   <link rel="preconnect" href="https://api.twitter.com" crossorigin>
   <title>Points System — WENDROPS</title>
@@ -166,6 +167,9 @@
           Disconnect
         </button>
       </div>
+      <div class="text-center mt-4">
+        <appkit-button></appkit-button>
+      </div>
       <p class="text-gray-400 mt-4 text-center">Connect to start earning points and completing quests</p>
     </div>
 
@@ -221,6 +225,10 @@
           <span class="text-2xl">🦊</span>
           <span class="font-medium">MetaMask</span>
         </button>
+        <button id="rabbyBtn" class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="rabby">
+          <span class="text-2xl">🦝</span>
+          <span class="font-medium">Rabby</span>
+        </button>
         <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="walletconnect">
           <span class="text-2xl">🔗</span>
           <span class="font-medium">WalletConnect</span>
@@ -236,6 +244,36 @@
     </div>
   </div>
 
+  <script type="module">
+    // Reown AppKit minimal setup (WalletConnect v2 modal)
+    const projectId = '0df867ed-6f37-4e00-a621-7cf8b637f094';
+    try {
+      const { createAppKit } = await import('https://unpkg.com/@reown/appkit@latest/dist/index.js');
+      const { WagmiAdapter } = await import('https://unpkg.com/@reown/appkit-adapter-wagmi@latest/dist/index.js');
+      const networksMod = await import('https://unpkg.com/@reown/appkit/networks');
+      const { mainnet, polygon, base, arbitrum } = networksMod;
+      const wagmiAdapter = new WagmiAdapter({ projectId, networks: [mainnet, polygon, base, arbitrum] });
+      const metadata = { name: 'WENDROPS', description: 'Points System', url: location.origin, icons: [location.origin + '/favicon.svg'] };
+      const modal = createAppKit({ adapters: [wagmiAdapter], networks: [mainnet, polygon, base, arbitrum], metadata, projectId });
+      const btn = document.getElementById('connectWalletBtn');
+      if (btn) btn.addEventListener('click', () => modal.open());
+      // Listen for connected account via wagmiAdapter (best-effort)
+      const { getAccount } = await import('https://unpkg.com/@wagmi/core@2.13.7/dist/index.js');
+      const syncWallet = async () => {
+        try {
+          const acc = getAccount(wagmiAdapter.wagmiConfig);
+          if (acc && acc.address) {
+            userData.walletConnected = true;
+            userData.walletType = 'AppKit';
+            userData.walletAddress = acc.address;
+            updateUserInterface();
+            saveUserDataCore && saveUserDataCore();
+          }
+        } catch {}
+      };
+      setInterval(syncWallet, 1500);
+    } catch (e) { console.warn('AppKit init failed', e); }
+  </script>
   <script>
     // Global state
     let userData = {
@@ -284,8 +322,8 @@
       }
     }
 
-    // Save user data to localStorage
-    function saveUserData() {
+    // Save user data to localStorage (core)
+    function saveUserDataCore() {
       localStorage.setItem('airdropHubUserData', JSON.stringify(userData));
     }
 
@@ -366,7 +404,11 @@
       // Wire follow verification button if present
       const btn = document.getElementById('btnFollowX');
       if (btn) {
-        btn.addEventListener('click', verifyFollowQuest);
+        btn.addEventListener('click', async () => {
+          await verifyFollowQuest();
+          saveUserData();
+          submitScoreAfterSave();
+        });
       }
     }
 
@@ -495,7 +537,8 @@
         // Complete wallet quest
         completeQuest('wallet');
         updateUserInterface();
-        saveUserData();
+        saveUserDataCore();
+        submitScoreAfterSave();
         // Analytics event: wallet_connect
         try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'metamask' } }); } catch {}
       } else {
@@ -506,8 +549,9 @@
 
     // WalletConnect connection
     async function connectWalletConnect() {
-      if (typeof WalletConnectProvider !== 'undefined') {
-        walletConnectProvider = new WalletConnectProvider({
+      const WC = (window.WalletConnectProvider && window.WalletConnectProvider.default) ? window.WalletConnectProvider.default : window.WalletConnectProvider;
+      if (typeof WC !== 'undefined') {
+        walletConnectProvider = new WC({
           rpc: {
             1: 'https://cloudflare-eth.com',
             137: 'https://polygon-rpc.com',
@@ -525,7 +569,8 @@
         
         completeQuest('wallet');
         updateUserInterface();
-        saveUserData();
+        saveUserDataCore();
+        submitScoreAfterSave();
         try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'walletconnect' } }); } catch {}
       } else {
         alert('WalletConnect provider not available');
@@ -544,7 +589,8 @@
         
         completeQuest('wallet');
         updateUserInterface();
-        saveUserData();
+        saveUserDataCore();
+        submitScoreAfterSave();
       } else {
         throw new Error('Coinbase Wallet not available');
       }
@@ -569,20 +615,26 @@
 
     // OKX Wallet connection
     async function connectOKX() {
-      if (typeof window.okxwallet !== 'undefined' && window.okxwallet.ethereum) {
-        const accounts = await window.okxwallet.ethereum.request({ method: 'eth_requestAccounts' });
-        userData.walletConnected = true;
-        userData.walletType = 'OKX';
-        userData.walletAddress = accounts[0];
-        walletProvider = window.okxwallet.ethereum;
-        
-        completeQuest('wallet');
-        updateUserInterface();
-        saveUserData();
-      } else {
-        alert('OKX Wallet not detected. Please install OKX Wallet.');
+      // Support both OKX's dedicated object and the unified ethereum provider flag
+      const okxEth = (typeof window.okxwallet !== 'undefined' && window.okxwallet.ethereum)
+        ? window.okxwallet.ethereum
+        : (window.ethereum && (window.ethereum.isOkxWallet || window.ethereum.isOKExWallet) ? window.ethereum : null);
+
+      if (!okxEth) {
+        alert('OKX Wallet not detected. Please install/enable the OKX Wallet extension.');
         throw new Error('OKX Wallet not installed');
       }
+
+      const accounts = await okxEth.request({ method: 'eth_requestAccounts' });
+      userData.walletConnected = true;
+      userData.walletType = 'OKX';
+      userData.walletAddress = accounts[0];
+      walletProvider = okxEth;
+
+      completeQuest('wallet');
+      updateUserInterface();
+      saveUserDataCore();
+      submitScoreAfterSave();
     }
 
     // Phantom connection
@@ -768,12 +820,9 @@
       } catch { el.innerHTML = '<div class="text-center text-red-400">Failed to load leaderboard</div>'; }
     }
 
-    // Submit score when points change
-    const _saveUserData = saveUserData;
-    function saveUserData() {
-      _saveUserData();
+    // Submit score helper (call after saveUserData when points change)
+    function submitScoreAfterSave() {
       try {
-        // Analytics event: leaderboard_submit
         window.va && window.va('event', { name: 'leaderboard_submit', params: { points: userData.points } });
         fetch('/api/leaderboard/submit', {
           method: 'POST', headers: { 'content-type': 'application/json' },
