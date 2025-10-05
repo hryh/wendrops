@@ -219,21 +219,9 @@
           <span class="text-2xl">🔗</span>
           <span class="font-medium">WalletConnect</span>
         </button>
-        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="coinbase">
-          <span class="text-2xl">🔵</span>
-          <span class="font-medium">Coinbase Wallet</span>
-        </button>
-        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="trust">
-          <span class="text-2xl">🛡️</span>
-          <span class="font-medium">Trust Wallet</span>
-        </button>
         <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="okx">
           <span class="text-2xl">⚡</span>
           <span class="font-medium">OKX Wallet</span>
-        </button>
-        <button class="wallet-option w-full flex items-center space-x-4 p-4 rounded-lg bg-dark-border hover:bg-crypto-purple transition-colors" data-wallet="phantom">
-          <span class="text-2xl">👻</span>
-          <span class="font-medium">Phantom</span>
         </button>
       </div>
       <button id="closeWalletModal" class="w-full mt-6 py-3 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
@@ -484,12 +472,13 @@
 
     // MetaMask connection
     async function connectMetaMask() {
-      if (typeof window.ethereum !== 'undefined') {
+      if (typeof window.ethereum !== 'undefined' && (window.ethereum.isMetaMask || window.ethereum.providers)) {
+        const provider = window.ethereum.providers ? window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum : window.ethereum;
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         userData.walletConnected = true;
         userData.walletType = 'MetaMask';
         userData.walletAddress = accounts[0];
-        walletProvider = window.ethereum;
+        walletProvider = provider;
         
         // Complete wallet quest
         completeQuest('wallet');
@@ -498,6 +487,7 @@
         // Analytics event: wallet_connect
         try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'metamask' } }); } catch {}
       } else {
+        alert('MetaMask not detected. Please install MetaMask or enable it in your browser.');
         throw new Error('MetaMask not installed');
       }
     }
@@ -507,9 +497,9 @@
       if (typeof WalletConnectProvider !== 'undefined') {
         walletConnectProvider = new WalletConnectProvider({
           rpc: {
-            1: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID',
+            1: 'https://cloudflare-eth.com',
             137: 'https://polygon-rpc.com',
-            56: 'https://bsc-dataseed.binance.org'
+            56: 'https://bsc.publicnode.com'
           }
         });
         
@@ -526,6 +516,7 @@
         saveUserData();
         try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'walletconnect' } }); } catch {}
       } else {
+        alert('WalletConnect provider not available');
         throw new Error('WalletConnect not available');
       }
     }
@@ -566,7 +557,7 @@
 
     // OKX Wallet connection
     async function connectOKX() {
-      if (typeof window.okxwallet !== 'undefined') {
+      if (typeof window.okxwallet !== 'undefined' && window.okxwallet.ethereum) {
         const accounts = await window.okxwallet.ethereum.request({ method: 'eth_requestAccounts' });
         userData.walletConnected = true;
         userData.walletType = 'OKX';
@@ -577,6 +568,7 @@
         updateUserInterface();
         saveUserData();
       } else {
+        alert('OKX Wallet not detected. Please install OKX Wallet.');
         throw new Error('OKX Wallet not installed');
       }
     }
