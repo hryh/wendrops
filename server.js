@@ -526,9 +526,10 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing targetUsername' });
     }
 
-    // Get target user id (requires app bearer OR user token; use user token for consistency)
+    // Get target user id using app bearer to avoid user-token scope limitations
+    const appBearer = process.env.X_BEARER_TOKEN ? process.env.X_BEARER_TOKEN.trim() : '';
     const tRes = await fetch(`${X_API}/users/by/username/${encodeURIComponent(targetUsername)}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${appBearer || token}` }
     });
     if (!tRes.ok) return res.status(400).json({ success: false, error: 'Target user lookup failed' });
     const tJson = await tRes.json();
