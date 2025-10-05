@@ -8,7 +8,10 @@ self.addEventListener('install', (event) => {
       '/wallet-analysis-v4.html',
       '/terms.html',
       '/favicon.svg',
-      '/manifest.webmanifest'
+      '/favicon.ico',
+      '/favicon-96x96.png',
+      '/apple-touch-icon.png',
+      '/site.webmanifest'
     ]);
   })());
 });
