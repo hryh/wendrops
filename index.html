@@ -13,6 +13,28 @@
   <meta name="twitter:title" content="WENDROPS — Discover & Track Crypto Airdrops" />
   <meta name="twitter:description" content="Discover the latest crypto airdrops across multiple blockchains. Track live, upcoming, and ended airdrops with detailed information and tutorials." />
   
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="dns-prefetch" href="https://api.twitter.com">
+  <link rel="preconnect" href="https://api.twitter.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "WENDROPS",
+    "url": "https://wendrops-airdrop.vercel.app/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://wendrops-airdrop.vercel.app/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -349,6 +371,12 @@
   </div>
 
   <script>
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
     // Light mode inversion hack (quick white theme)
     const style = document.createElement('style');
     style.textContent = `

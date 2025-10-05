@@ -4,10 +4,19 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="dns-prefetch" href="https://api.twitter.com">
+  <link rel="preconnect" href="https://api.twitter.com" crossorigin>
   <title>Points System — WENDROPS</title>
   <meta name="description" content="Earn points and climb the leaderboard on WENDROPS. Complete daily quests and boost your airdrop eligibility.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
     // Reuse hardened ethers loader here too
     window.__ethersReady = (function() {
       if (window.__ethersReady) return window.__ethersReady;

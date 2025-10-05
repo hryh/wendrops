@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wendrops-airdrop.vercel.app/sitemap.xml
+
+

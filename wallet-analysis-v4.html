@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.webmanifest" />
   <title>Wallet Analysis — WENDROPS</title>
   <meta name="description" content="Real blockchain wallet analysis across multiple networks for airdrop eligibility">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
     // Hardened ethers loader: multiple CDNs + timeout
     window.__ethersReady = (function() {
       let resolveFn, rejectFn;
