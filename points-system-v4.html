@@ -378,7 +378,13 @@
       // Wallet connection
       const connectWalletBtn = document.getElementById('connectWalletBtn');
       if (connectWalletBtn) {
-        connectWalletBtn.addEventListener('click', openWalletModal);
+        connectWalletBtn.addEventListener('click', () => {
+          connectWalletBtn.disabled = true;
+          const prev = connectWalletBtn.textContent;
+          connectWalletBtn.textContent = 'Opening…';
+          openWalletModal();
+          setTimeout(()=>{ connectWalletBtn.disabled = false; connectWalletBtn.textContent = prev; }, 800);
+        });
       }
       
       const closeWalletModalBtn = document.getElementById('closeWalletModal');
@@ -402,7 +408,17 @@
       // X connection
       const connectXBtn = document.getElementById('connectXBtn');
       if (connectXBtn) {
-        connectXBtn.addEventListener('click', connectX);
+        connectXBtn.addEventListener('click', async () => {
+          const prev = connectXBtn.textContent;
+          connectXBtn.textContent = 'Connecting…';
+          connectXBtn.disabled = true;
+          try {
+            await connectX();
+          } finally {
+            connectXBtn.textContent = prev;
+            connectXBtn.disabled = false;
+          }
+        });
       }
       
       const disconnectXBtn = document.getElementById('disconnectXBtn');
@@ -479,6 +495,8 @@
         completeQuest('wallet');
         updateUserInterface();
         saveUserData();
+        // Analytics event: wallet_connect
+        try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'metamask' } }); } catch {}
       } else {
         throw new Error('MetaMask not installed');
       }
@@ -506,6 +524,7 @@
         completeQuest('wallet');
         updateUserInterface();
         saveUserData();
+        try { window.va && window.va('event', { name: 'wallet_connect', params: { type: 'walletconnect' } }); } catch {}
       } else {
         throw new Error('WalletConnect not available');
       }
@@ -596,6 +615,7 @@
       try {
         // Redirect to X OAuth
         window.location.href = '/api/x/login';
+        try { window.va && window.va('event', { name: 'x_connect' }); } catch {}
       } catch (error) {
         console.error('X connection failed:', error);
         alert('X connection failed. Please try again.');
@@ -625,11 +645,14 @@
         if (data.isFollowing) {
           completeQuest('x_follow');
           showNotification('Follow verified', 'success');
+          try { window.va && window.va('event', { name: 'quest_verify', params: { quest: 'x_follow', result: 'success' } }); } catch {}
         } else {
           showNotification('You are not following yet', 'info');
+          try { window.va && window.va('event', { name: 'quest_verify', params: { quest: 'x_follow', result: 'not_following' } }); } catch {}
         }
       } catch (e) {
         showNotification('Verification failed', 'error');
+        try { window.va && window.va('event', { name: 'quest_verify', params: { quest: 'x_follow', result: 'error' } }); } catch {}
       }
     }
 
@@ -657,6 +680,19 @@
         console.warn('Status check failed');
       }
     }
+
+  // Periodically refresh X token if refresh cookie exists
+  setInterval(async () => {
+    try {
+      // lightweight ping to check cookie presence via status (includes cookies)
+      const res = await fetch('/api/x/status', { credentials: 'include' });
+      const data = await res.json();
+      if (data && data.connected) {
+        // attempt refresh silently
+        await fetch('/api/x/refresh', { method: 'POST', credentials: 'include' });
+      }
+    } catch {}
+  }, 10 * 60 * 1000);
 
     // Disconnect X and refresh UI
     async function disconnectX() {
@@ -733,6 +769,8 @@
     function saveUserData() {
       _saveUserData();
       try {
+        // Analytics event: leaderboard_submit
+        window.va && window.va('event', { name: 'leaderboard_submit', params: { points: userData.points } });
         fetch('/api/leaderboard/submit', {
           method: 'POST', headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ wallet: userData.walletAddress, points: userData.points, username: userData.walletType })

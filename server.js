@@ -21,6 +21,29 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('.'));
 
+// Basic rate limiting for API routes
+const ipRateMap = new Map();
+function rateLimit(windowMs = 60 * 1000, max = 120) {
+  return (req, res, next) => {
+    try {
+      const xff = (req.headers['x-forwarded-for'] || '').toString();
+      const ip = (xff.split(',')[0] || req.ip || 'unknown').trim();
+      const now = Date.now();
+      const record = ipRateMap.get(ip);
+      if (!record || (now - record.start) > windowMs) {
+        ipRateMap.set(ip, { start: now, count: 1 });
+        return next();
+      }
+      record.count += 1;
+      if (record.count > max) {
+        return res.status(429).json({ error: 'rate_limited' });
+      }
+      return next();
+    } catch (_) { return next(); }
+  };
+}
+app.use('/api/', rateLimit());
+
 // --- Helpers: cookies & PKCE ---
 function setCookie(res, name, value, opts = {}) {
   const {
@@ -292,6 +315,7 @@ app.get('/api/x/callback', async (req, res) => {
     }
     
     const accessToken = tokenJson.access_token;
+    const refreshToken = tokenJson.refresh_token;
 
     // Fetch user
     const meRes = await fetch(`${X_API}/users/me`, {
@@ -305,6 +329,7 @@ app.get('/api/x/callback', async (req, res) => {
     setCookie(res, 'x_token', accessToken, { maxAge: 60 * 60 });
     if (userId) setCookie(res, 'x_uid', userId, { maxAge: 60 * 60 });
     if (userName) setCookie(res, 'x_uname', userName, { maxAge: 60 * 60 });
+    if (refreshToken) setCookie(res, 'x_refresh', refreshToken, { maxAge: 7 * 24 * 60 * 60 });
     // Clear PKCE cookies and memory store
     setCookie(res, 'x_cv', '', { 
       maxAge: 0, 

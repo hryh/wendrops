@@ -269,9 +269,22 @@
       return new ethers.providers.JsonRpcProvider(rpcUrl);
     }
 
+    // Resolve ENS name to address if needed
+    async function resolveEnsIfNeeded(input) {
+      const val = input.trim();
+      if (/^0x[a-fA-F0-9]{40}$/.test(val)) return val;
+      if (!val.endsWith('.eth')) return val;
+      try {
+        const provider = new ethers.providers.JsonRpcProvider('https://cloudflare-eth.com');
+        const addr = await provider.resolveName(val);
+        return addr || val;
+      } catch { return val; }
+    }
+
     // Analyze wallet
     async function analyzeWallet() {
-      const address = document.getElementById('walletAddress').value.trim();
+      const raw = document.getElementById('walletAddress').value.trim();
+      const address = await resolveEnsIfNeeded(raw);
       
       if (!isValidAddress(address)) {
         alert('Please enter a valid Ethereum address');
@@ -310,34 +323,32 @@
         eligibilityScore: 0
       };
 
-      // Analyze each chain
-      for (const [chain, config] of Object.entries(CHAIN_CONFIG)) {
+      // Helper with timeout/retry
+      async function withTimeout(promise, ms = 8000) {
+        return await Promise.race([
+          promise,
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
+        ]);
+      }
+      async function fetchChain(chain, config) {
         try {
           const provider = getProvider(chain);
-          
-          // Get balance
-          const balance = await provider.getBalance(address);
+          const [balance, txCount] = await withTimeout(Promise.all([
+            provider.getBalance(address),
+            provider.getTransactionCount(address)
+          ]));
           results.balances[chain] = {
             balance: ethers.utils.formatEther(balance),
             symbol: config.symbol,
             name: config.name
           };
-
-          // Get transaction count
-          const txCount = await provider.getTransactionCount(address);
           results.transactionCounts[chain] = txCount;
-
-        } catch (error) {
-          console.error(`Error analyzing ${chain}:`, error);
-          results.balances[chain] = {
-            balance: '0',
-            symbol: config.symbol,
-            name: config.name,
-            error: true
-          };
+        } catch (err) {
+          results.balances[chain] = { balance: '0', symbol: config.symbol, name: config.name, error: true };
           results.transactionCounts[chain] = 0;
         }
       }
+      await Promise.all(Object.entries(CHAIN_CONFIG).map(([k, v]) => fetchChain(k, v)));
 
       // Calculate eligibility score
       results.eligibilityScore = calculateEligibilityScore(results);
