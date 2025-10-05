@@ -2,13 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <!-- Favicon links removed until files are deployed -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="manifest" href="/manifest.webmanifest" />
+  <!-- Manifest link removed until file is deployed -->
   <link rel="dns-prefetch" href="https://api.twitter.com">
   <link rel="preconnect" href="https://api.twitter.com" crossorigin>
   <title>Points System — WENDROPS</title>
@@ -241,34 +237,8 @@
   </div>
 
   <script type="module">
-    // Reown AppKit minimal setup (WalletConnect v2 modal)
-    const projectId = '0df867ed-6f37-4e00-a621-7cf8b637f094';
-    try {
-      const { createAppKit } = await import('https://unpkg.com/@reown/appkit@latest/dist/index.js');
-      const { WagmiAdapter } = await import('https://unpkg.com/@reown/appkit-adapter-wagmi@latest/dist/index.js');
-      const networksMod = await import('https://unpkg.com/@reown/appkit/networks');
-      const { mainnet, polygon, base, arbitrum } = networksMod;
-      const wagmiAdapter = new WagmiAdapter({ projectId, networks: [mainnet, polygon, base, arbitrum] });
-      const metadata = { name: 'WENDROPS', description: 'Points System', url: location.origin, icons: [location.origin + '/favicon.svg'] };
-      const modal = createAppKit({ adapters: [wagmiAdapter], networks: [mainnet, polygon, base, arbitrum], metadata, projectId });
-      const btn = document.getElementById('connectWalletBtn');
-      if (btn) btn.addEventListener('click', () => modal.open());
-      // Listen for connected account via wagmiAdapter (best-effort)
-      const { getAccount } = await import('https://unpkg.com/@wagmi/core@2.13.7/dist/index.js');
-      const syncWallet = async () => {
-        try {
-          const acc = getAccount(wagmiAdapter.wagmiConfig);
-          if (acc && acc.address) {
-            userData.walletConnected = true;
-            userData.walletType = 'AppKit';
-            userData.walletAddress = acc.address;
-            updateUserInterface();
-            saveUserDataCore && saveUserDataCore();
-          }
-        } catch {}
-      };
-      setInterval(syncWallet, 1500);
-    } catch (e) { console.warn('AppKit init failed', e); }
+    // WalletConnect integration removed due to CORS issues
+    // Using native injected wallet detection only
   </script>
   <script>
     // Global state
@@ -473,6 +443,8 @@
     function initializeTheme() {
       const themeToggle = document.getElementById('themeToggle');
       const themeIcon = document.getElementById('themeIcon');
+      
+      if (!themeToggle) return;
       
       // Load saved theme
       const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -734,7 +706,19 @@
           dxBtn.classList.add('hidden');
         }
       } catch (e) {
-        console.warn('Status check failed');
+        console.warn('Status check failed', e);
+        // Force reset to disconnected state on error
+        const xBtn = document.getElementById('connectXBtn');
+        const dxBtn = document.getElementById('disconnectXBtn');
+        if (xBtn) {
+          xBtn.textContent = 'Connect X Account';
+          xBtn.disabled = false;
+          xBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+          xBtn.classList.add('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+        }
+        if (dxBtn) {
+          dxBtn.classList.add('hidden');
+        }
       }
     }
 
@@ -755,6 +739,18 @@
     async function disconnectX() {
       try {
         await fetch('/api/x/logout', { method: 'POST', credentials: 'include' });
+        // Force immediate UI update
+        const xBtn = document.getElementById('connectXBtn');
+        const dxBtn = document.getElementById('disconnectXBtn');
+        if (xBtn) {
+          xBtn.textContent = 'Connect X Account';
+          xBtn.disabled = false;
+          xBtn.classList.remove('bg-green-600', 'cursor-not-allowed');
+          xBtn.classList.add('from-blue-500', 'to-blue-600', 'hover:shadow-lg', 'hover:scale-105');
+        }
+        if (dxBtn) {
+          dxBtn.classList.add('hidden');
+        }
         await refreshXStatus();
         showNotification('Disconnected from X', 'info');
       } catch (e) {

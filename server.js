@@ -519,6 +519,9 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
     const { targetUsername } = req.body;
     const cookies = getCookies(req);
     const token = cookies.x_token;
+    
+    console.log('Verify follow request:', { targetUsername, hasToken: !!token });
+    
     if (!token) {
       return res.status(401).json({ success: false, error: 'Not connected to X' });
     }
@@ -528,27 +531,46 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
 
     // Get target user id using app bearer to avoid user-token scope limitations
     const appBearer = process.env.X_BEARER_TOKEN ? process.env.X_BEARER_TOKEN.trim() : '';
+    console.log('Using bearer:', appBearer ? 'app bearer' : 'user token');
+    
     const tRes = await fetch(`${X_API}/users/by/username/${encodeURIComponent(targetUsername)}`, {
       headers: { Authorization: `Bearer ${appBearer || token}` }
     });
-    if (!tRes.ok) return res.status(400).json({ success: false, error: 'Target user lookup failed' });
+    
+    if (!tRes.ok) {
+      const errorText = await tRes.text();
+      console.error('Target lookup failed:', tRes.status, errorText);
+      return res.status(400).json({ success: false, error: `Target user lookup failed: ${tRes.status} ${errorText}` });
+    }
+    
     const tJson = await tRes.json();
     const targetId = tJson?.data?.id;
     if (!targetId) return res.status(404).json({ success: false, error: 'Target not found' });
 
     // Get me
     const meRes = await fetch(`${X_API}/users/me`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!meRes.ok) return res.status(401).json({ success: false, error: 'Invalid token' });
+    if (!meRes.ok) {
+      const errorText = await meRes.text();
+      console.error('Me lookup failed:', meRes.status, errorText);
+      return res.status(401).json({ success: false, error: `Invalid token: ${meRes.status} ${errorText}` });
+    }
+    
     const me = await meRes.json();
     const sourceId = me?.data?.id;
     if (!sourceId) return res.status(401).json({ success: false, error: 'Invalid user' });
 
     // Check following list (single page, up to 1000)
     const fRes = await fetch(`${X_API}/users/${sourceId}/following?max_results=1000`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!fRes.ok) return res.status(400).json({ success: false, error: 'Following fetch failed' });
+    if (!fRes.ok) {
+      const errorText = await fRes.text();
+      console.error('Following fetch failed:', fRes.status, errorText);
+      return res.status(400).json({ success: false, error: `Following fetch failed: ${fRes.status} ${errorText}` });
+    }
+    
     const fJson = await fRes.json();
     const isFollowing = Array.isArray(fJson.data) && fJson.data.some(u => u.id === targetId);
 
+    console.log('Verification result:', { isFollowing, targetId, sourceId });
     res.json({ success: true, isFollowing, method: 'twitter_v2' });
   } catch (error) {
     console.error('Real Twitter API verification error:', error);
