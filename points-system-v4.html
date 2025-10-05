@@ -190,7 +190,7 @@
           Connect X Account
           </button>
           <button id="disconnectXBtn" class="px-4 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold hidden">
-            Disconnect
+            Remove X Connection
           </button>
         </div>
         <p class="text-gray-400 mt-4">Connect your X account to complete social quests</p>
@@ -691,6 +691,7 @@
         const v = await fetch('/api/twitter/verify-follow-real', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ targetUsername })
         });
         const data = await v.json();

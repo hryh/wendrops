@@ -397,6 +397,13 @@ app.post('/api/x/logout', (req, res) => {
       sameSite: 'lax',
       path: '/'
     });
+    setCookie(res, 'x_refresh', '', {
+      maxAge: 0,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    });
     setCookie(res, 'x_uid', '', {
       maxAge: 0,
       httpOnly: true,
