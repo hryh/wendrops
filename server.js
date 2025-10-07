@@ -684,12 +684,23 @@ app.get('/api/health', (req, res) => {
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 
 function requireAdmin(req, res) {
-  const token = req.headers['x-admin-token'] || req.query.token || '';
-  if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+  try {
+    const hdr = req.headers || {};
+    let token = hdr['x-admin-token'] || hdr['X-Admin-Token'] || hdr['authorization'] || req.query.token || (req.body && req.body.token) || '';
+    if (typeof token !== 'string') token = String(token || '');
+    // Support Authorization: Bearer <token>
+    if (/^bearer\s+/i.test(token)) token = token.replace(/^bearer\s+/i, '');
+    try { token = decodeURIComponent(token); } catch {}
+    token = token.trim();
+    if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+      res.status(401).json({ success: false, error: 'unauthorized' });
+      return false;
+    }
+    return true;
+  } catch {
     res.status(401).json({ success: false, error: 'unauthorized' });
     return false;
   }
-  return true;
 }
 
 // Fetch all airdrops
