@@ -12,6 +12,22 @@
     {
       "src": "data/*.json",
       "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.*",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "web-app-manifest-*.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "site.webmanifest",
+      "use": "@vercel/static"
     }
   ],
   "headers": [
