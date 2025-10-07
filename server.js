@@ -708,10 +708,26 @@ function requireAdmin(req, res) {
 app.get('/api/airdrops', async (req, res) => {
   try {
     if (useRedis) {
-      const vals = await redisCmd([["HVALS", "airdrops:byId"]]);
-      const list = Array.isArray(vals?.[0]?.result) ? vals[0].result : [];
-      const out = [];
-      for (const v of list) { try { out.push(JSON.parse(v)); } catch {} }
+      let out = [];
+      try {
+        const vals = await redisCmd([["HVALS", "airdrops:byId"]]);
+        const list = Array.isArray(vals?.[0]?.result) ? vals[0].result : [];
+        for (const v of list) { try { out.push(JSON.parse(v)); } catch {} }
+      } catch (e) {
+        console.error('HVALS failed', e);
+      }
+      if (out.length === 0) {
+        try {
+          const all = await redisCmd([["HGETALL", "airdrops:byId"]]);
+          const flat = all?.[0]?.result || [];
+          for (let i = 0; i < flat.length; i += 2) {
+            const json = flat[i + 1];
+            try { out.push(JSON.parse(json)); } catch {}
+          }
+        } catch (e) {
+          console.error('HGETALL failed', e);
+        }
+      }
       return res.json({ success: true, airdrops: out });
     }
     // Fallback to static file
