@@ -96,9 +96,23 @@
     .gradient-orb {
       background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(0, 212, 255, 0.1) 50%, transparent 70%);
     }
+    /* Gatekeeping styles */
+    body.gated > *:not(.gate-overlay) { filter: blur(10px) grayscale(15%); pointer-events: none; user-select: none; }
+    .gate-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); }
+    .gate-card { max-width: 720px; width: 100%; border-radius: 20px; padding: 28px; text-align: center; background: linear-gradient(135deg, rgba(17,24,39,0.96), rgba(2,6,23,0.96)); color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 0 40px rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.35); }
+    .gate-title { font-size: 28px; font-weight: 800; letter-spacing: .5px; margin-bottom: 10px; }
+    .gate-sub { font-size: 16px; opacity: .9; margin-bottom: 18px; }
+    .gate-pill { display: inline-block; padding: 8px 14px; border-radius: 9999px; background: linear-gradient(90deg, #22d3ee, #a78bfa); color: #0b1020; font-weight: 700; font-size: 14px; }
   </style>
 </head>
 <body class="dark bg-dark-bg text-white">
+  <div class="gate-overlay">
+    <div class="gate-card">
+      <div class="gate-pill">Coming soon</div>
+      <div class="gate-title">Stay tuned!! Devs are cooking something up!!</div>
+      <div class="gate-sub">A sneak peek is live — the full Points System unlocks shortly. Check back soon.</div>
+    </div>
+  </div>
   <!-- Floating Points Widget -->
   <div id="floatingPointsWidget" class="fixed top-4 right-4 z-50 bg-crypto-purple text-white px-4 py-2 rounded-lg shadow-lg font-bold text-lg hidden">
     <span id="userPointsDisplay">0</span> Points
@@ -272,6 +286,8 @@
 
     // Initialize the app
     document.addEventListener('DOMContentLoaded', function() {
+      // Activate gate blur
+      document.body.classList.add('gated');
       loadUserData();
       updateUserInterface();
       initializeDailyQuests();
