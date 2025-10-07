@@ -566,8 +566,8 @@ app.post('/api/twitter/verify-follow-real', async (req, res) => {
     const sourceId = me?.data?.id;
     if (!sourceId) return res.status(401).json({ success: false, error: 'Invalid user' });
 
-    // Check following list (single page, up to 1000) - use bearer token for this too
-    const fRes = await fetch(`${X_API}/users/${sourceId}/following?max_results=1000`, { headers: { Authorization: `Bearer ${appBearer || token}` } });
+    // Check following list (single page, up to 1000) - MUST use the user's OAuth token
+    const fRes = await fetch(`${X_API}/users/${sourceId}/following?max_results=1000`, { headers: { Authorization: `Bearer ${token}` } });
     if (!fRes.ok) {
       const errorText = await fRes.text();
       console.error('Following fetch failed:', fRes.status, errorText);
