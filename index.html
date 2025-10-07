@@ -686,6 +686,11 @@
     function render() {
       applyFilters();
       console.log('Filtered airdrops:', filtered.length);
+      const total = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+      // Clamp page into bounds
+      if (state.page < 1) state.page = 1;
+      if (state.page > totalPages) state.page = totalPages;
       const start = (state.page - 1) * state.pageSize;
       const items = filtered.slice(start, start + state.pageSize);
       console.log('Items to render:', items.length);
@@ -710,8 +715,6 @@
         bindInteractive(cards);
       }
 
-      const total = filtered.length;
-      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
       document.getElementById('pageInfo').textContent = `${total} results`;
       document.getElementById('prevBtn').disabled = state.page <= 1;
       document.getElementById('nextBtn').disabled = state.page >= totalPages;
@@ -821,6 +824,12 @@
         </article>
       `;
     }
+
+    // Pagination buttons
+    const prevBtnEl = document.getElementById('prevBtn');
+    const nextBtnEl = document.getElementById('nextBtn');
+    if (prevBtnEl) prevBtnEl.addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
+    if (nextBtnEl) nextBtnEl.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize)); if (state.page < totalPages) { state.page++; render(); } });
 
     // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
