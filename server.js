@@ -708,14 +708,10 @@ function requireAdmin(req, res) {
 app.get('/api/airdrops', async (req, res) => {
   try {
     if (useRedis) {
-      const all = await redisCmd([["HGETALL", "airdrops:byId"]]);
-      const flat = all?.[0]?.result || [];
+      const vals = await redisCmd([["HVALS", "airdrops:byId"]]);
+      const list = Array.isArray(vals?.[0]?.result) ? vals[0].result : [];
       const out = [];
-      for (let i = 0; i < flat.length; i += 2) {
-        const id = flat[i];
-        const json = flat[i + 1];
-        try { out.push(JSON.parse(json)); } catch {}
-      }
+      for (const v of list) { try { out.push(JSON.parse(v)); } catch {} }
       return res.json({ success: true, airdrops: out });
     }
     // Fallback to static file
