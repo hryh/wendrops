@@ -681,7 +681,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ---------------- Airdrops (Redis-backed with file fallback) ----------------
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const ADMIN_TOKEN = (process.env.ADMIN_TOKEN || '').trim();
 
 function requireAdmin(req, res) {
   try {
@@ -693,6 +693,7 @@ function requireAdmin(req, res) {
     try { token = decodeURIComponent(token); } catch {}
     token = token.trim();
     if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+      console.warn('Admin auth failed', { hasEnv: !!ADMIN_TOKEN, envLen: ADMIN_TOKEN.length, providedLen: token.length });
       res.status(401).json({ success: false, error: 'unauthorized' });
       return false;
     }
