@@ -758,10 +758,14 @@ app.post('/api/airdrops/add', async (req, res) => {
       addedDate: now
     };
     if (useRedis) {
-      await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(airdrop)]]);
-      return res.json({ success: true, id });
+      try {
+        await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(airdrop)]]);
+        return res.json({ success: true, id });
+      } catch (e) {
+        console.error('Redis HSET failed, falling back to file', e);
+      }
     }
-    // File fallback
+    // File fallback (or when Redis fails)
     const fs = require('fs');
     const p = path.join(__dirname, 'data', 'data.json');
     let arr = [];
@@ -783,12 +787,16 @@ app.post('/api/airdrops/update', async (req, res) => {
     const { id, updates } = req.body || {};
     if (!id || !updates) return res.status(400).json({ success: false, error: 'invalid_payload' });
     if (useRedis) {
-      const got = await redisCmd([["HGET", "airdrops:byId", id]]);
-      const cur = got?.[0]?.result ? JSON.parse(got[0].result) : null;
-      if (!cur) return res.status(404).json({ success: false, error: 'not_found' });
-      const merged = { ...cur, ...updates };
-      await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(merged)]]);
-      return res.json({ success: true });
+      try {
+        const got = await redisCmd([["HGET", "airdrops:byId", id]]);
+        const cur = got?.[0]?.result ? JSON.parse(got[0].result) : null;
+        if (!cur) return res.status(404).json({ success: false, error: 'not_found' });
+        const merged = { ...cur, ...updates };
+        await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(merged)]]);
+        return res.json({ success: true });
+      } catch (e) {
+        console.error('Redis update failed, falling back to file', e);
+      }
     }
     // File fallback
     const fs = require('fs');
