@@ -34,6 +34,19 @@
     <pre id="out" class="mt-6 bg-black/40 border border-white/10 p-4 rounded text-xs overflow-auto"></pre>
   </div>
   <script>
+    function getQueryParam(name){
+      const u = new URL(location.href);
+      return u.searchParams.get(name);
+    }
+    function loadToken(){
+      const fromUrl = getQueryParam('token');
+      if (fromUrl) { localStorage.setItem('admin_token', fromUrl); }
+      const t = fromUrl || localStorage.getItem('admin_token') || '';
+      document.getElementById('token').value = t;
+      return t;
+    }
+    function saveToken(val){ if (val) localStorage.setItem('admin_token', val); }
+
     async function addAirdrop() {
       const body = {
         name: document.getElementById('name').value.trim(),
@@ -52,7 +65,9 @@
         featured: document.getElementById('featured').checked,
         featuredOrder: Number(document.getElementById('featuredOrder').value || 0)
       };
-      const token = document.getElementById('token').value.trim();
+      const token = (document.getElementById('token').value || '').trim();
+      saveToken(token);
+      if (!token) { document.getElementById('out').textContent = 'Missing admin token'; return; }
       const res = await fetch('/api/airdrops/add', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-token': token }, body: JSON.stringify(body) });
       const json = await res.json();
       document.getElementById('out').textContent = JSON.stringify(json, null, 2);
@@ -64,6 +79,8 @@
     }
     document.getElementById('addBtn').addEventListener('click', addAirdrop);
     document.getElementById('listBtn').addEventListener('click', listAirdrops);
+    // Prefill token on load
+    loadToken();
   </script>
 </body>
 </html>
