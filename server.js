@@ -680,6 +680,121 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// ---------------- Airdrops (Redis-backed with file fallback) ----------------
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+
+function requireAdmin(req, res) {
+  const token = req.headers['x-admin-token'] || req.query.token || '';
+  if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
+    res.status(401).json({ success: false, error: 'unauthorized' });
+    return false;
+  }
+  return true;
+}
+
+// Fetch all airdrops
+app.get('/api/airdrops', async (req, res) => {
+  try {
+    if (useRedis) {
+      const all = await redisCmd([["HGETALL", "airdrops:byId"]]);
+      const flat = all?.[0]?.result || [];
+      const out = [];
+      for (let i = 0; i < flat.length; i += 2) {
+        const id = flat[i];
+        const json = flat[i + 1];
+        try { out.push(JSON.parse(json)); } catch {}
+      }
+      return res.json({ success: true, airdrops: out });
+    }
+    // Fallback to static file
+    const fs = require('fs');
+    const p = path.join(__dirname, 'data', 'data.json');
+    if (fs.existsSync(p)) {
+      const arr = JSON.parse(fs.readFileSync(p, 'utf8'));
+      return res.json({ success: true, airdrops: Array.isArray(arr) ? arr : (arr.airdrops || []) });
+    }
+    return res.json({ success: true, airdrops: [] });
+  } catch (e) {
+    console.error('airdrops list error', e);
+    res.status(500).json({ success: false, error: 'list_failed' });
+  }
+});
+
+// Add a new airdrop
+app.post('/api/airdrops/add', async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const a = req.body || {};
+    if (!a.name || !a.chain) return res.status(400).json({ success: false, error: 'invalid_payload' });
+    const slug = (a.id || a.name || '').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const id = slug || `airdrop-${Date.now()}`;
+    const now = new Date().toISOString();
+    const airdrop = {
+      id,
+      name: a.name,
+      chain: a.chain,
+      rewardUSD: Number(a.rewardUSD || 0),
+      status: a.status || 'live',
+      deadline: a.deadline || null,
+      tasks: Array.isArray(a.tasks) ? a.tasks : [],
+      tags: Array.isArray(a.tags) ? a.tags : [],
+      popularity: Number(a.popularity || 0),
+      featured: Boolean(a.featured),
+      featuredOrder: a.featured ? Number(a.featuredOrder || 0) : undefined,
+      description: a.description || '',
+      links: a.links || {},
+      addedDate: now
+    };
+    if (useRedis) {
+      await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(airdrop)]]);
+      return res.json({ success: true, id });
+    }
+    // File fallback
+    const fs = require('fs');
+    const p = path.join(__dirname, 'data', 'data.json');
+    let arr = [];
+    if (fs.existsSync(p)) arr = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (!Array.isArray(arr)) arr = [];
+    arr.push(airdrop);
+    fs.writeFileSync(p, JSON.stringify(arr, null, 2));
+    res.json({ success: true, id });
+  } catch (e) {
+    console.error('airdrops add error', e);
+    res.status(500).json({ success: false, error: 'add_failed' });
+  }
+});
+
+// Update an existing airdrop (by id)
+app.post('/api/airdrops/update', async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const { id, updates } = req.body || {};
+    if (!id || !updates) return res.status(400).json({ success: false, error: 'invalid_payload' });
+    if (useRedis) {
+      const got = await redisCmd([["HGET", "airdrops:byId", id]]);
+      const cur = got?.[0]?.result ? JSON.parse(got[0].result) : null;
+      if (!cur) return res.status(404).json({ success: false, error: 'not_found' });
+      const merged = { ...cur, ...updates };
+      await redisCmd([["HSET", "airdrops:byId", id, JSON.stringify(merged)]]);
+      return res.json({ success: true });
+    }
+    // File fallback
+    const fs = require('fs');
+    const p = path.join(__dirname, 'data', 'data.json');
+    if (!fs.existsSync(p)) return res.status(404).json({ success: false, error: 'not_found' });
+    let arr = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (!Array.isArray(arr)) arr = [];
+    const idx = arr.findIndex(x => x.id === id);
+    if (idx === -1) return res.status(404).json({ success: false, error: 'not_found' });
+    arr[idx] = { ...arr[idx], ...updates };
+    fs.writeFileSync(p, JSON.stringify(arr, null, 2));
+    res.json({ success: true });
+  } catch (e) {
+    console.error('airdrops update error', e);
+    res.status(500).json({ success: false, error: 'update_failed' });
+  }
+});
+
 // Leaderboard storage: Upstash Redis (if configured) with in-memory fallback
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_TOKEN;

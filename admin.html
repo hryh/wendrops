@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDROPS Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">WENDROPS — Airdrops Admin</h1>
+    <div class="glass p-4 rounded-xl bg-white/5 border border-white/10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input id="token" placeholder="Admin Token" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="name" placeholder="Name" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="chain" placeholder="Chain (Ethereum, Solana, etc.)" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="rewardUSD" type="number" placeholder="Reward USD" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="status" placeholder="Status (live, upcoming, ended)" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="deadline" type="date" placeholder="Deadline" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="tags" placeholder="Tags (comma-separated)" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="tasks" placeholder="Tasks (comma-separated)" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="site" placeholder="Site URL" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="twitter" placeholder="Twitter URL" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="docs" placeholder="Docs URL" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+        <input id="featured" type="checkbox" class="w-5 h-5" /> <label for="featured">Featured</label>
+        <input id="featuredOrder" type="number" placeholder="Featured Order" class="px-3 py-2 rounded bg-black/40 border border-white/10" />
+      </div>
+      <textarea id="description" placeholder="Description" class="mt-4 w-full px-3 py-2 rounded bg-black/40 border border-white/10"></textarea>
+      <div class="mt-4 flex gap-3">
+        <button id="addBtn" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500">Add Airdrop</button>
+        <button id="listBtn" class="px-4 py-2 rounded bg-sky-600 hover:bg-sky-500">List Airdrops</button>
+      </div>
+    </div>
+    <pre id="out" class="mt-6 bg-black/40 border border-white/10 p-4 rounded text-xs overflow-auto"></pre>
+  </div>
+  <script>
+    async function addAirdrop() {
+      const body = {
+        name: document.getElementById('name').value.trim(),
+        chain: document.getElementById('chain').value.trim(),
+        rewardUSD: Number(document.getElementById('rewardUSD').value || 0),
+        status: document.getElementById('status').value.trim() || 'live',
+        deadline: document.getElementById('deadline').value || null,
+        tags: document.getElementById('tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        tasks: document.getElementById('tasks').value.split(',').map(s=>s.trim()).filter(Boolean),
+        description: document.getElementById('description').value,
+        links: {
+          site: document.getElementById('site').value.trim() || undefined,
+          twitter: document.getElementById('twitter').value.trim() || undefined,
+          docs: document.getElementById('docs').value.trim() || undefined,
+        },
+        featured: document.getElementById('featured').checked,
+        featuredOrder: Number(document.getElementById('featuredOrder').value || 0)
+      };
+      const token = document.getElementById('token').value.trim();
+      const res = await fetch('/api/airdrops/add', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-token': token }, body: JSON.stringify(body) });
+      const json = await res.json();
+      document.getElementById('out').textContent = JSON.stringify(json, null, 2);
+    }
+    async function listAirdrops() {
+      const res = await fetch('/api/airdrops');
+      const json = await res.json();
+      document.getElementById('out').textContent = JSON.stringify(json, null, 2);
+    }
+    document.getElementById('addBtn').addEventListener('click', addAirdrop);
+    document.getElementById('listBtn').addEventListener('click', listAirdrops);
+  </script>
+</body>
+</html>
+
+
