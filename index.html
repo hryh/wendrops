@@ -574,13 +574,31 @@
     async function loadData() {
       try {
         showSkeletons();
-        // Bring in Hot on X topic clicks to boost trending
         hotClicks = JSON.parse(localStorage.getItem('x_clicks') || '{}');
-        const res = await fetch('data/data.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        const txt = await res.text();
-        AIRDROPS = JSON.parse(txt);
-        console.log('Loaded airdrops:', AIRDROPS.length);
+
+        const [apiRes, staticRes] = await Promise.all([
+          fetch('/api/airdrops', { cache: 'no-store' }).catch(() => null),
+          fetch('data/data.json', { cache: 'no-store' }).catch(() => null)
+        ]);
+
+        let apiAirdrops = [];
+        if (apiRes && apiRes.ok) {
+          const apiJson = await apiRes.json().catch(() => ({ success: false }));
+          if (apiJson && apiJson.success && Array.isArray(apiJson.airdrops)) apiAirdrops = apiJson.airdrops;
+        }
+
+        let staticAirdrops = [];
+        if (staticRes && staticRes.ok) {
+          const txt = await staticRes.text();
+          try { staticAirdrops = JSON.parse(txt); } catch {}
+        }
+
+        // Merge: prefer API versions, de-duplicate by id
+        const byId = new Map();
+        for (const it of staticAirdrops) { if (it && it.id) byId.set(it.id, it); }
+        for (const it of apiAirdrops) { if (it && it.id) byId.set(it.id, it); }
+        AIRDROPS = Array.from(byId.values());
+        console.log('Merged airdrops:', AIRDROPS.length, { api: apiAirdrops.length, static: staticAirdrops.length });
 
         // Featured picks with manual order
         featured = AIRDROPS.filter(x => x.featured === true)
@@ -588,10 +606,10 @@
           .slice(0, 3);
 
         // Restore UI
-        document.getElementById('chainFilter').value = state.chain;
-        document.getElementById('sortBy').value = state.sortBy;
-        document.getElementById('searchInput').value = state.search;
-        document.getElementById('favoritesOnly').checked = state.favoritesOnly;
+        const chainEl = document.getElementById('chainFilter'); if (chainEl) chainEl.value = state.chain;
+        const sortEl = document.getElementById('sortBy'); if (sortEl) sortEl.value = state.sortBy;
+        const searchEl = document.getElementById('searchInput'); if (searchEl) searchEl.value = state.search;
+        const favEl = document.getElementById('favoritesOnly'); if (favEl) favEl.checked = state.favoritesOnly;
         renderFeatured();
         render();
       } catch (e) {
