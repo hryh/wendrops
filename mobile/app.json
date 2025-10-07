@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "WENDROPS",
+    "slug": "wendrops",
+    "scheme": "wendrops",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "../public/web-app-manifest-192x192.png",
+    "splash": {
+      "image": "../public/web-app-manifest-512x512.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b1020"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.wendrops.app",
+      "permissions": [],
+      "versionCode": 1
+    },
+    "extra": {
+      "baseUrl": "https://wendrops-airdrop.vercel.app/",
+      "eas": {
+        "projectId": "ea01274e-9240-4762-80ae-e116bf5fe530"
+      }
+    }
+  }
+}

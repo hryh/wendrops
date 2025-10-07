@@ -1,2 +1,13 @@
+node_modules/
+public/*.map
+
+# Mobile app ignores
+mobile/node_modules/
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/app/debug.keystore
+mobile/.expo/
+mobile/.expo-shared/
 .vercel
 .env*.local

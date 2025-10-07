@@ -1,3 +1,30 @@
+## Solana dApp Store (PWA → APK via Bubblewrap)
+
+This repo supports generating an Android APK using a Trusted Web Activity (TWA) wrapper so WENDROPS can be published to the Solana dApp Store.
+
+### Prerequisites
+- Node.js 18+
+- Java JDK 11+
+- Android Studio + Android SDK
+- Bubblewrap CLI: `npm i -g @bubblewrap/cli`
+
+### Steps
+1. Initialize TWA project from the live PWA manifest:
+   - `npm run bw:init`
+     - When prompted, set packageId, app name, and default URL: `https://wendrops-airdrop.vercel.app/`
+2. Build APK:
+   - `npm run bw:build`
+3. Install locally on a device (USB debugging):
+   - `npm run bw:install`
+4. Sign the app (first time):
+   - Generate a keystore and configure via `npm run bw:update` (or `bubblewrap updateConfig`)
+5. Create release build in Android Studio if needed, or use Bubblewrap output directly.
+
+### Solana dApp Store Submission
+Follow Solana Mobile docs for publishing: see Quickstart and PWA→APK conversion in their guide.
+
+Reference: https://docs.solanamobile.com/dapp-publishing/intro
+
 # Airdrop Hub - Complete Improvements Summary
 
 ## 🚀 **Major Improvements Implemented**
