@@ -23,13 +23,76 @@ export default function App() {
 
   const fetchAirdrops = async () => {
     try {
+      console.log('Fetching airdrops...');
       const response = await fetch('https://wendrops-airdrop.vercel.app/api/airdrops');
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (data.success) {
+      console.log('API response:', data);
+      
+      if (data.success && Array.isArray(data.airdrops)) {
         setAirdrops(data.airdrops.slice(0, 10)); // Show first 10
+        console.log('Loaded airdrops:', data.airdrops.length);
+      } else {
+        // Fallback to static data if API fails
+        console.log('API returned no airdrops, using fallback data');
+        setAirdrops([
+          {
+            id: '1',
+            name: 'EigenLayer',
+            status: 'Live',
+            chain: 'Ethereum',
+            rewardUSD: 1500,
+            description: 'Restaking protocol for Ethereum security',
+            links: { website: 'https://eigenlayer.xyz' }
+          },
+          {
+            id: '2', 
+            name: 'LayerZero',
+            status: 'Upcoming',
+            chain: 'Multi-Chain',
+            rewardUSD: 2000,
+            description: 'Omnichain interoperability protocol',
+            links: { website: 'https://layerzero.network' }
+          },
+          {
+            id: '3',
+            name: 'Celestia',
+            status: 'Live',
+            chain: 'Celestia',
+            rewardUSD: 800,
+            description: 'Modular blockchain network',
+            links: { website: 'https://celestia.org' }
+          }
+        ]);
       }
     } catch (error) {
       console.error('Failed to fetch airdrops:', error);
+      // Use fallback data on error
+      setAirdrops([
+        {
+          id: 'fallback-1',
+          name: 'EigenLayer',
+          status: 'Live',
+          chain: 'Ethereum',
+          rewardUSD: 1500,
+          description: 'Restaking protocol for Ethereum security',
+          links: { website: 'https://eigenlayer.xyz' }
+        },
+        {
+          id: 'fallback-2', 
+          name: 'LayerZero',
+          status: 'Upcoming',
+          chain: 'Multi-Chain',
+          rewardUSD: 2000,
+          description: 'Omnichain interoperability protocol',
+          links: { website: 'https://layerzero.network' }
+        }
+      ]);
     } finally {
       setLoading(false);
     }
