@@ -1,4 +1,4 @@
-// Native WENDROPS Mobile App
+// Native WENDROPS Mobile App with Navigation
 import React, { useState, useEffect } from 'react';
 import { 
   SafeAreaView, 
@@ -8,23 +8,37 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   StatusBar,
-  Image,
   Alert,
-  Linking
+  Linking,
+  TextInput,
+  RefreshControl
 } from 'react-native';
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState('home');
   const [airdrops, setAirdrops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [walletAddress, setWalletAddress] = useState('');
+  const [walletAnalysis, setWalletAnalysis] = useState(null);
+  const [pointsData, setPointsData] = useState({
+    walletConnected: false,
+    walletAddress: '',
+    points: 0,
+    quests: []
+  });
 
   useEffect(() => {
-    fetchAirdrops();
-  }, []);
+    if (currentScreen === 'home') {
+      fetchAirdrops();
+    }
+  }, [currentScreen]);
 
   const fetchAirdrops = async () => {
     try {
+      setLoading(true);
       console.log('Fetching airdrops...');
-      const response = await fetch('https://wendrops-airdrop.vercel.app/api/airdrops');
+      const baseUrl = 'https://wendrops-airdrop.vercel.app';
+      const response = await fetch(`${baseUrl}/api/airdrops`);
       console.log('Response status:', response.status);
       
       if (!response.ok) {
@@ -67,6 +81,15 @@ export default function App() {
             rewardUSD: 800,
             description: 'Modular blockchain network',
             links: { website: 'https://celestia.org' }
+          },
+          {
+            id: '4',
+            name: 'Starknet',
+            status: 'Live',
+            chain: 'Starknet',
+            rewardUSD: 1200,
+            description: 'Zero-knowledge rollup for Ethereum',
+            links: { website: 'https://starknet.io' }
           }
         ]);
       }
@@ -96,6 +119,76 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const analyzeWallet = async () => {
+    if (!walletAddress.trim()) {
+      Alert.alert('Error', 'Please enter a wallet address');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const baseUrl = 'https://wendrops-airdrop.vercel.app';
+      const response = await fetch(`${baseUrl}/api/wallet-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: walletAddress.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setWalletAnalysis(data);
+    } catch (error) {
+      console.error('Wallet analysis failed:', error);
+      // Mock data for demo
+      setWalletAnalysis({
+        address: walletAddress,
+        balance: '2.45 ETH',
+        transactions: 127,
+        airdropEligibility: [
+          { project: 'EigenLayer', eligible: true, reason: 'Active restaker' },
+          { project: 'LayerZero', eligible: true, reason: 'Cross-chain user' },
+          { project: 'Starknet', eligible: false, reason: 'No activity' }
+        ],
+        riskScore: 'Low',
+        recommendation: 'Good airdrop potential. Consider more DeFi activity.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const connectWallet = () => {
+    // Mock wallet connection for demo
+    const mockAddress = '0x742d35Cc6635C0532925a3b8D6Ac6E2f0';
+    setPointsData({
+      walletConnected: true,
+      walletAddress: mockAddress,
+      points: 1250,
+      quests: [
+        { name: 'Connect Wallet', completed: true, points: 50 },
+        { name: 'Follow @WENDROPS', completed: true, points: 100 },
+        { name: 'Join Discord', completed: false, points: 150 },
+        { name: 'Share on X', completed: false, points: 200 }
+      ]
+    });
+    Alert.alert('Wallet Connected', `Connected: ${mockAddress.substring(0, 6)}...${mockAddress.substring(mockAddress.length - 4)}`);
+  };
+
+  const disconnectWallet = () => {
+    setPointsData({
+      walletConnected: false,
+      walletAddress: '',
+      points: 0,
+      quests: []
+    });
+    Alert.alert('Wallet Disconnected', 'Wallet has been disconnected');
   };
 
   const openAirdrop = (url) => {
@@ -135,6 +228,175 @@ export default function App() {
     }
   };
 
+  const renderHomeScreen = () => (
+    <ScrollView 
+      style={styles.content} 
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={fetchAirdrops} />
+      }
+    >
+      <Text style={styles.sectionTitle}>Latest Airdrops</Text>
+      
+      {loading && airdrops.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading airdrops...</Text>
+        </View>
+      ) : (
+        <View style={styles.airdropsList}>
+          {airdrops.map(renderAirdropCard)}
+        </View>
+      )}
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>© 2025 WENDROPS. All rights reserved.</Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://wendrops-airdrop.vercel.app/terms.html')}>
+          <Text style={styles.footerLink}>Terms of Service</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+
+  const renderWalletAnalysisScreen = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <Text style={styles.sectionTitle}>Wallet Analysis</Text>
+      
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Wallet Address</Text>
+        <TextInput
+          style={styles.textInput}
+          value={walletAddress}
+          onChangeText={setWalletAddress}
+          placeholder="0x..."
+          placeholderTextColor="rgba(255,255,255,0.5)"
+        />
+        <TouchableOpacity 
+          style={styles.analyzeButton} 
+          onPress={analyzeWallet}
+          disabled={loading}
+        >
+          <Text style={styles.analyzeButtonText}>
+            {loading ? 'Analyzing...' : 'Analyze Wallet'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {walletAnalysis && (
+        <View style={styles.analysisResults}>
+          <Text style={styles.resultsTitle}>Analysis Results</Text>
+          
+          <View style={styles.resultCard}>
+            <Text style={styles.resultLabel}>Address</Text>
+            <Text style={styles.resultValue}>{walletAnalysis.address}</Text>
+          </View>
+
+          <View style={styles.resultCard}>
+            <Text style={styles.resultLabel}>Balance</Text>
+            <Text style={styles.resultValue}>{walletAnalysis.balance}</Text>
+          </View>
+
+          <View style={styles.resultCard}>
+            <Text style={styles.resultLabel}>Transactions</Text>
+            <Text style={styles.resultValue}>{walletAnalysis.transactions}</Text>
+          </View>
+
+          <View style={styles.resultCard}>
+            <Text style={styles.resultLabel}>Risk Score</Text>
+            <Text style={[styles.resultValue, { color: '#10B981' }]}>
+              {walletAnalysis.riskScore}
+            </Text>
+          </View>
+
+          <Text style={styles.eligibilityTitle}>Airdrop Eligibility</Text>
+          {walletAnalysis.airdropEligibility?.map((item, index) => (
+            <View key={index} style={styles.eligibilityCard}>
+              <Text style={styles.projectName}>{item.project}</Text>
+              <View style={styles.eligibilityRow}>
+                <Text style={[styles.eligibilityStatus, { 
+                  color: item.eligible ? '#10B981' : '#EF4444' 
+                }]}>
+                  {item.eligible ? 'Eligible' : 'Not Eligible'}
+                </Text>
+                <Text style={styles.eligibilityReason}>{item.reason}</Text>
+              </View>
+            </View>
+          ))}
+
+          <View style={styles.recommendationCard}>
+            <Text style={styles.recommendationTitle}>Recommendation</Text>
+            <Text style={styles.recommendationText}>{walletAnalysis.recommendation}</Text>
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  const renderPointsSystemScreen = () => (
+    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <Text style={styles.sectionTitle}>Points System</Text>
+      
+      {!pointsData.walletConnected ? (
+        <View style={styles.connectContainer}>
+          <Text style={styles.connectTitle}>Connect Your Wallet</Text>
+          <Text style={styles.connectDescription}>
+            Connect your wallet to start earning points and participating in quests.
+          </Text>
+          <TouchableOpacity style={styles.connectButton} onPress={connectWallet}>
+            <Text style={styles.connectButtonText}>Connect Wallet</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.pointsContainer}>
+          <View style={styles.pointsHeader}>
+            <Text style={styles.pointsTitle}>Your Points</Text>
+            <Text style={styles.pointsValue}>{pointsData.points.toLocaleString()}</Text>
+          </View>
+
+          <View style={styles.walletInfo}>
+            <Text style={styles.walletLabel}>Connected Wallet</Text>
+            <Text style={styles.walletAddress}>
+              {pointsData.walletAddress.substring(0, 6)}...{pointsData.walletAddress.substring(pointsData.walletAddress.length - 4)}
+            </Text>
+          </View>
+
+          <TouchableOpacity style={styles.disconnectButton} onPress={disconnectWallet}>
+            <Text style={styles.disconnectButtonText}>Disconnect Wallet</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.questsTitle}>Available Quests</Text>
+          {pointsData.quests.map((quest, index) => (
+            <View key={index} style={styles.questCard}>
+              <View style={styles.questHeader}>
+                <Text style={styles.questName}>{quest.name}</Text>
+                <Text style={styles.questPoints}>+{quest.points} pts</Text>
+              </View>
+              <View style={[styles.questStatus, { 
+                backgroundColor: quest.completed ? '#10B981' : '#6B7280' 
+              }]}>
+                <Text style={styles.questStatusText}>
+                  {quest.completed ? 'Completed' : 'Pending'}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  const renderCurrentScreen = () => {
+    switch (currentScreen) {
+      case 'home':
+        return renderHomeScreen();
+      case 'wallet':
+        return renderWalletAnalysisScreen();
+      case 'points':
+        return renderPointsSystemScreen();
+      default:
+        return renderHomeScreen();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0b1020" />
@@ -153,38 +415,34 @@ export default function App() {
 
       {/* Navigation */}
       <View style={styles.navContainer}>
-        <TouchableOpacity style={[styles.navButton, styles.activeNav]}>
-          <Text style={[styles.navText, styles.activeNavText]}>Home</Text>
+        <TouchableOpacity 
+          style={[styles.navButton, currentScreen === 'home' && styles.activeNav]}
+          onPress={() => setCurrentScreen('home')}
+        >
+          <Text style={[styles.navText, currentScreen === 'home' && styles.activeNavText]}>
+            Home
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navText}>Wallet Analysis</Text>
+        <TouchableOpacity 
+          style={[styles.navButton, currentScreen === 'wallet' && styles.activeNav]}
+          onPress={() => setCurrentScreen('wallet')}
+        >
+          <Text style={[styles.navText, currentScreen === 'wallet' && styles.activeNavText]}>
+            Wallet Analysis
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navText}>Points System</Text>
+        <TouchableOpacity 
+          style={[styles.navButton, currentScreen === 'points' && styles.activeNav]}
+          onPress={() => setCurrentScreen('points')}
+        >
+          <Text style={[styles.navText, currentScreen === 'points' && styles.activeNavText]}>
+            Points System
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>Latest Airdrops</Text>
-        
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading airdrops...</Text>
-          </View>
-        ) : (
-          <View style={styles.airdropsList}>
-            {airdrops.map(renderAirdropCard)}
-          </View>
-        )}
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2025 WENDROPS. All rights reserved.</Text>
-          <TouchableOpacity onPress={() => Linking.openURL('https://wendrops-airdrop.vercel.app/terms.html')}>
-            <Text style={styles.footerLink}>Terms of Service</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      {renderCurrentScreen()}
     </SafeAreaView>
   );
 }
@@ -327,6 +585,240 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
     lineHeight: 20,
+  },
+  // Wallet Analysis Styles
+  inputContainer: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+    padding: 12,
+    color: '#fff',
+    fontSize: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  analyzeButton: {
+    backgroundColor: '#22D3EE',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  analyzeButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  analysisResults: {
+    gap: 16,
+  },
+  resultsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  resultCard: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  resultLabel: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  resultValue: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  eligibilityTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  eligibilityCard: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 8,
+  },
+  projectName: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  eligibilityRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eligibilityStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  eligibilityReason: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+    flex: 1,
+    textAlign: 'right',
+  },
+  recommendationCard: {
+    backgroundColor: 'rgba(34, 211, 238, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#22D3EE',
+    marginTop: 8,
+  },
+  recommendationTitle: {
+    color: '#22D3EE',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  recommendationText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  // Points System Styles
+  connectContainer: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  connectTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  connectDescription: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  connectButton: {
+    backgroundColor: '#22D3EE',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  connectButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pointsContainer: {
+    gap: 16,
+  },
+  pointsHeader: {
+    backgroundColor: 'rgba(34, 211, 238, 0.1)',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#22D3EE',
+  },
+  pointsTitle: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  pointsValue: {
+    color: '#22D3EE',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  walletInfo: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  walletLabel: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  walletAddress: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  disconnectButton: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  disconnectButtonText: {
+    color: '#EF4444',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  questsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 8,
+  },
+  questCard: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 8,
+  },
+  questHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  questName: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    flex: 1,
+  },
+  questPoints: {
+    color: '#22D3EE',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  questStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  questStatusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   footer: {
     marginTop: 40,
