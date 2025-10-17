@@ -218,14 +218,6 @@
   <!-- Notification System -->
   <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-  <!-- Floating Points Widget -->
-  <div id="pointsWidget" class="hidden fixed right-4 bottom-4 z-40">
-    <div class="rounded-xl border border-white/10 bg-black/50 backdrop-blur px-4 py-3 shadow-glow">
-      <div class="text-xs text-white/60">Your Points</div>
-      <div id="pointsWidgetValue" class="text-2xl font-bold">0</div>
-      <div id="pointsWidgetAddr" class="text-[11px] text-white/50 mt-1">-</div>
-    </div>
-  </div>
 
   <main class="max-w-6xl mx-auto px-4 py-6 pb-24">
     <!-- Hero -->
@@ -531,26 +523,7 @@
       });
     })();
 
-    // Floating points widget updater
-    function updatePointsWidget() {
-      try {
-        const addr = localStorage.getItem('current_user_wallet');
-        if (!addr) { document.getElementById('pointsWidget').classList.add('hidden'); return; }
-        const user = JSON.parse(localStorage.getItem('user_' + addr) || '{}');
-        const points = user.totalPoints ?? 0;
-        const val = document.getElementById('pointsWidgetValue');
-        const ad = document.getElementById('pointsWidgetAddr');
-        if (val && ad) {
-          val.textContent = String(points);
-          ad.textContent = addr.slice(0,6) + '...' + addr.slice(-4);
-        }
-        document.getElementById('pointsWidget').classList.remove('hidden');
-      } catch {}
-    }
-    window.addEventListener('storage', (e) => {
-      if (e.key && (e.key.startsWith('user_') || e.key === 'current_user_wallet')) updatePointsWidget();
-    });
-    updatePointsWidget();
+    // Wallet UI removed on homepage: no widget or wallet state sync needed
 
     function saveState() { try { localStorage.setItem('filters', JSON.stringify(state)); } catch {} }
     function restoreState() {
@@ -609,70 +582,7 @@
     }
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
-    // Wallet read-only integration
-    const CHAINS = [
-      { key: 'Ethereum', chainId: '0x1', rpc: 'https://cloudflare-eth.com' },
-      { key: 'Arbitrum', chainId: '0xa4b1', rpc: 'https://arb1.arbitrum.io/rpc' },
-      { key: 'Base', chainId: '0x2105', rpc: 'https://mainnet.base.org' },
-      { key: 'Polygon', chainId: '0x89', rpc: 'https://polygon-rpc.com' }
-    ];
-    let wallet = { address: null, stats: {}, readiness: 0, lastChain: null };
-
-    const walletBtn = document.getElementById('walletBtn');
-    const walletInfo = document.getElementById('walletInfo');
-
-    if (walletBtn) {
-      walletBtn.addEventListener('click', connectWallet);
-    }
-
-    async function connectWallet() {
-      if (!window.ethereum) { alert('No wallet found (MetaMask/Rabby). Read-only connect requires a browser wallet.'); return; }
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        wallet.address = accounts[0];
-        walletInfo.textContent = `Connected: ${short(wallet.address)} ??Reading recent activity?�`;
-        await readWalletStats();
-        walletInfo.textContent = `Connected: ${short(wallet.address)} ??Readiness: ${(wallet.readiness*100).toFixed(0)}%`;
-        renderFeatured(); render();
-      } catch (e) {
-        alert('Wallet connection failed: ' + (e.message || e));
-      }
-    }
-
-    function short(addr){ return addr ? addr.slice(0,6)+'...'+addr.slice(-4) : ''; }
-
-    async function readWalletStats() {
-      const clicks = JSON.parse(localStorage.getItem('x_clicks') || '{}'); // just to show how we might mix signals later
-      const stats = {};
-      for (const c of CHAINS) {
-        try {
-          const [bal, txc] = await Promise.all([
-            rpcCall(c.rpc, 'eth_getBalance', [wallet.address, 'latest']),
-            rpcCall(c.rpc, 'eth_getTransactionCount', [wallet.address, 'latest'])
-          ]);
-          const balanceEth = Number(parseInt(bal, 16)) / 1e18;
-          const txCount = parseInt(txc, 16);
-          stats[c.key] = { balanceEth, txCount };
-        } catch { stats[c.key] = { balanceEth: 0, txCount: 0 }; }
-      }
-      wallet.stats = stats;
-      // Simple readiness score: having some tx history and small balances across chains
-      const chainsActive = Object.values(stats).filter(s => s.txCount > 3).length;
-      const hasGas = Object.values(stats).filter(s => s.balanceEth > 0.01).length;
-      wallet.readiness = clamp((chainsActive*0.15 + hasGas*0.1), 0, 0.5); // up to +0.5 boost distributed
-      try { localStorage.setItem('wallet_readiness', JSON.stringify({ addr: wallet.address, stats: wallet.stats, readiness: wallet.readiness, t: Date.now() })); } catch {}
-    }
-
-    async function rpcCall(rpc, method, params) {
-      const res = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error.message);
-      return json.result;
-    }
+    // Removed wallet connection/readiness code from homepage
 
     // Skeletons
     function showSkeletons() {
