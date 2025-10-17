@@ -1149,6 +1149,16 @@
     });
     if (mApply) mApply.addEventListener('click', () => { applyMobileToState(); render(); closeFilterModal(); });
     if (mobileSearch && searchInput) mobileSearch.addEventListener('click', () => { searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); searchInput.focus(); });
+
+    // Handle deep links for mobile actions
+    (function handleHashActions(){
+      const h = (location.hash || '').toLowerCase();
+      if (h === '#filters') {
+        openFilterModal();
+      } else if (h === '#search') {
+        if (searchInput) { searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); searchInput.focus(); }
+      }
+    })();
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script defer src="/_vercel/speed-insights/script.js"></script>

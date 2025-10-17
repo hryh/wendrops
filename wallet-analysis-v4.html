@@ -112,7 +112,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="container mx-auto px-4 py-8">
+  <main class="container mx-auto px-4 py-8 pb-24">
     <!-- Hero Section -->
     <div class="text-center mb-12">
       <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-crypto-gold via-crypto-blue to-crypto-purple bg-clip-text text-transparent">
@@ -183,6 +183,15 @@
       </div>
     </div>
   </main>
+
+  <!-- Mobile bottom nav -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-black/70 backdrop-blur border-t border-white/10 sm:hidden">
+    <div class="max-w-6xl mx-auto px-4 py-2 grid grid-cols-3 gap-2 text-sm">
+      <a href="index.html" class="btn flex items-center justify-center gap-2"><span>Home</span></a>
+      <a href="index.html#filters" class="btn flex items-center justify-center gap-2"><span>Filters</span></a>
+      <a href="index.html#search" class="btn flex items-center justify-center gap-2"><span>Search</span></a>
+    </div>
+  </nav>
 
   <!-- Footer -->
   <footer class="bg-dark-card/80 backdrop-blur-md border-t border-dark-border mt-16">
@@ -418,7 +427,8 @@
       transactionHistory.innerHTML = '<div class="text-gray-400 text-center py-8">Transaction history analysis coming soon...</div>';
     }
   </script>
-</script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
