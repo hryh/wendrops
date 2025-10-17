@@ -1103,7 +1103,6 @@
     const mApply = document.getElementById('mApply');
     const mStatusWrap = document.getElementById('mStatusWrap');
     const mobileSearch = document.getElementById('mobileSearch');
-    const searchInput = document.getElementById('searchInput');
 
     function openFilterModal() { filterModal.classList.remove('hidden'); filterModal.classList.add('flex'); syncMobileControlsFromState(); }
     function closeFilterModal() { filterModal.classList.add('hidden'); filterModal.classList.remove('flex'); }
@@ -1138,7 +1137,6 @@
     if (mApply) mApply.addEventListener('click', () => { applyMobileToState(); render(); closeFilterModal(); });
     if (mobileSearch && searchInput) mobileSearch.addEventListener('click', () => { searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); searchInput.focus(); });
   </script>
-</script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
