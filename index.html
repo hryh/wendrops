@@ -703,8 +703,8 @@
 
         // Merge: prefer API versions, de-duplicate by id
         const byId = new Map();
-        for (const it of staticAirdrops) { if (it && it.id) byId.set(it.id, it); }
-        for (const it of apiAirdrops) { if (it && it.id) byId.set(it.id, it); }
+        for (const it of staticAirdrops) { if (it && it.id) byId.set(String(it.id), it); }
+        for (const it of apiAirdrops) { if (it && it.id) byId.set(String(it.id), it); }
         AIRDROPS = Array.from(byId.values());
         console.log('Merged airdrops:', AIRDROPS.length, { api: apiAirdrops.length, static: staticAirdrops.length });
 
@@ -731,8 +731,10 @@
       console.log('Applying filters to', AIRDROPS.length, 'airdrops');
       console.log('State:', state);
       filtered = AIRDROPS.filter(x => {
-        if (state.status !== 'all' && x.status !== state.status) return false;
-        if (state.chain !== 'all' && x.chain !== state.chain) return false;
+        const statusVal = String(x.status || '').toLowerCase();
+        const chainVal = String(x.chain || '');
+        if (state.status !== 'all' && statusVal !== state.status) return false;
+        if (state.chain !== 'all' && chainVal !== state.chain) return false;
         if (state.favoritesOnly && !favorites.has(x.id)) return false;
         if (q) {
           const hay = `${x.name} ${x.id} ${x.chain} ${(x.tags||[]).join(' ')}`.toLowerCase();
@@ -742,8 +744,8 @@
       });
 
       switch (state.sortBy) {
-        case 'deadlineAsc': filtered.sort((a,b)=>a.deadline.localeCompare(b.deadline)); break;
-        case 'deadlineDesc': filtered.sort((a,b)=>b.deadline.localeCompare(a.deadline)); break;
+        case 'deadlineAsc': filtered.sort((a,b)=>String(a.deadline||'').localeCompare(String(b.deadline||''))); break;
+        case 'deadlineDesc': filtered.sort((a,b)=>String(b.deadline||'').localeCompare(String(a.deadline||''))); break;
         case 'rewardDesc': filtered.sort((a,b)=>(b.rewardUSD??0)-(a.rewardUSD??0)); break;
         case 'rewardAsc': filtered.sort((a,b)=>(a.rewardUSD??0)-(b.rewardUSD??0)); break;
         case 'popularityDesc': filtered.sort((a,b)=>(b.popularity??0)-(a.popularity??0)); break;
