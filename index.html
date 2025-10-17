@@ -45,6 +45,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <script>
+    // Silence Tailwind CDN production warning only
+    (function(){
+      const origWarn = console.warn;
+      console.warn = function(){
+        try {
+          const msg = arguments && arguments[0] ? String(arguments[0]) : '';
+          if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;
+        } catch {}
+        return origWarn.apply(console, arguments);
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
