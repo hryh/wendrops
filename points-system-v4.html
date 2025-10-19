@@ -909,43 +909,33 @@
     // Initialize leaderboard on load
     initializeLeaderboard();
 
-    // Countdown Gatekeeper Logic
+    // Countdown Gatekeeper Logic - Synchronized across all devices
     (function countdownGatekeeper() {
-      const GATEKEEPER_KEY = 'wendrops_gatekeeper';
-      const GATEKEEPER_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+      let countdownData = null;
+      let serverTimeOffset = 0; // Difference between server time and local time
       
-      function getGatekeeperData() {
+      async function fetchCountdownData() {
         try {
-          const stored = localStorage.getItem(GATEKEEPER_KEY);
-          if (stored) {
-            const data = JSON.parse(stored);
-            const now = Date.now();
-            if (now < data.endTime) {
-              return data;
-            }
+          const response = await fetch('/api/countdown');
+          const data = await response.json();
+          if (data.success) {
+            countdownData = data;
+            // Calculate server time offset for more accurate local updates
+            serverTimeOffset = data.currentTime - Date.now();
+            return data;
           }
-        } catch (e) {
-          console.warn('Failed to parse gatekeeper data:', e);
+        } catch (error) {
+          console.warn('Failed to fetch countdown data:', error);
         }
         return null;
       }
       
-      function setGatekeeperData() {
-        const now = Date.now();
-        const data = {
-          startTime: now,
-          endTime: now + GATEKEEPER_DURATION
-        };
-        try {
-          localStorage.setItem(GATEKEEPER_KEY, JSON.stringify(data));
-        } catch (e) {
-          console.warn('Failed to save gatekeeper data:', e);
-        }
-        return data;
+      function getCurrentServerTime() {
+        return Date.now() + serverTimeOffset;
       }
       
       function updateCountdown(endTime) {
-        const now = Date.now();
+        const now = getCurrentServerTime();
         const timeLeft = Math.max(0, endTime - now);
         
         if (timeLeft <= 0) {
@@ -989,20 +979,35 @@
         }
       }
       
-      // Initialize countdown
-      let gatekeeperData = getGatekeeperData();
-      if (!gatekeeperData) {
-        gatekeeperData = setGatekeeperData();
+      async function initializeCountdown() {
+        // Fetch countdown data from server
+        const data = await fetchCountdownData();
+        if (!data || !data.isActive) {
+          // Countdown is not active, hide the gatekeeper
+          const gate = document.getElementById('countdownGate');
+          if (gate) {
+            gate.style.display = 'none';
+          }
+          return;
+        }
+        
+        // Update countdown immediately and then every second
+        updateCountdown(data.endTime);
+        const interval = setInterval(() => {
+          updateCountdown(data.endTime);
+          if (getCurrentServerTime() >= data.endTime) {
+            clearInterval(interval);
+          }
+        }, 1000);
+        
+        // Re-sync with server every 30 seconds to maintain accuracy
+        setInterval(async () => {
+          await fetchCountdownData();
+        }, 30000);
       }
       
-      // Update countdown immediately and then every second
-      updateCountdown(gatekeeperData.endTime);
-      const interval = setInterval(() => {
-        updateCountdown(gatekeeperData.endTime);
-        if (Date.now() >= gatekeeperData.endTime) {
-          clearInterval(interval);
-        }
-      }, 1000);
+      // Initialize countdown
+      initializeCountdown();
     })();
   </script>
 </script>

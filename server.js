@@ -680,6 +680,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Countdown timer endpoint - synchronized across all devices
+app.get('/api/countdown', (req, res) => {
+  try {
+    const now = Date.now();
+    const GATEKEEPER_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    
+    // Use a fixed start time based on when the countdown was first set
+    // This ensures all devices show the same countdown
+    const COUNTDOWN_START_TIME = 1735689600000; // January 1, 2025 00:00:00 UTC (example - you can change this)
+    const endTime = COUNTDOWN_START_TIME + GATEKEEPER_DURATION;
+    
+    res.json({
+      success: true,
+      startTime: COUNTDOWN_START_TIME,
+      endTime: endTime,
+      currentTime: now,
+      timeLeft: Math.max(0, endTime - now),
+      isActive: now < endTime
+    });
+  } catch (error) {
+    console.error('Countdown endpoint error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get countdown data' });
+  }
+});
+
 // ---------------- Airdrops (Redis-backed with file fallback) ----------------
 const ADMIN_TOKEN = (process.env.ADMIN_TOKEN || '').trim();
 
