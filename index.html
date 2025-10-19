@@ -59,6 +59,20 @@
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .countdown-item {
+      @apply text-center;
+    }
+    .countdown-number {
+      @apply text-3xl sm:text-4xl font-bold text-cyan-400 mb-2 bg-black/20 rounded-lg py-3 px-2 border border-white/10;
+    }
+    .countdown-label {
+      @apply text-xs text-white/60 uppercase tracking-wider;
+    }
+    .countdown-timer {
+      @apply animate-pulse;
+    }
+  </style>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -173,6 +187,49 @@
   </script>
 </head>
 <body class="min-h-screen text-white relative overflow-x-hidden">
+  <!-- Countdown Gatekeeper -->
+  <div id="countdownGate" class="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+    <div class="text-center max-w-md mx-auto px-6">
+      <div class="mb-8">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-2xl">
+          <span class="text-3xl font-black text-black">W</span>
+        </div>
+        <h1 class="text-4xl font-bold mb-2">WENDROPS</h1>
+        <p class="text-cyan-300 text-lg">Pro</p>
+      </div>
+      
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Coming Soon</h2>
+        <p class="text-white/70 mb-6">We're putting the finishing touches on something amazing. Stay tuned!</p>
+      </div>
+
+      <div class="countdown-timer mb-8">
+        <div class="grid grid-cols-4 gap-4">
+          <div class="countdown-item">
+            <div class="countdown-number" id="days">00</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="hours">00</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="minutes">00</div>
+            <div class="countdown-label">Minutes</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-number" id="seconds">00</div>
+            <div class="countdown-label">Seconds</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-sm text-white/50">
+        <p>Launching in <span id="launchDate"></span></p>
+      </div>
+    </div>
+  </div>
+
   <!-- Background Orbs / Grid -->
   <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
     <div class="absolute -top-24 -right-16 w-[38rem] h-[38rem] rounded-full blur-3xl opacity-20" style="background: radial-gradient(circle at 30% 30%, rgba(59,130,246,0.6), transparent 60%);"></div>
@@ -1068,6 +1125,102 @@
       } else if (h === '#search') {
         if (searchInput) { searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); searchInput.focus(); }
       }
+    })();
+
+    // Countdown Gatekeeper Logic
+    (function countdownGatekeeper() {
+      const GATEKEEPER_KEY = 'wendrops_gatekeeper';
+      const GATEKEEPER_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+      
+      function getGatekeeperData() {
+        try {
+          const stored = localStorage.getItem(GATEKEEPER_KEY);
+          if (stored) {
+            const data = JSON.parse(stored);
+            const now = Date.now();
+            if (now < data.endTime) {
+              return data;
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to parse gatekeeper data:', e);
+        }
+        return null;
+      }
+      
+      function setGatekeeperData() {
+        const now = Date.now();
+        const data = {
+          startTime: now,
+          endTime: now + GATEKEEPER_DURATION
+        };
+        try {
+          localStorage.setItem(GATEKEEPER_KEY, JSON.stringify(data));
+        } catch (e) {
+          console.warn('Failed to save gatekeeper data:', e);
+        }
+        return data;
+      }
+      
+      function updateCountdown(endTime) {
+        const now = Date.now();
+        const timeLeft = Math.max(0, endTime - now);
+        
+        if (timeLeft <= 0) {
+          // Countdown finished, hide gatekeeper
+          const gate = document.getElementById('countdownGate');
+          if (gate) {
+            gate.style.opacity = '0';
+            gate.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              gate.style.display = 'none';
+            }, 300);
+          }
+          return;
+        }
+        
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        
+        // Update display
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const launchDateEl = document.getElementById('launchDate');
+        
+        if (daysEl) daysEl.textContent = days.toString().padStart(2, '0');
+        if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+        if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+        if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+        
+        if (launchDateEl) {
+          const launchDate = new Date(endTime);
+          launchDateEl.textContent = launchDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
+      }
+      
+      // Initialize countdown
+      let gatekeeperData = getGatekeeperData();
+      if (!gatekeeperData) {
+        gatekeeperData = setGatekeeperData();
+      }
+      
+      // Update countdown immediately and then every second
+      updateCountdown(gatekeeperData.endTime);
+      const interval = setInterval(() => {
+        updateCountdown(gatekeeperData.endTime);
+        if (Date.now() >= gatekeeperData.endTime) {
+          clearInterval(interval);
+        }
+      }, 1000);
     })();
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
